@@ -1,0 +1,408 @@
+
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Profiles {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "general" %}
+
+<div class="container-fluid innerBodies">
+
+    <div class="row innerBodies justify-content-center">
+        <h5>PROFILE MANAGEMENT</h5>
+    </div>
+    <hr>
+    <div class="row innerBodies justify-content-center">
+        <div class="col-lg-3 col-md-3 asLink" style="text-align:center;" name="monitorProfiles" onclick="open_only(this, 'profileDiv')">MONITOR<br/>PROFILES</div>
+        <div class="col-lg-3 col-md-3 asLink" style="text-align:center;" name="locationProfiles" onclick="open_only(this, 'profileDiv')">LOCATION<br/>PROFILES</div>
+        <div class="col-lg-3 col-md-3 asLink" style="text-align:center;" name="ingestionProfiles" onclick="open_only(this, 'profileDiv')">INGESTION <br/>PROFILES</div>
+<!--        <div class="col-lg-3 col-md-3 asLink" style="text-align:center;" name="parserProfiles" onclick="location.href=location.href+'add_parser_profile'">PARSER<br/>PROFILES</div>-->
+        <div class="col-lg-3 col-md-3 asLink" style="text-align:center;" name="parserProfiles" onclick="open_only(this, 'profileDiv')">PARSER<br/>PROFILES</div>
+    </div>
+    <hr>
+    <div class="container-fluid" id="monitorProfiles" style="display:block;" name="profileDiv"><!--Monitor Profiles div-->
+        <div class="row">
+            <div class="col-md-6 asLink plusBefore"  name="addingMonitorProfile" data-toggle="modal" data-target="#add_monitor_profile"
+                 onclick="document.getElementById('add_monitor_profile_frame').src='{% url 'add_monitor_profile' %}';">
+                ADD NEW MONITOR PROFILE
+            </div>
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>MONITOR PROFILES</caption>
+
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Profile<br/>Name</th>
+                        <th>Profile<br/>Type</th>
+                        <th>SNMP<br/>Version</th>
+                        <th>HTTP<br/>Method</th>
+                        <th>HTTP<br/>Port</th>
+                        <th>Database<br/>Name</th>
+                        <th>Request<br/>to Send</th>
+                        <th>Response<br/>to Receive</th>
+                        <th>Response<br/>to Down</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in monitorProfileList %}
+                    <tr>
+                        <td>
+<!--                            <a class="asLink" name="editMPD" href="{{profile.get_edit_url}}">&#9998;</a>-->
+                            <div class="asLink" name="editMPD" title="Edit Monitor Profile" data-toggle="modal" data-target="#editMPD"
+                                 onclick="document.getElementById('edit_MPD_frame').src='{{profile.get_edit_url}}';">
+                                &#9998;
+                            </div>
+                        </td>
+                        <td>
+                            {% if not profile.is_in_use %}
+                                <a class="asLink" name="deleteMPD" onclick="this.href='{{profile.get_delete_url}}';">🗑</a>
+                            {% endif %}
+                        </td>
+                        <td>{{ profile.paramsname }}</td>
+                        <td>{{ profile.monitorProfile.monitorprofiletype }}</td>
+                        <td>{{ profile.snmpversion|default_if_none:"" }}</td>
+                        <td>{{ profile.httpmethod|default_if_none:"" }}</td>
+                        <td>{{ profile.httpport|default_if_none:"" }}</td>
+                        <td>{{ profile.dbasename|default_if_none:"" }}</td>
+                        <td>{{ profile.querytosend|default_if_none:"" }}</td>
+                        <td>{{ profile.responsetoreceive|default_if_none:"" }}</td>
+                        <td>{{ profile.responsetodown|default_if_none:"" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <hr>
+        <div class="modal fade" id="editMPD" tabindex="-1" role="dialog" aria-labelledby="editMPDModalLabel" aria-hidden="true"><!--edit MPD modal-->
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editMPDModalLabel"> Edit Monitor Profile </h5>
+                        <button name="closeModal" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <iframe style="width:100%;height:600px;" id="edit_MPD_frame" src="" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button name="closeModal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div><!--/edit MPD modal-->
+    </div><!--/Monitor Profiles div-->
+    <div class="modal fade" id="add_monitor_profile" tabindex="-1" role="dialog" aria-labelledby="addMonitorProfileModalLabel" aria-hidden="true"><!--add_monitor_profile modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMonitorProfileModalLabel"> Add Monitor Profile</h5>
+                    <button name="closeModal" type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="add_monitor_profile_frame" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="closeModal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/add_monitor_profile modal-->
+
+    <div class="container-fluid" id="locationProfiles" style="display:none;" name="profileDiv"><!--Location Profiles div-->
+        <div class="row">
+            <div class="col-md-6 asLink plusBefore"  name="addingLocationProfile" data-toggle="modal" data-target="#add_location_profile"
+                 onclick="document.getElementById('add_location_profile_frame').src='{% url 'add_location_profile' %}';">
+                ADD NEW LOCATION PROFILE
+            </div>
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>LOCATION PROFILES</caption>
+
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th>Profile<br/>Name</th>
+                        <th>Profile<br/>Code</th>
+                        <th>Profile Group<br/>Name</th>
+                        <th>Profile Group<br/>Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in locationProfileList %}
+                    <tr>
+                        <td>
+<!--                            <div class="asLink" name="editSource" data-toggle="modal" data-target="#modalLocation{{profile.id}}">-->
+<!--                                &#9998;-->
+<!--                            </div>-->
+                        </td>
+                        <td>{{ profile.locationname }}</td>
+                        <td>{{ profile.locationcode }}</td>
+                        <td>{{ profile.locationGroup.locationgroupname }}</td>
+                        <td>{{ profile.locationGroup.locationgroupcode }}</td>
+                    </tr>
+<!--                        <div class="modal fade" id="modalLocation{{profile.id}}" tabindex="-1" role="dialog" aria-labelledby="stagingSource{{source.id}}ModalLabel" aria-hidden="true">&lt;!&ndash;edit modal&ndash;&gt;-->
+<!--                            <div class="modal-dialog modal-xl" role="document">-->
+<!--                                <div class="modal-content">-->
+<!--                                    <div class="modal-header">-->
+<!--                                        <h5 class="modal-title" id="stagingSource{{source.id}}ModalLabel"> EDIT SOURCE IN STAGING AREA </h5>-->
+<!--                                        <button name="closeModal" type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                                            <span aria-hidden="true">&times;</span>-->
+<!--                                        </button>-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-body">-->
+<!--                                        <div class="container-fluid">-->
+<!--                                            <iframe style="width:100%;height:600px;" id="edit_staging_source_frame" src="{{source.get_absolute_url}}" frameborder="0"></iframe>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-footer">-->
+<!--                                        <button name="closeModal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>&lt;!&ndash;/edit modal&ndash;&gt;-->
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <hr>
+
+    </div><!--/Location Profiles div-->
+    <div class="modal fade" id="add_location_profile" tabindex="-1" role="dialog" aria-labelledby="addLocationProfileModalLabel" aria-hidden="true"><!--add_location_profile modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLocationProfileModalLabel"> Add New Location Profile</h5>
+                    <button name="closeModal" type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="add_location_profile_frame" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="closeModal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/add_location_profile modal-->
+
+    <div class="container-fluid" id="ingestionProfiles" style="display:none;" name="profileDiv"><!--Ingestion Profile div-->
+        <div class="row">
+            {% if ingestionProfileTypeCount > 1 %}
+            <div class="col-md-6 asLink plusBefore"  name="addingIngestionProfile" data-toggle="modal" data-target="#add_ingestion_profile"
+                 onclick="document.getElementById('add_ingestion_profile_frame').src='{% url 'add_ingestion_profile' %}';">
+                ADD NEW INGESTION PROFILE
+            </div>
+            {% endif %}
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>INGESTION PROFILES</caption>
+
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th>Profile<br/>Name</th>
+                        <th>Ingestion<br/>Type</th>
+                        <th>Ingestion<br/>Port</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in ingestionProfileList %}
+                    <tr>
+                        <td>
+<!--                            <div class="asLink" name="editSource" data-toggle="modal" data-target="#modalIngestion{{source.id}}">-->
+<!--                                &#9998;-->
+<!--                            </div>-->
+                        </td>
+                        <td>{{ profile.ingestionprofilename }}</td>
+                        <td>{{ profile.get_profile_type }}</td>
+                        <td>{{ profile.ingestionport|default_if_none:"" }}</td>
+                    </tr>
+<!--                        <div class="modal fade" id="modalIngestion{{source.id}}" tabindex="-1" role="dialog" aria-labelledby="historySource{{source.id}}ModalLabel" aria-hidden="true">&lt;!&ndash;edit modal&ndash;&gt;-->
+<!--                            <div class="modal-dialog modal-xl" role="document">-->
+<!--                                <div class="modal-content">-->
+<!--                                    <div class="modal-header">-->
+<!--                                        <h5 class="modal-title" id="historySource{{source.id}}ModalLabel"> EDIT SOURCE IN HISTORY </h5>-->
+<!--                                        <button name="closeModal" type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                                            <span aria-hidden="true">&times;</span>-->
+<!--                                        </button>-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-body">-->
+<!--                                        <div class="container-fluid">-->
+<!--                                            <iframe style="width:100%;height:600px;" id="edit_history_source_frame" src="{{source.get_absolute_url}}" frameborder="0"></iframe>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-footer">-->
+<!--                                        <button name="closeModal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>&lt;!&ndash;/edit modal&ndash;&gt;-->
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <hr>
+
+    </div><!--/Ingestion Profile div-->
+    <div class="modal fade" id="add_ingestion_profile" tabindex="-1" role="dialog" aria-labelledby="addIngestionProfileModalLabel" aria-hidden="true"><!--add_ingestion_profile modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addIngestionProfileModalLabel"> Add New Ingestion Profile</h5>
+                    <button name="closeModal" type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="add_ingestion_profile_frame" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="closeModal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/add_ingestion_profile modal-->
+
+    <div class="container-fluid" id="parserProfiles" style="display:none;" name="profileDiv"><!--Parser Profile div-->
+        <div class="row">
+            <div class="col-md-6" style="text-align:center;">
+                <a class="asLink plusBefore" href="{% url 'add_parser_profile' %}">ADD / EDIT OR TEST PARSER PROFILE</a>
+            </div>
+<!--            <div class="col-md-6" style="text-align:center;">-->
+<!--                <a class="asLink" href="">TEST PARSER PROFILE</a>-->
+<!--            </div>-->
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>CUSTOM PARSER PROFILES ({{customParserList|length}})</caption>
+                <thead class="thead-light">
+                    <tr>
+                        <th>Profile<br/>Name</th>
+                        <th>Alternative<br/>Parser</th>
+                        <th>Parse Rules for<br/>Areas in Log</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in customParserList %}
+                    <tr>
+                        <td>{{ profile.parsername }}</td>
+                        <td>{{ profile.get_alternative.parsername }}</td>
+                        <td>
+                            {% for rule in profile.get_parser_rules %}
+                                {{rule.varname}} ,
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br/>
+        <hr/>
+        <br/>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>INSTALLED PARSER PROFILES ({{installedParserList|length}})</caption>
+                <thead class="thead-light">
+                    <tr>
+                        <th>Profile<br/>Name</th>
+                        <th>Alternative<br/>Parser</th>
+                        <th>Parse Rules for<br/>Areas in Log</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in installedParserList %}
+                    <tr>
+                        <td>{{ profile.parsername }}</td>
+                        <td>{{ profile.get_alternative.parsername }}</td>
+                        <td>
+                            {% for rule in profile.get_parser_rules %}
+                                {{rule.varname}} ,
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div><!--/Parser Profile div-->
+    <div class="modal fade" id="add_parser_profile" tabindex="-1" role="dialog" aria-labelledby="addParserProfileModalLabel" aria-hidden="true"><!--add_parser_profile modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addParserProfileModalLabel"> Add New Parser Profile</h5>
+                    <button name="closeModal" type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="add_parser_profile_frame" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="closeModal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/add_parser_profile modal-->
+
+
+
+</div>
+
+<script type="text/javascript" lang="javascript">
+    if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+</script>
+
+
+{% elif route == "detail" %}
+
+<div class="container-fluid innerBodies">
+
+
+</div>
+
+{% else %}
+
+<div class="container-fluid innerBodies">
+
+
+</div>
+
+{% endif %}
+
+<!--<div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">-->
+<!--    <small>{% include 'messages.html' %}</small>-->
+<!--</div>-->
+
+
+{% endblock %}

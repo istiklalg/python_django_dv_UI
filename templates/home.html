@@ -1,0 +1,200 @@
+
+
+{% extends 'base.html' %}
+
+{% block titleBlock %}
+
+     Home {{ block.super }}
+
+{% endblock %}
+
+
+{% block bodyBlock %}
+
+<div class="innerBodies container-fluid" style="padding-top:10px;font-size:9pt;">
+
+    <div class="row justify-content-center" id="inventoriesChartsHeader">
+        <div class="col-md-11 col-sm-5"><legend>General Information About Given Environment</legend></div>
+        <div class="col-md-1 col-sm-1">
+<!--                <small>-->
+<!--                    <select name="chartType" onchange="changeCharts(this.value)">-->
+<!--                        <option value="doughnut">Doughnut Chart</option>-->
+<!--                        <option value="bar">Bar Chart</option>-->
+<!--                    </select>-->
+<!--                </small>-->
+            <span style="padding:2px;"></span>
+            <button class="btn btn-sm btn-outline-secondary circle" name="inventoriesChart2"
+                    id="inventoriesChartButton" onclick="open_close(this)" title="See Content">
+<!--                        &#10094;-->
+<!--                    &#x002B;-->
+                    &#8722;
+            </button>
+        </div>
+    </div>
+    <br />
+    <div class="container-fluid" style="border-radius:5px;">
+        <div class="row justify-content-around" id="systemOverview">
+            {% for element in overViewData %}
+                <div class="col-md-2 col-sm-12 shadowBox" style="background-color:#ffffff;">
+                    <div class="row justify-content-center"><h6 align="center" style="border-bottom: 0.5px solid grey;">{{element.0}}</h6></div>
+                    <div class="row justify-content-center"><h6>{{element.1}}</h6></div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <hr>
+    <br />
+    <div class="container-fluid" id="inventoriesChartDiv">
+        <div class="row" name="homeScreen" id="inventoriesChart1">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 shadowBox" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="chartDevice" title="TOTAL COUNT"></canvas>
+                <hr/>
+                <a class="asLink" href="{% url 'inventories:devices' %}" title="Monitoring Devices">LOG SOURCE STATUS</a>
+                <data id="{{device_chart_labels}}" value="{{device_chart_values}}" style="display:none;">doughnut</data>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 shadowBox" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="chartSources"></canvas>
+                <hr/>
+                <a class="asLink" href="{% url 'log_sources' %}" title="Log Sources">LOG SOURCE VENDORS</a>
+                <data id="{{sources_chart_labels}}" value="{{sources_chart_values}}" style="display:none;">doughnut_empty</data>
+            </div>
+<!--                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12" style="border-right: 1px solid black;" align="center" name="charts">-->
+<!--                    <canvas id="chartLogsElastic"></canvas>-->
+<!--                    <hr/>-->
+<!--                    <a class="asLink" href="{% url 'AgentRoot:log_monitoring' %}" title="Monitoring All Logs">TOTAL LOGS COLLECTED</a>-->
+<!--                    <data id="{{LogsElastic_chart_labels}}" value="{{LogsElastic_chart_values}}" style="display:none;">doughnut</data>-->
+<!--                </div>-->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 shadowBox" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="weeklyLogs"></canvas>
+                <hr/>
+                <a class="asLink" href="{% url 'AgentRoot:log_monitoring' %}" title="Monitoring All Logs">LOGS IN LAST 7 DAYS</a>
+                <data id="{{weeklyLogs_chart_labels}}" value="{{weeklyLogs_chart_values}}" style="display:none;">logs_bar</data>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 shadowBox" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="chartLogs" title="Brands"></canvas>
+                <hr/>
+                <a class="asLink" href="{% url 'inventories:logs' %}" title="Logs in Queue">UNPARSED & QUEUED LOGS</a>
+                <data id="{{log_chart_labels}}" value="{{log_chart_values}}" style="display:none;">doughnut</data>
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="row" name="homeScreen" id="inventoriesChart2">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 shadowBox" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="chartRC"></canvas>
+                <hr/>
+                <a class="asLink" href="{% url 'AgentRoot:diagnosis_monitor' %}" target="_blank" title="Incidents and Details">DIAGNOSES</a>
+                <data id="{{rc_chart_labels}}" value="{{rc_chart_values}}" style="display:none;">doughnut</data>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 shadowBox" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="chartAlerts"></canvas>
+                <hr/>
+                <a class="asLink" href="{% url 'AgentRoot:general_monitor' %}" title="Monitoring All Logs">GENERATED ALERTS</a>
+                <data id="{{alerts_chart_labels}}" value="{{alerts_chart_values}}" style="display:none;">horizontalBar</data>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 shadowBox" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="chartLogsElastic"></canvas>
+                <hr/>
+                <a class="asLink" href="{% url 'AgentRoot:log_monitoring' %}" title="Monitoring All Logs">TOTAL LOGS COLLECTED</a>
+                <data id="{{LogsElastic_chart_labels}}" value="{{LogsElastic_chart_values}}" style="display:none;">doughnut</data>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 shadowBox" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="chartLocation"></canvas>
+                <hr/>
+                <a class="asLink" href="{% url 'inventories:locations' %}">LOCATIONS</a>
+                <data id="{{location_chart_labels}}" value="{{location_chart_values}}" style="display:none;">doughnut</data>
+            </div>
+        </div>
+    </div>
+
+    <br /><hr />
+
+    <div class="row justify-content-center" id="incidentsHeader">
+            <div class="col-md-10 col-sm-5"><legend>Detections</legend></div>
+            <div class="col-md-2 col-sm-1">
+                    <div class="row" align="right">
+                            <a class="btn btn-sm btn-outline-secondary circle" name="incidentsFrame" id="incidentsPage"
+                                    type="button" href="{% url 'AgentRoot:incidents_home' %}" title="Open incidents List Page"
+                                    target="_blank">
+                                    &#9776;
+                            </a>
+                            <span style="padding:2px;"></span>
+                            <button class="btn btn-sm btn-outline-secondary circle" name="incidentsFrame" id="incidentsRefresh"
+                                    onclick="refreshFlow(this)" title="Refresh Detection List">
+                                    &#8635;
+                            </button>
+                            <span style="padding:2px;"></span>
+                            <button class="btn btn-sm btn-outline-secondary circle" name="incidentsFrame" id="incidentsChart"
+                                    onclick="open_close(this)" title="Close Content">
+<!--                                        &#709;-->
+                                    &#8722;
+                            </button>
+                    </div>
+            </div>
+    </div>
+    <br />
+    <div class="row justify-content-center" id="incidentsDiv">
+            <iframe class="rcframe" id="incidentsFrame" src="{% url 'AgentRoot:incidents_home' %}" frameborder="0"></iframe>
+    </div>
+
+    <br /><hr />
+
+<!--    <div class="row justify-content-center" id="rootCauseHeader">-->
+<!--            <div class="col-md-10 col-sm-5">Anomaly Detections and Root - Cause Relationships</div>-->
+<!--            <div class="col-md-2 col-sm-1">-->
+<!--                    <div class="row" align="right">-->
+<!--                            <a class="btn btn-sm btn-outline-secondary circle" name="rootCauseFrame" id="rcFlowPage"-->
+<!--                                    type="button" href="{% url 'AgentRoot:rc_flowing' %}" title="Open Detection List Page"-->
+<!--                                    target="_blank">-->
+<!--                                    &#9776;-->
+<!--                            </a>-->
+<!--                            <span style="padding:2px;"></span>-->
+<!--                            <button class="btn btn-sm btn-outline-secondary circle" name="rootCauseFrame" id="rcFlowRefresh"-->
+<!--                                    onclick="refreshFlow(this)" title="Refresh Detection List">-->
+<!--                                    &#8635;-->
+<!--                            </button>-->
+<!--                            <span style="padding:2px;"></span>-->
+<!--                            <button class="btn btn-sm btn-outline-secondary circle" name="rootCauseFrame" id="rcFlowChart"-->
+<!--                                    onclick="open_close(this)" title="Close Content">-->
+<!--&lt;!&ndash;                                        &#709;&ndash;&gt;-->
+<!--                                    &#8722;-->
+<!--                            </button>-->
+<!--                    </div>-->
+<!--            </div>-->
+<!--    </div>-->
+<!--    <br />-->
+<!--    <div class="row justify-content-center" id="rootCauseDiv">-->
+<!--            <iframe class="rcframe shadowBox" id="rootCauseFrame" src="{% url 'AgentRoot:rc_flowing' %}" frameborder="0"></iframe>-->
+<!--    </div>-->
+
+<!--    <br /><hr />-->
+
+<!--        <div class="row justify-content-center" id="reportSelectionHeader">-->
+
+<!--                <div class="col-md-11 col-sm-5">Design A Report Type You Need</div>-->
+<!--                <div class="col-md-1 col-sm-1">-->
+<!--                        <button class="btn btn-sm btn-outline-secondary circle" name="reportSelectionDiv"-->
+<!--                                id="reportSelections" onclick="open_close(this)" title="See Content">-->
+<!--&lt;!&ndash;                                &#10094;&ndash;&gt;-->
+<!--                            	&#x002B;-->
+<!--                        </button>-->
+<!--                </div>-->
+
+<!--        </div>-->
+<!--        <br />-->
+<!--        <div class="row justify-content-center" name="homeScreen" id="reportSelectionDiv" style="display:none;">-->
+<!--                <div class="col-sm-12 col-md-4 col-lg-3">-->
+<!--                        <a href="{% url 'inventories:module_home' %}">Report Module to Create New Report Type</a>-->
+<!--                </div>-->
+<!--                <div class="col-sm-12 col-md-4 col-lg-3">-->
+<!--                        <a href="{% url 'inventories:report_list' %}">Existing Report Type Records</a>-->
+<!--                </div>-->
+<!--        </div>-->
+<!--        <br /><hr />-->
+
+</div>
+
+{% endblock %}

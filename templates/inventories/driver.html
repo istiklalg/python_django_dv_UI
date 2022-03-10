@@ -1,0 +1,232 @@
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Driver {{route}} {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+    {% if route == "file load" %}
+
+        <div class="container-fluid innerBodies">
+            <h5 align="center">LOAD A NEW LOG SOURCE DRIVER FILE</h5>
+            <div class="container-fluid" name="formDiv">
+                {% crispy form %}
+            </div>
+            <hr>
+            <div class="container-fluid" name="loadInfoDiv">
+            {% if loadedFile %}
+                <div class="row">
+                    <div class="col-md-6" name="newlyLoad">
+                        <div class="row">
+                            <h5 class="col-md-11" align="center">DRIVER FILE DETAILS</h5>
+<!--                            <form method="post">-->
+                                <button name="resetGlobals" type="button" class="col-md-1 close" aria-label="Close"
+                                        style="border:none;outline:none;color:lightgrey;" title="Close"
+                                        onclick="resetGlobals();">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+<!--                            </form>-->
+                        </div>
+
+                        <ul>
+                            <li>FILE NAME : <span id="file_name">{{loadedFile}}</span></li>
+                            {% if loadedDirectory == versionInfo.filename %}
+                                <li>DRIVER FILE NAME : <span id="driver_file_name">{{versionInfo.filename}}</span></li>
+                            {% else %}
+                                <li>DRIVER FILE NAME : <span id="incompatible_driver_file_name" style="color:rgba(255, 99, 132, 0.85);">{{versionInfo.filename}} -> incompatible driver file !!</span></li>
+                            {% endif %}
+                            <li>DRIVER TYPE : <span id="driver_type">{{versionInfo.tarType}}</span></li>
+                            <li>VENDOR NAME : <span id="vendor_name">{{versionInfo.definitionname}}</span></li>
+                            <li>VENDOR ID : <span id="vendor_id">{{versionInfo.definitioncode}}</span></li>
+                            <li>VERSION : <span id="version_info">{{versionInfo.defversion}}.{{versionInfo.defsubversion}}</span></li>
+                        </ul>
+                        <button class="btn btn-sm btn-outline-success" name="installLoaded" onclick="installLoadedFile()"
+                                style="font-size:9pt;width:100%;" {%if loadedDirectory != versionInfo.filename %} disabled {% endif %}>
+                            &#8681; INSTALL
+                        </button>
+                    </div>
+                    <div class="col-md-6" name="loadedInfoDiv" style="border-left:0.5px solid lightgrey;overflow-y:scroll;">
+                        <h5 align="center">FILES LOADED BEFORE</h5>
+                        {% if not loadedDrivers %}There is no file loaded before{% endif %}
+                        <ul>
+                            {% for name, status, error, vendor, date in loadedDrivers %}
+                                <li {% if loadedDirectory == name %} class="blinking" {% endif %}>
+                                    {% if status %}
+                                        <span style="color:rgba(75, 192, 192, 0.85)">{{name}} - {{date}} - installed</span>
+                                    {% elif error or error != "" %}
+                                        <span style="color:rgba(255, 99, 132, 0.85);">{{name}} - {{date}} - installed with errors : {{error}}</span>
+                                    {% else %}
+                                        <span>{{name}} - loaded but not installed</span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% else %}
+                <div name="loadedInfoDiv" style="overflow-y:scroll;max-height:250px;">
+                    <h5 align="center">FILES LOADED BEFORE</h5>
+                    {% if not loadedDrivers %}There is no file loaded before{% endif %}
+                    <ul>
+                        {% for name, status, error, vendor, date in loadedDrivers %}
+                            <li>
+                                {% if status %}
+                                    <span style="color:rgba(75, 192, 192, 0.85)">{{name}} - {{date}} - installed</span>
+                                {% elif error or error != "" %}
+                                    <span style="color:rgba(255, 99, 132, 0.85);">{{name}} - {{date}} - installed with errors : {{error}}</span>
+                                {% else %}
+                                    <span>{{name}} - loaded not installed</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            </div>
+            <hr>
+            <div class="container-fluid" name="installResultDiv" id="installResultDiv" style="display:none;">
+
+            </div>
+            <div class="container-fluid" name="loadedTableDiv">
+                <table class="table table-sm table-striped">
+                    <caption>DRIVERS ALREADY INSTALLED</caption>
+                    <thead>
+                        <tr>
+                            <th>VENDOR</th>
+                            <th>MODEL</th>
+                            <th>TYPE</th>
+                            <th>VERSIONS</th>
+                        </tr>
+                        <tr>
+                            <th>
+                                <select name="filterVendor" id="filterVendor" onchange="location.href='?filterVendor='+this.value;">
+                                    <option value="">No Filter</option>
+                                    <option disabled>-----------</option>
+                                    {% for vendor in vendorList %}
+                                        <option value="{{vendor.id}}" {%if request.GET.filterVendor%} selected {%endif%}>{{vendor.markname}}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for drvr in loadedList %}
+                        <tr>
+                            <td>{{drvr.brand}}</td>
+                            <td>{{drvr.modelname}}</td>
+                            <td>{{drvr.devicetype}}</td>
+                            <td>{{drvr.get_versions|safe}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <hr>
+                {# PAGINATION #}
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if loadedList.has_previous %}
+                            <a href="?page=1{% if request.GET.filterVendor %}&filterVendor={{ request.GET.filterVendor }}{% endif %}">&laquo; jump to first </a>/
+                            <a href="?page={{ loadedList.previous_page_number }}{% if request.GET.filterVendor %}&filterVendor={{ request.GET.filterVendor }}{% endif %}"> previous </a>/
+                        {% endif %}
+
+                        <span class="current">
+                            <i>{{ loadedList.number }}. of {{ loadedList.paginator.num_pages }} pages </i>
+                        </span>
+
+                        {% if loadedList.has_next %}
+                            /<a href="?page={{ loadedList.next_page_number }}{% if request.GET.filterVendor %}&filterVendor={{ request.GET.filterVendor }}{% endif %}"> next </a>
+                            /<a href="?page={{ loadedList.paginator.num_pages }}{% if request.GET.filterVendor %}&filterVendor={{ request.GET.filterVendor }}{% endif %}"> jump to last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>{# /pagination #}
+                <br>
+            </div>
+        </div>
+
+    {% elif route == "file expand" %}
+
+        <div class="container-fluid innerBodies">
+
+        </div>
+
+    {% else %}
+
+        <div class="container-fluid innerBodies">
+
+        </div>
+
+    {% endif %}
+
+<script type="text/javascript" lang="javascript">
+
+var route = '{{route}}';
+if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+if(route=='file load'){
+    $(".custom-file-label").css("font-size", "9pt");
+    $(".custom-file-label").css("z-index", "0");
+
+    function installLoadedFile(){
+        var csrf = $("input[name=csrfmiddlewaretoken]").val();
+        var resultDiv = $("#installResultDiv");
+        $.ajax({
+            url: "/inventories/add_device_driver/",
+            type: "post",
+            data: {csrfmiddlewaretoken: csrf, action: "installLoaded"},
+            beforeSend: function (){resultDiv.css("color", "rgba(54, 162, 235, 0.85)");resultDiv.html("Installing...");resultDiv.fadeIn();},
+            success: function(response){
+                if(response.command!=0){
+                    resultDiv.css("color", "rgba(75, 192, 192, 0.85)");
+                    resultDiv.html(response.result);
+                    if(response.command==2){
+                        resultDiv.html(resultDiv.html()+" .  Page will be reloaded in 10 seconds");
+                        setInterval(function(){location.reload();}, 10000);
+                    }
+                    //setInterval(function(){resultDiv.fadeOut();}, 15000);
+                }else if(response.command==0){
+                    resultDiv.css("color", "rgba(255, 99, 132, 0.85)");
+                    resultDiv.html(response.result);
+                    //setInterval(function(){resultDiv.fadeOut();}, 15000);
+                }else{
+                    resultDiv.css("color", "rgba(255, 99, 132, 0.85)");
+                    resultDiv.html("No response !!");
+                    //setInterval(function(){resultDiv.fadeOut();}, 15000);
+                }
+            }
+        });
+    }
+
+    function resetGlobals(){
+        var csrf = $("input[name=csrfmiddlewaretoken]").val();
+        $.ajax({
+            url: "/inventories/add_device_driver/",
+            type: "post",
+            data: {csrfmiddlewaretoken: csrf, action: "resetGlobals"},
+            success: function(response){
+                if(response.action=="resetGlobals"){
+                    if(response.command!=0){
+                        location.reload();
+                    }else {
+
+                    }
+                }
+            }
+        });
+    }
+}
+
+</script>
+
+{% endblock %}
+

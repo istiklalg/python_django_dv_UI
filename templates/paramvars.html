@@ -1,0 +1,121 @@
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block titleBlock %}
+
+     Parameter Variables {{ block.super }}
+
+{% endblock %}
+
+
+{% block bodyBlock %}
+
+<style></style>
+
+<div class="innerBodies container-fluid" style="padding-top:10px;font-size:9pt;">
+
+    {% if route == "general" %}
+        <div class="container-fluid">
+            <div class="row justify-content-between mx-1">
+                <div class="col-sm-6"><legend>Parameter variables</legend></div>
+                <div class="col-sm-2" align="right"><a class="btn btn-sm btn-outline-info" type="button" href="{% url 'add_parameter_variable'%}">Add New</a></div>
+            </div>
+            <hr />
+            <table class="table table-sm table-hover">
+                <thead class="thead-light">
+                    <form method="GET" class="form-inline">
+                        <tr>
+                            <th><a class="asLink" href="?order_by=id{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">#</a></th>
+                            <th><a class="asLink" href="?order_by=codeorder{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">Order</a></th>
+                            <th></th>
+                            <th><a class="asLink" href="?order_by=kodnote{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">Parameter Name</a></th>
+                            <th><a class="asLink" href="?order_by=parametertypeid_id{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">Parameter Type</a></th>
+                            <th><a class="asLink" href="?order_by=paramtype{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">Group of<br />Parameter Type</a></th>
+                            <th><a class="asLink" href="?order_by=kod{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">Code</a></th>
+                            <th><a class="asLink" href="?order_by=valacceptreg{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">Regex to Accept</a></th>
+                            <th><a class="asLink" href="?order_by=hidevalue{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">Masked?</a></th>
+                            <th><a class="asLink" href="?order_by=correlationstatus{% if request.GET %}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">Correlation?</a></th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th><small><input type="text" name="name_q" value="{{request.GET.name_q}}" placeholder="&#8981;" style="height:20px;max-width:110px;" /></small></th>
+                            <th></th>
+                            <th><small><input type="text" name="type_q" value="{{request.GET.type_q}}" placeholder="&#8981;" style="height:20px;max-width:90px;" /></small></th>
+                            <th><small><input type="text" name="code_q" value="{{request.GET.code_q}}" placeholder="&#8981;" style="height:20px;max-width:110px;" /></small></th>
+                            <th></th>
+                            <th></th>
+                            <th><small><button style="height:20px;width:60px;padding:0;margin:0;overflow:hidden;" class="btn btn-outline-success btn-sm" type="submit">&#8981;</button></small></th>
+                        </tr>
+                    </form>
+                </thead>
+                <tbody>
+                    {% for row in paramsList %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.codeorder }}</td>
+                        <td><a href="{{row.get_absolute_url}}" title="Edit">&#128394;</a></td>
+                        <td>{{ row.kodnote }}</td>
+                        <td>{{ row.parametertypeid|default_if_none:"" }}</td>
+                        <td>{{ row.paramtype }}</td>
+                        <td>{{ row.kod }}</td>
+                        <td>{{ row.valacceptreg|default_if_none:"" }}</td>
+                        <td>{{ row.hidevalue }}</td>
+                        <td>{{ row.correlationstatus|default_if_none:"" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <hr />
+            <p>{{record_count}} record</p>
+            {# PAGINATION #}
+            <div class="pagination">
+                <span class="step-links">
+                    {% if paramsList.has_previous %}
+                        <a href="?page=1{% if request.GET %}&order_by={{request.GET.order_by}}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}">&laquo; jump to first </a>/
+                        <a href="?page={{ paramsList.previous_page_number }}{% if request.GET %}&order_by={{request.GET.order_by}}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}"> previous </a>/
+                    {% endif %}
+
+                    <span class="current">
+                        <i>{{ paramsList.number }}. of {{ paramsList.paginator.num_pages }} pages </i>
+                    </span>
+
+                    {% if paramsList.has_next %}
+                        /<a href="?page={{ paramsList.next_page_number }}{% if request.GET %}&order_by={{request.GET.order_by}}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}"> next </a>
+                        /<a href="?page={{ paramsList.paginator.num_pages }}{% if request.GET %}&order_by={{request.GET.order_by}}&name_q={{request.GET.name_q}}&type_q={{request.GET.type_q}}&code_q={{request.GET.code_q}}{% endif %}"> jump to last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>{# /pagination #}
+        </div>
+    {% elif route == "detail" %}
+        <div class="container-fluid">
+            <h5>Parameter variables</h5>
+        </div>
+    {% elif route == "edit" or route == "add" %}
+        <div class="container-fluid">
+            <legend>Parameter variables {{route}}</legend>
+            <hr />
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% crispy form %}
+                <datalist id="paramtype_choices">
+                    {% for param in paramTypes %}
+                        <option value="{{param}}">{{param}}</option>
+                    {% endfor %}
+                </datalist>
+            </form>
+        </div>
+    {% else %}
+    {% endif %}
+
+</div>
+
+<script type="text/javascript" language="JavaScript">
+
+
+</script>
+
+{% endblock %}

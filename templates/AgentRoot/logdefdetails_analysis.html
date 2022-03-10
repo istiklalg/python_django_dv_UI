@@ -1,0 +1,182 @@
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> Log Definition Details </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body  style="padding-top:15px;">
+
+        {% if route == 'general' %}
+
+
+        {% elif route == 'detail' %}
+
+        <div class="container-fluid" style="text-align:center;font-size:9pt;">
+
+            <div class="row" style="margin:10px;">
+                <form method="POST" name="delete_subdef">
+                    {%csrf_token%}
+                    <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size:9pt;" value="" id="delete_subdef" name="delete_subdef">
+                        &#128465; Delete Sub Definition
+                    </button>
+                </form>
+                <form method="POST" name="new_subdef">
+                    {%csrf_token%}
+                    <button type="submit" class="btn btn-sm btn-outline-info" style="font-size:9pt;margin-left:10px;" value="" id="new_subdef" name="new_subdef">
+                        &#9777; Create New Sub Definition
+                    </button>
+                </form>
+            </div>
+
+            <h5>{{logdefinition.definitionname}}</h5>
+
+            <div class="row" style="margin:10px;">
+                <table class="table table-sm table-hover">
+                    <thead class="thead-light">
+                        <form method="GET" class="form-inline">
+                        <tr>
+                            <th><small><input type="text" name="logcode_q" placeholder="&#8981; Log code search" value="{{request.GET.logcode_q}}" /></small></th>
+                            <th></th>
+                            <th><small><input type="text" name="structs_q" style="width:100%;" placeholder="&#8981; search in log structure" value="{{request.GET.structs_q}}" /></small></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th colspan="2">
+                                <a class="asLink"
+                                   href="{{logdefinition.get_absolute_url}}"
+                                   style="text-decoration:None;">Clear Search</a>
+                            </th>
+<!--                            <th colspan="2">-->
+<!--                                <a class="asLink"-->
+<!--                                   onclick="location.assign(location.origin+location.pathname);"-->
+<!--                                   style="text-decoration:None;">Clear Search</a>-->
+<!--                            </th>-->
+                            <th>
+                                <small>
+                                    <button style="height:21px;width:21px;padding:0;overflow:hidden;"
+                                            class="btn btn-outline-success btn-sm" type="submit">
+                                        <small>&#8981;</small>
+                                    </button>
+                                </small>
+                            </th>
+                        </tr>
+                        </form>
+                        <tr>
+                            <th><a href="?order_by=logcode{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}{% endif %}">Log Code</a></th>
+                            <th><a href="?order_by=logsubdefcode{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}{% endif %}">Sub Definition<br>Code</a></th>
+                            <th><a href="?order_by=logstructs{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}{% endif %}">Log Structure</a></th>
+                            <th>User Defined<br>Severity</th>
+                            <th>Edit<br>Details</th>
+                            <th>Alert<br>Disabled?</th>
+                            <th><a href="?order_by=paramsvalid{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}{% endif %}">Parser<br>Validated?</a></th>
+                            <th><a href="?order_by=systemlogdef{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}{% endif %}">Base<br>Log?</a></th>
+                            <th><a href="?order_by=autoparam{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}{% endif %}">Status?</a></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for ldd in logdefdetailList %}
+                        <tr onclick="prepare_button_values({{ldd.id}})" id="ldd_row-{{ldd.id}}" name="ldd_rows">
+                            <td style="cursor:pointer;">{{ ldd.logcode }}</td>
+                            <td style="cursor:pointer;">{{ ldd.logsubdefcode }}</td>
+                            <td style="cursor:pointer;">{{ ldd.logstructs }}</td>
+                            <td>
+                                <select name="outclasstype"
+                                        onchange="location.assign(location.origin+location.pathname+'?change_severity_for={{ldd.id}}&change_severity_to='+this.value+'{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}&order_by={{request.GET.order_by}}&page={{request.GET.page}}{% endif %}');">
+                                    {% if not ldd.outclasstype %}
+                                        <option value=""></option>
+                                    {% endif %}
+                                    {% for x in systemSeverityList %}
+                                        <option value="{{x}}" {%if x == ldd.outclasstype%}selected{%endif%}>
+<!--                                            <a href="?change_severity_for={{ldd.logcode}}?change_severity_to={{x}}{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}&order_by={{request.GET.order_by}}{% endif %}">{{x}}</a>-->
+                                            {{x}}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <a type="button" class="btn btn-outline-info btn-sm" target="_blank"
+                                        title="EDIT DEFINITION DETAILS"
+                                        style="float:right;height:18px;width:18px;padding:0;overflow:hidden;"
+                                        {%if ldd.systemlogdef or ldd.logsubdefcode == 999%} {%else%} href="{{ldd.get_absolute_url}}" {%endif%}>
+                                    <small>&#128394;</small>
+                                </a>
+                            </td>
+                            <td>{% if ldd.userdisabled %}&#x2713;{% else %}&#x2717;{% endif %}</td>
+                            <td>{% if ldd.paramsvalid %}&#x2713;{% else %}&#x2717;{% endif %}</td>
+                            <td>{% if ldd.systemlogdef %}&#x2713;{% else %}&#x2717;{% endif %}</td>
+                            <td>{% if ldd.autoparam %}&#x2713;{% else %}&#x2717;{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <hr/>
+                <div class="pagination">{# pagination #}
+                    <span class="step-links">
+                        {% if logdefdetailList.has_previous %}
+                            <a href="?page=1{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}&order_by={{request.GET.order_by}}{% endif %}">&laquo; jump to first </a>/
+                            <a href="?page={{ logdefdetailList.previous_page_number }}{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}&order_by={{request.GET.order_by}}{% endif %}"> previous </a>/
+                        {% endif %}
+                        <span class="current">
+                            <i>{{ logdefdetailList.number }}. of {{ logdefdetailList.paginator.num_pages }} pages </i>
+                        </span>
+                        {% if logdefdetailList.has_next %}
+                            /<a href="?page={{ logdefdetailList.next_page_number }}{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}&order_by={{request.GET.order_by}}{% endif %}"> next </a>
+                            /<a href="?page={{ logdefdetailList.paginator.num_pages }}{% if request.GET %}&logcode_q={{request.GET.logcode_q}}&structs_q={{request.GET.structs_q}}&order_by={{request.GET.order_by}}{% endif %}"> jump to last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>{# /pagination #}
+            </div>
+
+        </div>
+
+        {% else %}
+
+         <div class="container" style="text-align:center;">
+            <h5>SOON ...</h5>
+            <hr>
+         </div>
+
+        {% endif %}
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+        /*
+            console.log(location.href);
+            console.log(location.hostname);
+            console.log(location.pathname);
+            console.log(location.protocol);
+            console.log(location.port);
+            console.log(location.protocol+'//'+location.hostname+':'+location.port+location.pathname);
+        */
+        var ldd_rows = document.getElementsByName("ldd_rows")
+        var delete_subdef = document.getElementById("delete_subdef");
+        var new_subdef = document.getElementById("new_subdef");
+
+        function prepare_button_values(lddID){
+            console.log("Selected row id is : "+lddID);
+            delete_subdef.value = lddID;
+            new_subdef.value = lddID;
+            var ldd_row = document.getElementById("ldd_row-"+lddID);
+            ldd_rows.forEach(function (row){row.style.backgroundColor = "white";});
+            ldd_row.style.backgroundColor = "rgba(245, 245, 220, 0.6)";
+        }
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,162 @@
+
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Check interval data {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "general" %}
+
+<div class="container-fluid innerBodies">
+
+    <div class="row innerBodies justify-content-center">
+        <h5>INVESTIGATE INTERVAL TABLES</h5>
+    </div>
+    <hr>
+    <div class="row innerBodies justify-content-between form-inline container-fluid">
+        {% csrf_token %}
+        <label class="col-md-1" for="src_unique_id">SOURCE UNIQUE ID</label>
+        <div class="col-md-1">
+            <select class="form-control" name="src_unique_id" id="src_unique_id" style="font-size:9pt;">
+                <option value="">---</option>
+            </select>
+        </div>
+        <label class="col-md-1" for="param_or_code">LOG CODE or PARAMETER</label>
+        <div class="col-md-1">
+            <select class="form-control" name="src_unique_id" id="param_or_code" style="font-size:9pt;">
+                <option value="">---</option>
+            </select>
+        </div>
+        <label class="col-md-1" for="start_date">START DATE</label>
+        <div class="col-md-1">
+            <input class="form-control" type="date" name="start_date" id="start_date"
+                                     style="font-size:9pt;" value="{{start_date|date:'Y-m-d'}}" />
+        </div>
+        <label class="col-md-1" for="end_date">END DATE</label>
+        <div class="col-md-1">
+            <input class="form-control" type="date" name="end_date" id="end_date"
+                   style="font-size:9pt;" value="{{end_date|date:'Y-m-d'}}" />
+        </div>
+        <div class="col-md-1">
+            <input class="btn btn-sm btn-outline-info" type="submit" style="font-size:9pt;width:100%;" value="DRAW" />
+        </div>
+    </div>
+    <hr />
+    <div class="row justify-content-center innerBodies">
+        <div class="col col-xl-11 col-lg-11 col-md-12 col-sm-12" align="center" name="interval_chart" id="interval_chart">
+            <canvas id="intervals_chart_canvas" height="120"></canvas>
+            <hr/>
+            <data id="data" value="{{chart_labels}}" style="display:none;">logs_line</data>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" lang="javascript">
+    // colors -> [green, red, orange, blue, yellow, grey, purple]
+    var graphColors = ['rgba(75, 192, 192, 0.85)','rgba(255, 99, 132, 0.85)','rgba(255, 159, 64, 0.85)','rgba(54, 162, 235, 0.85)','rgba(255, 206, 86, 0.85)','rgba(150, 150, 150, 0.85)','rgba(106, 92, 112, 0.85)']
+    var labelNames = ['Alert ', 'Cause ', 'Sub']
+
+    if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+    $(document).ready(function () {
+        var _div = document.getElementById("interval_chart");
+        var _canvas = document.getElementById("intervals_chart_canvas");
+        //var _data = document.getElementById("data");
+        //var _label_list = (_data.value).replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+        //var _label_list = {{chart_labels|safe}};
+        drawIntervalChart({{graph_data}}, {{chart_labels|safe}}, _canvas);
+    });
+
+    function drawIntervalChart(chartData, chartLabels, canvasToDraw){
+        var ctx = canvasToDraw.getContext("2d");
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: "Upper Bound",
+                        data: chartData[0],
+                        backgroundColor: ['rgba(150, 150, 150, 0.50)'],
+                        borderColor: ['rgba(150, 150, 150, 0.50)'],
+                        borderWidth: 0.5,
+                        pointRadius: 1,
+                        fill: '1',
+                    },
+                    {
+                        label: "Lower Bound",
+                        data: chartData[2],
+                        backgroundColor: ['rgba(150, 150, 150, 0.50)'],
+                        borderColor: ['rgba(150, 150, 150, 0.50)'],
+                        borderWidth: 0.5,
+                        pointRadius: 1,
+                        fill: false,
+                    },
+                    {
+                        label: "Log Count",
+                        order: 1,
+                        data: chartData[1],
+                        backgroundColor: 'rgba(75, 192, 192, 0.85)',
+                        borderColor: 'rgba(75, 192, 192, 0.85)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        fill: false,
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    xAxes: [{scaleLabel: {display: true, labelString: 'Date & Time'}}],
+                    yAxes: [{scaleLabel: {display: true, labelString: 'Count of Logs'}, ticks: {beginAtZero: true,}}]
+                },
+                elements: {
+                    center: {
+                        text: " ",
+                    }
+                },
+            }
+        });
+    }
+
+
+</script>
+
+{% elif route == "detail" %}
+
+<div class="container-fluid innerBodies">
+
+
+</div>
+
+<script type="text/javascript" lang="javascript">
+
+
+</script>
+
+{% else %}
+
+<div class="container-fluid innerBodies">
+
+
+</div>
+
+<script type="text/javascript" lang="javascript">
+
+
+</script>
+
+{% endif %}
+
+{% endblock %}

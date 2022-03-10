@@ -1,0 +1,160 @@
+
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> ATIBAreport - Latest Incidents & Root-Cause Diagnoses </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    {% if route == 'general' %}
+    <body style="background-color:rgba(245, 245, 220, 0.6);font-size:9pt;">
+
+        {% csrf_token %}
+
+        <div class="innerBodies" style="background-color:white;text-align:center;"><small>{{ newCount }} new in last {{rcList|length}} record</small></div>
+
+        {% for rc in rcList %}
+        <div class="rcitem" id="{{rc.id}}" style="background-color:white;">
+            <div class="row">
+                <div class="col-md-9">
+                    <small id="small_{{forloop.counter}}" style="text-align-horizontal:center;">
+                        <a href="{{rc.get_absolute_url}}" target="_blank"> DETECTED Incident(s)  </a><span>at {{ rc.graphupdatetime|date:'Y-m-d H:i:s' }}</span> <small> ({{ rc.graphupdatetime|timesince }} before..)</small>
+                    </small>
+                </div>
+            </div>
+            {% for device in rc.get_root_devices %}
+                <div class="container-fluid rcitem">
+                    <div class="row" style="">
+
+
+                        <div class="col-md-2"><b>{{device.brandModel.devicetype}}</b></div>
+
+                        <div class="col-md-2" style="border-right:0.5px solid lightgrey"><small>Name : {{device}}</small></div>
+
+                        <div class="col-md-2" style="border-right:0.5px solid lightgrey"><small>Unique ID : {{device.uniqueid}}</small></div>
+
+                        <div class="col-md-2" style="border-right:0.5px solid lightgrey"><small>IP : {{device.ipaddress}}</small></div>
+
+                        <div class="col-md-2" style="border-right:0.5px solid lightgrey"><small>Brand : {{device.brand}}</small></div>
+
+                        <div class="col-md-2"><small>Model : {{device.brandModel}}</small></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-9">
+                            <small style="text-align-horizontal:center;"></small>
+                            <hr/>
+                        </div>
+                    </div>
+
+                    {% for type in rc.get_anomaly_types %}
+
+                        {% for root in rc.get_root_logs %}
+                        {% if device == root.get_device and type == root.get_type_definition %}
+
+                            <div class="row" name="rootLogs">
+                                <div class="col-md-2">
+                                    <small name="typeDefinitions"><b>{{root.get_type_definition}}</b></small>
+                                </div>
+                                <div class="col-md-10">
+                                    <p name="rootLogDetails">
+                                        <small>
+                                            <b>{{forloop.counter}} -</b>
+<!--                                            <a href="{{rc.get_absolute_url}}" target="_blank">&#128270;</a>-->
+                                            {% if root.anomalytype == 1 %}
+                                                <i><u>Definition</u> : {{ root }} </i>
+                                            {% elif root.anomalytype == 2 %}
+                                                <i><u>Definition</u> : {{ root.logevent }} </i>
+                                            {% elif root.anomalytype == 1201 %}
+                                                <i><u>Definition</u> : Anomaly about log behaviour </i>
+                                            {% elif root.anomalytype == 1301 %}
+                                                <i><u>Definition</u> : {{ root.paramvariable }} = {{ root.paramvalue|truncatechars:3 }} </i>
+                                            {% else %}
+                                                <i><u>Definition</u> : {{ root }} </i>
+                                            {% endif %}
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+
+                        {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+
+                </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/general_style.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            window.scroll({top: 0, left: 0, behavior: 'smooth'});
+            var newCount = localStorage.getItem("newCount");
+            for(var i=1;i<newCount;i++){
+                var smallEl = id="small_"+i
+                var blinker = document.getElementById(smallEl);
+                blinker.className="blinking";
+            }
+            newCount = 0;
+            localStorage.setItem("newCount", newCount);
+            var id_text_list = $(".rcitem");
+            if(id_text_list.length>0){
+                var id_text = $(".rcitem")[0].id;
+                var first_id = id_text.replace(".","");
+                var count = {{rcTotalCount}};
+                setInterval(function(){
+                    var csrf = $("input[name=csrfmiddlewaretoken]").val();
+                    //console.log(count + " " + first_id);
+                    $.ajax({
+                        url: "/monitor/flowing/",
+                        type: "post",
+                        data: {csrfmiddlewaretoken: csrf, count: count, first_id: parseInt(first_id)},
+                        success: function(response){
+                            if(response.command!=0){
+                                newCount = response.newCount;
+                                localStorage.setItem("newCount", newCount);
+                                location.reload(true);
+                            }
+                        }
+                    });
+                }, 30000);
+            }else{
+                setInterval(function(){location.reload();}, 30000);
+            }
+        </script>
+    </body>
+    {% elif route == 'timeout' %}
+
+    <body style="background-color:rgba(245, 245, 220, 0.6);">
+
+        <div class="innerBodies" style="text-align:center;font-size:9pt;">
+            <p>Your session timed out</p>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/general_style.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+
+
+        </script>
+
+    </body>
+
+    {% endif %}
+
+</html>
+

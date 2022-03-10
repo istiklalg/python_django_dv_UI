@@ -1,0 +1,133 @@
+[INFO - django.utils.autoreload - 2021-09-09 11:20:57,185 - run_with_reloader - line 617 - process 12796 - thread 4072] : Watching for file changes with StatReloader
+[INFO - django.utils.autoreload - 2021-09-09 11:25:07,351 - trigger_reload - line 240 - process 12796 - thread 4072] : C:\Users\user\Desktop\ATIBA_REPORT\AgentRoot\others.py changed, reloading.
+[INFO - django.utils.autoreload - 2021-09-09 11:25:15,619 - run_with_reloader - line 617 - process 14912 - thread 10528] : Watching for file changes with StatReloader
+[DEBUG - others - 2021-09-09 11:26:30,016 - wrap - line 22 - process 14912 - thread 7832] : Garbage collect operation collected : 0
+[INFO - others - 2021-09-09 11:26:30,016 - wrap - line 24 - process 14912 - thread 7832] : Post collection count of variables that pointing memory for home_view : (10, 0, 0)
+[INFO - others - 2021-09-09 11:26:30,187 - wrap - line 40 - process 14912 - thread 7832] : Demo license expiration date : 2021-09-10 00:00:00
+[INFO - others - 2021-09-09 11:26:30,187 - wrap - line 43 - process 14912 - thread 7832] : Calling view home_view..
+[INFO - others - 2021-09-09 11:26:30,189 - home_view - line 168 - process 14912 - thread 7832] : TODAY : 2021-08-16
+[INFO - others - 2021-09-09 11:26:30,246 - home_view - line 169 - process 14912 - thread 7832] : USER IS : Admin
+[WARNING - others - 2021-09-09 11:26:30,259 - home_view - line 175 - process 14912 - thread 7832] : Request from external guest : 'HTTP_REFERER' in port 8000
+[INFO - django.server - 2021-09-09 11:26:30,985 - log_message - line 157 - process 14912 - thread 7832] : "GET / HTTP/1.1" 200 4707
+[DEBUG - others - 2021-09-09 11:26:35,130 - - line 22 - process 14912 - thread 7832] : Garbage collect operation collected : 33
+[INFO - others - 2021-09-09 11:26:35,131 - wrap - line 24 - process 14912 - thread 7832] : Post collection count of variables that pointing memory for home_view : (10, 0, 0)
+[INFO - others - 2021-09-09 11:26:35,243 - wrap - line 40 - process 14912 - thread 7832] : Demo license expiration date : 2021-09-10 00:00:00
+[INFO - others - 2021-09-09 11:26:35,244 - wrap - line 43 - process 14912 - thread 7832] : Calling view home_view..
+[INFO - others - 2021-09-09 11:26:35,246 - home_view - line 168 - process 14912 - thread 7832] : TODAY : 2021-08-16
+[INFO - others - 2021-09-09 11:26:35,258 - home_view - line 169 - process 14912 - thread 7832] : USER IS : Admin
+[DEBUG - others - 2021-09-09 11:26:35,261 - home_view - line 173 - process 14912 - thread 7832] : Request from internal guest : http://127.0.0.1:8000/ in port 8000
+[WARNING - others - 2021-09-09 11:26:35,262 - check_elastic_health - line 734 - process 14912 - thread 7832] : You are in development environment, no elasticsearch in here
+[INFO - others - 2021-09-09 11:26:35,407 - check_psql_health - line 717 - process 14912 - thread 7832] : Postgresql is alive
+[DEBUG - others - 2021-09-09 11:26:35,600 - home_view - line 222 - process 14912 - thread 7832] : Dev Locations table total count : 0
+[DEBUG - others - 2021-09-09 11:26:35,670 - home_view - line 231 - process 14912 - thread 7832] : Devices total count : 6
+[ERROR - others - 2021-09-09 11:26:35,935 - home_view - line 248 - process 14912 - thread 7832] : An error occurred trying to get brand info from devicemark table. ERROR IS : DeviceMark matching query does not exist.
+[INFO - others - 2021-09-09 11:26:35,942 - home_view - line 255 - process 14912 - thread 7832] : Brand list for sources : ['VMWARE', 'HPE', 'Unknown']
+[INFO - others - 2021-09-09 11:26:35,943 - home_view - line 256 - process 14912 - thread 7832] : Brand counts for sources : [1, 3, 1]
+[INFO - others - 2021-09-09 11:26:35,963 - home_view - line 291 - process 14912 - thread 7832] : Logs total count : 1 from postgresql grand total is 1 with unparsed logs in elastic
+[WARNING - others - 2021-09-09 11:26:35,964 - home_view - line 340 - process 14912 - thread 7832] : NO ELASTIC CONNECTION total count : 0
+[INFO - others - 2021-09-09 11:26:35,965 - home_view - line 341 - process 14912 - thread 7832] : Logs in Elastic weekly total : 1700
+[INFO - others - 2021-09-09 11:26:35,970 - home_view - line 342 - process 14912 - thread 7832] : Logs in Elastic total count : 0
+[INFO - others - 2021-09-09 11:26:35,974 - home_view - line 348 - process 14912 - thread 7832] : Root Cause Graphs total count : 199
+[DEBUG - others - 2021-09-09 11:26:36,236 - home_view - line 353 - process 14912 - thread 7832] : <QuerySet [{'anomalytype': 1, 'total': 613}, {'anomalytype': 2, 'total': 35}, {'anomalytype': 1201, 'total': 610}, {'anomalytype': 1301, 'total': 147}]>
+[DEBUG - others - 2021-09-09 11:26:36,265 - take_memory_usage - line 961 - process 14912 - thread 7832] : Memory allocation of view 38587 B
+[INFO - others - 2021-09-09 11:26:36,266 - home_view - line 391 - process 14912 - thread 7832] : Memory allocation  0.04 MB
+[INFO - django.server - 2021-09-09 11:26:37,106 - log_message - line 157 - process 14912 - thread 7832] : "GET / HTTP/1.1" 200 19974
+[INFO - django.server - 2021-09-09 11:26:37,168 - log_message - line 157 - process 14912 - thread 4744] : "GET /static/js/general_style.js HTTP/1.1" 304 0
+[INFO - django.server - 2021-09-09 11:26:37,176 - log_message - line 157 - process 14912 - thread 7832] : "GET /static/css/general_style.css HTTP/1.1" 304 0
+[DEBUG - others - 2021-09-09 11:26:37,454 - wrap - line 22 - process 14912 - thread 7832] : Garbage collect operation collected : 35
+[INFO - others - 2021-09-09 11:26:37,455 - wrap - line 24 - process 14912 - thread 7832] : Post collection count of variables that pointing memory for incidents_home : (21, 0, 0)
+[INFO - others - 2021-09-09 11:26:37,583 - wrap - line 40 - process 14912 - thread 7832] : Demo license expiration date : 2021-09-10 00:00:00
+[INFO - others - 2021-09-09 11:26:37,583 - wrap - line 43 - process 14912 - thread 7832] : Calling view incidents_home..
+[DEBUG - others - 2021-09-09 11:26:37,890 - incidents_home - line 549 - process 14912 - thread 7832] : Incident ids by log sources : <class 'list'> : [('22958152', [None], [None]), ('evap', [63, 68, 69, 70, 71, 72, 73, 74, 76, None], [77, None]), ('evcontroller', [None], [None]), ('evswitch', [None], [None]), ('vmwareev', [None], [None])]
+[DEBUG - others - 2021-09-09 11:26:37,891 - incidents_home - line 550 - process 14912 - thread 7832] : Alerts by log sources : <class 'list'> : [{'lsuniqueid': '22958152', 'status': '000', 'total': 9, 'recent': 239}, {'lsuniqueid': 'evap', 'status': '000', 'total': 1013, 'recent': 6014}, {'lsuniqueid': 'evap', 'status': '001', 'total': 1, 'recent': 439}, {'lsuniqueid': 'evcontroller', 'status': '000', 'total': 1, 'recent': 4113}, {'lsuniqueid': 'evswitch', 'status': '000', 'total': 2, 'recent': 4118}, {'lsuniqueid': 'vmwareev', 'status': '000', 'total': 379, 'recent': 5983}]
+[INFO - django.server - 2021-09-09 11:26:38,749 - log_message - line 157 - process 14912 - thread 7832] : "GET /monitor/incidents_home/ HTTP/1.1" 200 24077
+[DEBUG - others - 2021-09-09 11:27:03,987 - wrap - line 22 - process 14912 - thread 7832] : Garbage collect operation collected : 88
+[INFO - others - 2021-09-09 11:27:03,987 - wrap - line 24 - process 14912 - thread 7832] : Post collection count of variables that pointing memory for incidents_home : (10, 0, 0)
+[INFO - others - 2021-09-09 11:27:04,098 - wrap - line 40 - process 14912 - thread 7832] : Demo license expiration date : 2021-09-10 00:00:00
+[INFO - others - 2021-09-09 11:27:04,099 - wrap - line 43 - process 14912 - thread 7832] : Calling view incidents_home..
+[INFO - others - 2021-09-09 11:27:04,113 - incidents_home - line 504 - process 14912 - thread 7832] : Detections, update check..
+[INFO - django.server - 2021-09-09 11:27:04,598 - log_message - line 157 - process 14912 - thread 7832] : "POST /monitor/incidents_home/ HTTP/1.1" 200 14
+[DEBUG - others - 2021-09-09 11:27:08,670 - wrap - line 22 - process 14912 - thread 7832] : Garbage collect operation collected : 65
+[INFO - others - 2021-09-09 11:27:08,670 - wrap - line 24 - process 14912 - thread 7832] : Post collection count of variables that pointing memory for general_monitor : (10, 0, 0)
+[INFO - others - 2021-09-09 11:27:08,783 - wrap - line 40 - process 14912 - thread 7832] : Demo license expiration date : 2021-09-10 00:00:00
+[INFO - others - 2021-09-09 11:27:08,783 - wrap - line 43 - process 14912 - thread 7832] : Calling view general_monitor..
+[DEBUG - others - 2021-09-09 11:27:09,086 - take_memory_usage - line 961 - process 14912 - thread 7832] : Memory allocation of view 1130975 B
+[INFO - others - 2021-09-09 11:27:09,087 - general_monitor - line 1271 - process 14912 - thread 7832] : Memory allocation  1.08 MB
+[INFO - django.server - 2021-09-09 11:27:11,189 - log_message - line 157 - process 14912 - thread 7832] : "GET /monitor/ HTTP/1.1" 200 67516
+[DEBUG - others - 2021-09-09 11:27:11,295 - loading_view - line 57 - process 14912 - thread 7832] : Loading screen appeared..
+[INFO - django.server - 2021-09-09 11:27:11,841 - log_message - line 157 - process 14912 - thread 7832] : "GET /monitor/loading/ HTTP/1.1" 200 1577
+[DEBUG - others - 2021-09-09 11:27:13,850 - wrap - line 22 - process 14912 - thread 7832] : Garbage collect operation collected : 5506
+[INFO - others - 2021-09-09 11:27:13,850 - wrap - line 24 - process 14912 - thread 7832] : Post collection count of variables that pointing memory for anomalies_detail_monitor : (10, 0, 0)
+[INFO - others - 2021-09-09 11:27:13,984 - wrap - line 40 - process 14912 - thread 7832] : Demo license expiration date : 2021-09-10 00:00:00
+[INFO - others - 2021-09-09 11:27:13,985 - wrap - line 43 - process 14912 - thread 7832] : Calling view anomalies_detail_monitor..
+[WARNING - others - 2021-09-09 11:27:19,928 - anomalies_detail_monitor - line 1412 - process 14912 - thread 7832] : No Elasticsearch connection !
+[DEBUG - others - 2021-09-09 11:27:20,567 - get_anomaly_logs - line 1772 - process 14912 - thread 7832] : Anomaly Parameters object for anomaly id 6013 is : <QuerySet [{'id': 146, 'uniqueid': 'evap'}]>
+[DEBUG - others - 2021-09-09 11:27:20,784 - get_anomaly_logs - line 1781 - process 14912 - thread 7832] : Parameter detail ids for anomaly id 6013: []
+[DEBUG - others - 2021-09-09 11:27:20,824 - anomalies_detail_monitor - line 1486 - process 14912 - thread 7832] : INTERVAL COUNT : 10
+[DEBUG - others - 2021-09-09 11:27:20,842 - anomalies_detail_monitor - line 1489 - process 14912 - thread 7832] : DIFFERENT ANOMALIES COUNT : 1
+[DEBUG - others - 2021-09-09 11:27:20,859 - take_memory_usage - line 961 - process 14912 - thread 7832] : Memory allocation of view 81404 B
+[INFO - others - 2021-09-09 11:27:20,860 - anomalies_detail_monitor - line 1561 - process 14912 - thread 7832] : Memory allocation  0.08 MB
+[INFO - django.server - 2021-09-09 11:27:21,509 - log_message - line 157 - process 14912 - thread 7832] : "GET /monitor/anomalies/6013/ HTTP/1.1" 200 76957
+[INFO - django.server - 2021-09-09 11:34:02,452 - log_message - line 157 - process 14912 - thread 8604] : "GET /monitor/loading HTTP/1.1" 301 0
+[DEBUG - others - 2021-09-09 11:34:02,461 - loading_view - line 57 - process 14912 - thread 8604] : Loading screen appeared..
+[INFO - django.server - 2021-09-09 11:34:02,497 - log_message - line 157 - process 14912 - thread 8604] : "GET /monitor/loading/ HTTP/1.1" 200 1577
+[DEBUG - others - 2021-09-09 11:34:05,379 - wrap - line 22 - process 14912 - thread 8604] : Garbage collect operation collected : 598
+[INFO - others - 2021-09-09 11:34:05,380 - wrap - line 24 - process 14912 - thread 8604] : Post collection count of variables that pointing memory for anomalies_detail_monitor : (10, 0, 0)
+[INFO - others - 2021-09-09 11:34:05,517 - wrap - line 40 - process 14912 - thread 8604] : Demo license expiration date : 2021-09-10 00:00:00
+[INFO - others - 2021-09-09 11:34:05,517 - wrap - line 43 - process 14912 - thread 8604] : Calling view anomalies_detail_monitor..
+[WARNING - others - 2021-09-09 11:34:05,567 - anomalies_detail_monitor - line 1322 - process 14912 - thread 8604] : No Elasticsearch connection !
+[WARNING - others - 2021-09-09 11:34:05,568 - anomalies_detail_monitor - line 1412 - process 14912 - thread 8604] : No Elasticsearch connection !
+[INFO - others - 2021-09-09 11:34:05,661 - get_anomaly_logs - line 1808 - process 14912 - thread 8604] : AnomalyLogs count for Critical Alerts with id 502 : 204
+[INFO - others - 2021-09-09 11:34:05,750 - anomalies_detail_monitor - line 1428 - process 14912 - thread 8604] : list from anomalylogsdetails for [10271, 10265, 10264, 10260, 10258, 10219, 10189, 10177, 10176, 10171, 10170, 10163, 10142, 10138, 10137, 10135, 10132, 10129, 10123, 10122, 10118, 10117, 10115, 10105, 10104] -> [[], [<AnomalyLogsDetails: No Value>]]
+[INFO - others - 2021-09-09 11:34:05,803 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10271 -> []
+[INFO - others - 2021-09-09 11:34:05,825 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10271 -> []
+[INFO - others - 2021-09-09 11:34:05,832 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10265 -> []
+[INFO - others - 2021-09-09 11:34:05,839 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10265 -> []
+[INFO - others - 2021-09-09 11:34:05,848 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10264 -> []
+[INFO - others - 2021-09-09 11:34:05,853 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10264 -> []
+[INFO - others - 2021-09-09 11:34:05,860 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10260 -> []
+[INFO - others - 2021-09-09 11:34:05,864 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10260 -> []
+[INFO - others - 2021-09-09 11:34:05,868 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10258 -> []
+[INFO - others - 2021-09-09 11:34:05,876 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10258 -> []
+[INFO - others - 2021-09-09 11:34:05,881 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10219 -> []
+[INFO - others - 2021-09-09 11:34:05,884 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10219 -> []
+[INFO - others - 2021-09-09 11:34:05,893 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10189 -> [<RootCauseGraphsDetails: Causal Mapping for Incident(s) : [10211, 10210]>]
+[INFO - others - 2021-09-09 11:34:05,897 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10189 -> [<RootCauseGraphsDetails: Causal Mapping for Incident(s) : [10211, 10210]>]
+[DEBUG - others - 2021-09-09 11:34:05,898 - anomalies_detail_monitor - line 1445 - process 14912 - thread 8604] : rcItem -> 10211-10189 : [10211, 10188, 10189] <class 'list'>
+[DEBUG - others - 2021-09-09 11:34:05,914 - anomalies_detail_monitor - line 1445 - process 14912 - thread 8604] : rcItem -> 10210-10189 : [10210, 10188, 10189] <class 'list'>
+[INFO - others - 2021-09-09 11:34:05,932 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10177 -> []
+[INFO - others - 2021-09-09 11:34:05,937 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10177 -> []
+[INFO - others - 2021-09-09 11:34:05,944 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10176 -> []
+[INFO - others - 2021-09-09 11:34:05,947 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10176 -> []
+[INFO - others - 2021-09-09 11:34:05,953 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10171 -> []
+[INFO - others - 2021-09-09 11:34:05,959 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10171 -> []
+[INFO - others - 2021-09-09 11:34:05,962 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10170 -> []
+[INFO - others - 2021-09-09 11:34:05,966 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10170 -> []
+[INFO - others - 2021-09-09 11:34:05,971 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10163 -> []
+[INFO - others - 2021-09-09 11:34:05,976 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10163 -> []
+[INFO - others - 2021-09-09 11:34:05,979 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10142 -> []
+[INFO - others - 2021-09-09 11:34:05,983 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10142 -> []
+[INFO - others - 2021-09-09 11:34:05,990 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10138 -> []
+[INFO - others - 2021-09-09 11:34:05,993 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10138 -> []
+[INFO - others - 2021-09-09 11:34:05,997 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10137 -> []
+[INFO - others - 2021-09-09 11:34:06,000 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10137 -> []
+[INFO - others - 2021-09-09 11:34:06,008 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10135 -> []
+[INFO - others - 2021-09-09 11:34:06,011 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10135 -> []
+[INFO - others - 2021-09-09 11:34:06,015 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10132 -> []
+[INFO - others - 2021-09-09 11:34:06,022 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10132 -> []
+[INFO - others - 2021-09-09 11:34:06,025 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10129 -> []
+[INFO - others - 2021-09-09 11:34:06,029 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10129 -> []
+[INFO - others - 2021-09-09 11:34:06,032 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10123 -> []
+[INFO - others - 2021-09-09 11:34:06,039 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10123 -> []
+[INFO - others - 2021-09-09 11:34:06,042 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10122 -> []
+[INFO - others - 2021-09-09 11:34:06,045 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10122 -> []
+[INFO - others - 2021-09-09 11:34:06,049 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10118 -> []
+[INFO - others - 2021-09-09 11:34:06,055 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10118 -> []
+[INFO - others - 2021-09-09 11:34:06,058 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10117 -> []
+[INFO - others - 2021-09-09 11:34:06,062 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10117 -> []
+[INFO - others - 2021-09-09 11:34:06,065 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10115 -> []
+[INFO - others - 2021-09-09 11:34:06,072 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10115 -> []
+[INFO - others - 2021-09-09 11:34:06,077 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10105 -> []
+[INFO - others - 2021-09-09 11:34:06,080 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10105 -> []
+[INFO - others - 2021-09-09 11:34:06,085 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10104 -> []
+[INFO - others - 2021-09-09 11:34:06,090 - get_rc_graphs - line 2082 - process 14912 - thread 8604] : list from RootCauseGraphDetails for AnomalyLogs with id : 10104 -> []

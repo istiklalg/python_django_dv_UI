@@ -1,0 +1,227 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="tr-TR">
+    <head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title> ATIBA Greeting </title>
+
+		<link rel="apple-touch-icon" sizes="57x57" href="{% static 'img/favicons/apple-icon-57x57.png' %}">
+        <link rel="apple-touch-icon" sizes="60x60" href="{% static 'img/favicons/apple-icon-60x60.png' %}">
+        <link rel="apple-touch-icon" sizes="72x72" href="{% static 'img/favicons/apple-icon-72x72.png' %}">
+        <link rel="apple-touch-icon" sizes="76x76" href="{% static 'img/favicons/apple-icon-76x76.png' %}">
+        <link rel="apple-touch-icon" sizes="114x114" href="{% static 'img/favicons/apple-icon-114x114.png' %}">
+        <link rel="apple-touch-icon" sizes="120x120" href="{% static 'img/favicons/apple-icon-120x120.png' %}">
+        <link rel="apple-touch-icon" sizes="144x144" href="{% static 'img/favicons/apple-icon-144x144.png' %}">
+        <link rel="apple-touch-icon" sizes="152x152" href="{% static 'img/favicons/apple-icon-152x152.png' %}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/favicons/apple-icon-180x180.png' %}">
+        <link rel="icon" type="image/png" sizes="192x192"  href="{% static 'img/favicons/android-icon-192x192.png' %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicons/favicon-32x32.png' %}">
+        <link rel="icon" type="image/png" sizes="96x96" href="{% static 'img/favicons/favicon-96x96.png' %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicons/favicon-16x16.png' %}">
+        <link rel="manifest" href="{% static 'img/favicons/manifest.json' %}">
+        <meta name="msapplication-TileColor" content="#ffffff">
+        <meta name="msapplication-TileImage" content="{% static 'img/favicons/ms-icon-144x144.png' %}">
+        <meta name="theme-color" content="#ffffff">
+	
+	<style>
+
+		* {
+		  margin: 0;
+		  padding: 0;
+		}
+		body {
+		  background-color: #3d3d5c;
+		  background-image:url(/static/img/ai_background1.jpg);
+		  height: 100%;
+		  font-family: 'Arial', sans-serif;
+		  font-size: 1.3vw;
+		}
+		.text {
+		  //width: 100%;
+		  //height: 40%;
+		  display: flex;
+		  justify-content: center;
+		  align-content: center;
+		  //position: fixed;
+		  //top: 50%;
+		  //left: 50%;
+		  //transform: translateX(-50%) translateY(-50%);
+		  //transform: translateY(-50%);
+		  list-style: none;
+		  border-bottom: 0;
+
+		}
+
+		.text.hidden {
+		  //border-bottom: 1px solid #fff;
+		  text-shadow: 5px 5px 8px rgba(134, 172, 185, 0.80);
+		}
+
+		.text li {
+		  display: inline-block;
+		  float: left;
+		  font-weight: 700;
+		  font-size: 2em;
+		  color: #fff;
+		  opacity: 1;
+		  transition: all 0.6s ease-in-out;
+		  max-width: 2em;
+		}
+		.text.hidden li.spaced {
+		  padding-left: 0;
+		}
+		.text li.spaced {
+		  padding-left: 0.5em;
+		}
+
+		.text.hidden li.ghost {
+		  opacity: 0;
+		  max-width: 0;
+		}
+
+	</style>
+	</head>
+	
+    <body>
+
+	
+<!--		<ul id="greeting" class="text hidden">-->
+<!--		  <li>Λ</li>-->
+<!--		  <li class="ghost">T</li>-->
+<!--		  <li class="ghost">I</li>-->
+<!--		  <li class="ghost">B</li>-->
+<!--		  <li class="ghost">Λ</li>-->
+
+<!--		  <li class="spaced">R</li>-->
+<!--		  <li class="ghost">E</li>-->
+<!--		  <li class="ghost">P</li>-->
+<!--		  <li class="ghost">O</li>-->
+<!--		  <li class="ghost">R</li>-->
+<!--		  <li class="ghost">T</li>-->
+
+<!--		  <li class="spaced">Λ</li>-->
+<!--		  <li class="ghost">G</li>-->
+<!--		  <li class="ghost">E</li>-->
+<!--		  <li class="ghost">N</li>-->
+<!--		  <li class="ghost">T</li>-->
+<!--		</ul>-->
+<!--		<div>-->
+<!--			<h1 align="center"-->
+<!--				style="padding-top:100px;color:#fff;text-shadow: 5px 5px 8px rgba(134, 172, 185, 0.80);">-->
+<!--				ΛTIBΛ-->
+<!--			</h1>-->
+<!--		</div>-->
+
+		<div style="height:200px;"><p>.</p></div>
+
+		<ul id="greeting" class="text hidden">
+			<li>Λ</li>
+			<li class="ghost">R</li>
+			<li class="ghost">T</li>
+			<li class="ghost">I</li>
+			<li class="ghost">F</li>
+			<li class="ghost">I</li>
+			<li class="ghost">C</li>
+			<li class="ghost">I</li>
+			<li class="ghost">Λ</li>
+			<li class="ghost">L</li>
+
+			<li class="spaced">T</li>
+			<li class="ghost">E</li>
+			<li class="ghost">C</li>
+			<li class="ghost">H</li>
+			<li class="ghost">N</li>
+			<li class="ghost">O</li>
+			<li class="ghost">L</li>
+			<li class="ghost">O</li>
+			<li class="ghost">G</li>
+			<li class="ghost">I</li>
+			<li class="ghost">E</li>
+			<li class="ghost">S</li>
+
+			<li class="spaced">I</li>
+			<li class="ghost">N</li>
+
+			<li class="spaced">B</li>
+			<li class="ghost">U</li>
+			<li class="ghost">S</li>
+			<li class="ghost">I</li>
+			<li class="ghost">N</li>
+			<li class="ghost">E</li>
+			<li class="ghost">S</li>
+			<li class="ghost">S</li>
+
+			<li class="spaced">Λ</li>
+			<li class="ghost">P</li>
+			<li class="ghost">P</li>
+			<li class="ghost">L</li>
+			<li class="ghost">I</li>
+			<li class="ghost">C</li>
+			<li class="ghost">Λ</li>
+			<li class="ghost">T</li>
+			<li class="ghost">I</li>
+			<li class="ghost">O</li>
+			<li class="ghost">N</li>
+			<li class="ghost">S</li>
+
+<!--			<li>W</li>-->
+<!--			<li class="ghost">E</li>-->
+<!--			<li class="ghost">L</li>-->
+<!--			<li class="ghost">C</li>-->
+<!--			<li class="ghost">O</li>-->
+<!--			<li class="ghost">M</li>-->
+<!--			<li class="ghost">E</li>-->
+<!--			<li class="spaced ghost">T</li>-->
+<!--			<li class="ghost">O</li>-->
+
+<!--			<li class="spaced">A</li>-->
+<!--			<li>I</li>-->
+<!--			<li class="ghost">O</li>-->
+<!--			<li class="ghost">p</li>-->
+<!--			<li class="ghost">s</li>-->
+<!--&lt;!&ndash;			<li class="ghost">T</li>&ndash;&gt;-->
+
+<!--			<li class="spaced">T</li>-->
+<!--			<li class="ghost">E</li>-->
+<!--			<li class="ghost">C</li>-->
+<!--			<li class="ghost">H</li>-->
+<!--&lt;!&ndash;			<li class="ghost">S</li>&ndash;&gt;-->
+
+<!--			<br />-->
+
+<!--			<li class="ghost">w</li>-->
+<!--			<li class="ghost">i</li>-->
+<!--			<li class="ghost">t</li>-->
+<!--			<li class="ghost">h</li>-->
+
+<!--			<li class="spaced ghost">Λ</li>-->
+<!--			<li class="ghost">T</li>-->
+<!--			<li class="ghost">I</li>-->
+<!--			<li class="ghost">B</li>-->
+<!--			<li class="ghost">Λ</li>-->
+		</ul>
+
+
+	<script type="text/javascript" language="javascript">
+
+		console.log(Request.UserHostAddress);
+
+		setTimeout(function(){
+			var graph = document.getElementById("greeting");
+			graph.className = "text";
+		},1500);
+		setTimeout(function(){
+			window.location = "";
+		},4000);
+
+
+	</script>
+    </body>
+	
+	
+    <footer>
+
+    </footer>
+</html>

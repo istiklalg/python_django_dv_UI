@@ -1,0 +1,108 @@
+
+
+
+{% extends 'base.html' %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Networks {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+
+{% if route == "general" %}
+
+    <div class="innerBodies">
+        <table class="table table-striped table-sm table-hover">
+            <caption>NETWORKS</caption>
+            <thead class="thead-light">
+                <tr>
+                    <th>NETWORK NAME</th>
+                    <th>IP ADDRESS</th>
+                    <th>SUB NETWORK MASK</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for network in networkList %}
+                <tr>
+                    <td><a href="{{ network.get_absolute_url }}">{{ network.networkname }}</a></td>
+                    <td>{{ network.ipaddress }}</td>
+                    <td>{{ network.subnetmask }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <div></div>
+
+        <hr />
+        {# PAGINATION #}
+        <div class="pagination">
+            <span class="step-links">
+                {% if networkList.has_previous %}
+                    <a href="?page=1">&laquo; jump to first </a>/
+                    <a href="?page={{ networkList.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"> previous </a>/
+                {% endif %}
+
+                <span class="current">
+                    <i>{{ networkList.number }}. of {{ networkList.paginator.num_pages }} pages </i>
+                </span>
+
+                {% if networkList.has_next %}
+                    /<a href="?page={{ networkList.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"> next </a>
+                    /<a href="?page={{ networkList.paginator.num_pages }}"> jump to last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>{# /pagination #}
+
+    </div>
+
+
+
+{% elif route == "detail" %}
+
+<div class="container-fluid innerBodies">
+    <table class="table table-striped table-sm table-hover">
+        <caption>NETWORK DETAILS</caption>
+        <thead class="thead-light">
+            <tr>
+                <th>Name</th>
+                <th>{{ systemNetwork.networkname }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>IP Address</td>
+                <td>{{systemNetwork.ipaddress}}</td>
+            </tr>
+            <tr>
+                <td>Sub Network Mask</td>
+                <td>{{systemNetwork.subnetmask}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div></div>
+    <div><a href="{% url 'inventories:networks' %}"> BACK TO NETWORKS </a></div>
+
+
+
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+{% endblock %}

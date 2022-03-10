@@ -1,0 +1,102 @@
+
+
+{% extends 'base.html' %}
+
+{% block titleBlock %}
+
+     Helps {{ block.super }}
+
+{% endblock %}
+
+
+{% block bodyBlock %}
+
+<div class="innerBodies container-fluid" style="font-size:9pt;">
+
+     <h4 style="text-align:center;">Help Documents</h4>
+
+     <ul>
+          <li>
+               <p>
+                    <button class="btn btn-sm btn-outline-secondary circle" name="psql_date_time_format_help"
+                            id="button_psql_date_time_format_help" onclick="open_close(this)"
+                            style="font-size:9pt;width:20px;height:20px;margin:0;padding:0;margin-right:20px;"
+                            title="See Details">
+                             &#x002B;
+                    </button>
+                    Format types of date & time to use while creating parser profiles.
+
+               </p> <!-- PSQL Date & time format tips header -->
+               <div class="container" id="psql_date_time_format_help" style="display:none;">
+                    <table class="table table-sm table-striped">
+                         <thead>
+                              <tr>
+                                   <th>{{ help_psqlDateTimeFormats.0.0 }}</th>
+                                   <th>{{ help_psqlDateTimeFormats.0.1 }}</th>
+                              </tr>
+                         </thead>
+                         <tbody>
+                              {% for x, y in help_psqlDateTimeFormats %}
+                                   {% if forloop.counter > 1 %}
+                                        <tr>
+                                             <td>{{ x }}</td>
+                                             <td>{{ y }}</td>
+                                        </tr>
+                                   {% endif %}
+                              {% endfor %}
+                         </tbody>
+                    </table>
+               </div><!-- PSQL Date & time format tips details -->
+          </li> <!-- PSQL Date & time format tips -->
+          <li>
+               <p>
+                    <button class="btn btn-sm btn-outline-secondary circle" name="psql_string_ops_help"
+                            id="button_psql_string_ops_help" onclick="open_close(this)"
+                            style="font-size:9pt;width:20px;height:20px;margin:0;padding:0;margin-right:20px;"
+                            title="See Details">
+                             &#x002B;
+                    </button>
+                    String operations and functions to use while creating parser profiles.
+
+               </p> <!-- PSQL string operations tips header -->
+               <div class="container" id="psql_string_ops_help" style="display:none;">
+                    <table class="table table-sm table-striped">
+                         <thead>
+                              <tr>
+                                   <th>{{ help_psqlStringOps.0.0 }}</th>
+                                   <th>{{ help_psqlStringOps.0.1 }}</th>
+                                   <th>{{ help_psqlStringOps.0.2 }}</th>
+                                   <th>{{ help_psqlStringOps.0.3 }}</th>
+                                   <th>{{ help_psqlStringOps.0.4 }}</th>
+                              </tr>
+                         </thead>
+                         <tbody>
+                              {% for x, y, z, t, u in help_psqlStringOps %}
+                                   {% if forloop.counter > 1 %}
+                                        <tr>
+                                             <td>{{ x }}</td>
+                                             <td>{{ y }}</td>
+                                             <td>{{ z }}</td>
+                                             <td>{{ t }}</td>
+                                             <td>{{ u }}</td>
+                                        </tr>
+                                   {% endif %}
+                              {% endfor %}
+                         </tbody>
+                    </table>
+               </div><!-- PSQL string operations tips details -->
+
+          </li> <!-- PSQL string operations tips -->
+     </ul>
+
+
+
+</div>
+
+
+{% endblock %}
+
+
+
+
+

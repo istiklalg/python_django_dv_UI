@@ -1,0 +1,121 @@
+
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> Log Definition Details </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body  style="padding-top:15px;">
+
+        {% if route == 'general' %}
+
+
+        {% elif route == 'detail' %}
+
+        <div class="container-fluid" style="text-align:center;font-size:9pt;">
+            <h5>id : {{logDefDetail.id}} / {{logDefDetail.logcode}}</h5>
+
+            <div class="row" style="margin:10px;">
+                <form method="POST" name="reparse_all">
+                    {%csrf_token%}
+                    <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size:9pt;"
+                            value="{{logDefDetail.logcode}}" id="reparse_all" name="reparse_all">
+                        Re-Parse All
+                    </button>
+                </form>
+                <form method="POST" name="reparse_selected">
+                    {%csrf_token%}
+                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                            style="font-size:9pt;margin-left:10px;" value="" id="reparse_selected"
+                            name="reparse_selected">
+                        Re-Parse Selected
+                    </button>
+                </form>
+                <form method="POST" name="analyse_parameter">
+                    {%csrf_token%}
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"
+                            style="font-size:9pt;margin-left:10px;" value="" id="analyse_parameter"
+                            name="analyse_parameter">
+                        Analyse Parameter
+                    </button>
+                </form>
+            </div>
+
+            <br>
+
+            <div class="row" style="margin:10px;">
+                <div class="col-md-9">
+                    <div class="row">
+                        <h5>Definition Structure</h5>
+                    </div>
+                    <br>
+                    <div class="row">
+                        {{logDefDetail.logstructs}}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <button class="btn btn-outline-info btn-sm"
+                                name="{{anomaly.get_type_definition}}"
+                                onclick="create_frame_url(this)" id="{{anomaly.id}}" title="EDIT PARAMETERS"
+                                data-toggle="modal" data-target="#modal_edit_params"
+                                style="font-size:9pt;">
+                            Edit Parameters
+                        </button>
+                        <form method="POST" name="paramsvalid">
+                            {%csrf_token%}
+                            <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                    style="font-size:9pt;margin-left:10px;" value="True" id="paramsvalid"
+                                    name="paramsvalid">
+                                Validate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {% else %}
+
+         <div class="container" style="text-align:center;">
+            <h5>SOON ...</h5>
+            <hr>
+         </div>
+
+        {% endif %}
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            function create_frame_url(button) {
+                var frame = document.getElementById('anomaly_detail_frame');
+                var anomaly_id = button.id;
+                document.getElementById('modalLabel').innerHTML = anomaly_id+" - "+button.name;
+                //console.log(document.getElementById('modalLabel'));
+                //console.log(frame);
+                //console.log(frame.src);
+                //console.log(anomaly_id);
+                frame.src = window.location.origin+"/monitor/anomalies/"+anomaly_id;
+                console.log(frame.src);
+                console.log(window.location.origin);
+            }
+        </script>
+    </body>
+
+</html>

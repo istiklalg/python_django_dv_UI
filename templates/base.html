@@ -1,0 +1,112 @@
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/Chart.min.css' %}">
+
+        <title> ATIBAreport - {% block titleBlock %}  {% endblock %} </title>
+
+<!--        <link rel="icon" href="{% static 'img/favicon.png' %}">-->
+<!--        <link rel="icon" href="{% static 'img/favicons/favicon.png' %}">-->
+
+        <!-- All about favicons-->
+        <link rel="apple-touch-icon" sizes="57x57" href="{% static 'img/favicons/apple-icon-57x57.png' %}">
+        <link rel="apple-touch-icon" sizes="60x60" href="{% static 'img/favicons/apple-icon-60x60.png' %}">
+        <link rel="apple-touch-icon" sizes="72x72" href="{% static 'img/favicons/apple-icon-72x72.png' %}">
+        <link rel="apple-touch-icon" sizes="76x76" href="{% static 'img/favicons/apple-icon-76x76.png' %}">
+        <link rel="apple-touch-icon" sizes="114x114" href="{% static 'img/favicons/apple-icon-114x114.png' %}">
+        <link rel="apple-touch-icon" sizes="120x120" href="{% static 'img/favicons/apple-icon-120x120.png' %}">
+        <link rel="apple-touch-icon" sizes="144x144" href="{% static 'img/favicons/apple-icon-144x144.png' %}">
+        <link rel="apple-touch-icon" sizes="152x152" href="{% static 'img/favicons/apple-icon-152x152.png' %}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/favicons/apple-icon-180x180.png' %}">
+        <link rel="icon" type="image/png" sizes="192x192"  href="{% static 'img/favicons/android-icon-192x192.png' %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicons/favicon-32x32.png' %}">
+        <link rel="icon" type="image/png" sizes="96x96" href="{% static 'img/favicons/favicon-96x96.png' %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicons/favicon-16x16.png' %}">
+        <link rel="manifest" href="{% static 'img/favicons/manifest.json' %}">
+        <meta name="msapplication-TileColor" content="#ffffff">
+        <meta name="msapplication-TileImage" content="{% static 'img/favicons/ms-icon-144x144.png' %}">
+        <meta name="theme-color" content="#ffffff">
+
+
+
+    </head>
+    <body>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+
+        {% include 'schema.html' %}
+
+        <div class="contentViewport">
+
+            <div class="container-fluid innerBodies" id="loading" style="display:block;">
+                <div class="container-fluid" id="atiba_loading">
+                    <h2 class="atiba_loading_h">ΛTIBΛ</h2>
+                </div>
+            </div>
+
+            <div id="page" style="display:none;">
+                {% include 'news.html' %}
+                {% block bodyBlock %}
+
+
+
+                {% endblock %}
+            </div>
+
+        </div>
+
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        {% if request.path != '/' %}
+            <hr />
+            <div class="container-fluid innerBodies" id="floating_button">
+                <button class="btn pmd-btn-fab pmd-ripple-effect btn-outline-secondary floating-left" title="GO BACK"
+                        id="floating_back_button" type="button" onclick="window.history.back()">
+                    ❮&#10094;
+                </button>
+<!--                we can use breadcrumbs -->
+<!--                <span id="url_map">{{ request.path }}</span>-->
+            </div>
+        {% endif %}
+
+<!--        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>-->
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/Chart.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/general_style.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            console.log("Active browser : "+getClientBrowserName());
+            $(function () {
+              $('[data-toggle="tooltip"]').tooltip()
+            })
+
+            $(document).ready(function () {
+                $("#loading").hide();
+                $("#page").show();
+            });
+        </script>
+
+    </body>
+    <footer>
+        <noscript>
+            In order to use the application, you must enable javascript in your browser's settings.
+        </noscript>
+        <div id="footer-content">
+            {% block footerBlock %}
+            {% include 'footer.html' %}
+            {% endblock %}
+        </div>
+    </footer>
+
+</html>

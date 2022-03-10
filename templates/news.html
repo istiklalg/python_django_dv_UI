@@ -1,0 +1,14 @@
+
+
+{% if newsList %}
+    <div class="container-fluid">
+        {% for news in newsList %}
+            <div class="container newsframe-{{news.0}}">
+                <span class="newsframeClose" aria-hidden="true" onclick="$(this).parent().hide();">&times;  | </span>
+                <span class="newsframeSpan">{{ news.1|safe }}</span>
+            </div>
+            <br />
+        {% endfor %}
+        <br />
+    </div>
+{% endif %}

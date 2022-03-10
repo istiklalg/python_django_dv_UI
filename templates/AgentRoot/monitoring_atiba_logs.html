@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> ATIBAreport - Monitor {{serviceName|upper}} logs </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+        <style>
+
+        </style>
+    </head>
+    <body>
+
+        <div id="loading"><!-- LOADING PART -->
+            <div class="container-fluid" id="atiba_loading">
+                <h2 class="atiba_loading_h">ΛTIBΛ</h2>
+            </div>
+        </div><!-- / LOADING PART -->
+
+        <div class="container-fluid" id="page" style="margin:0;padding:0;display:none;"><!-- PAGE PART -->
+            <h5 align="center">ATIBA OWN LOGS MONITORING</h5>
+<!--            {% for x in algorithms %}<p>{{x}}</p>{% endfor %}-->
+            <hr style="margin-bottom:0;padding-bottom:0;">
+<!--            <div class="container-fluid" name="formContainer" style="display:none;">-->
+<!--                {% for log in my_logs %}-->
+<!--                    <p>{{ log }}</p>-->
+<!--                {% endfor %}-->
+<!--            </div>-->
+            <div class="container-fluid" name="tableContainer" style="background-color:rgba(245, 245, 220, 0.6);">
+                <form method="POST" action="{% url 'AgentRoot:monitoring_atiba_uilogs' %}">
+                    {% csrf_token %}
+                    <div class="form-inline">
+                        <label class="col-md-1" for="log_file">SERVICE</label>
+                        <div class="col-md-2">
+                            <select class="form-control" name="log_file" id="log_file"
+                                    style="font-size:9pt;background-color:rgba(245, 245, 220, 0.6);">
+                                {% for service in serviceList %}
+                                    {% if service.log_file %}
+                                        {% if logFile == service.log_file %}
+                                        <option class="form-control" selected
+                                                style="font-size:9pt;background-color:rgba(245, 245, 220, 0.6);"
+                                                value="{{service.log_file}}">{{service.name}}</option>
+                                        {% else %}
+                                        <option class="form-control"
+                                                style="font-size:9pt;background-color:rgba(245, 245, 220, 0.6);"
+                                                value="{{service.log_file}}">{{service.name}}</option>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label class="col-md-1" for="start_date">START DATE</label>
+                        <div class="col-md-2">
+                            <input class="form-control" type="date" name="start_date" id="start_date"
+                                                     style="font-size:9pt;background-color:rgba(245, 245, 220, 0.6);" value="{{startDate|date:'Y-m-d'}}" />
+                        </div>
+                        <label class="col-md-1" for="end_date">END DATE</label>
+                        <div class="col-md-2">
+                            <input class="form-control" type="date" name="end_date" id="end_date"
+                                   style="font-size:9pt;background-color:rgba(245, 245, 220, 0.6);" value="{{endDate|date:'Y-m-d'}}" />
+                        </div>
+                        <div class="col-md-3">
+                            <input class="btn btn-sm btn-outline-info" type="submit" style="font-size:9pt;width:100%;" value="GET LOGS" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <hr style="margin-top:0;padding-top:0;">
+            <div class="container-fluid" name="tableContainer">
+                <table class="table table-sm table-striped table-hover">
+                    <caption>{{serviceName|upper}} SERVICE'S {{totalCount}} LOGS IN BETWEEN DAYS {{startDate}} - {{endDate}}</caption>
+                    <thead class="thead-light">
+                        <tr>
+                            <th>
+<!--                                <div class="dropdown">-->
+                                <div class="btn-group">
+                                    <a type="button" class="btn btn-sm btn-light" style="font-size:9pt;" title="Sort Table"
+                                       href="?sort_by=0{% if request.GET.pri_filter %}&pri_filter={{ request.GET.pri_filter }}{% endif %}">
+                                        PRIORITY <br> OF LOG
+                                    </a>
+                                    <button class="btn btn-sm btn-light dropdown-toggle dropdown-toggle-split" type="button"
+                                            id="priorityFilter" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" style="font-size:9pt;" title="Filter by PRI">
+<!--                                        PRIORITY-->
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="priorityFilter">
+                                        {% for pri, counts in priList %}
+                                            <a {% if request.GET.pri_filter == pri or counts == 0 %}class="dropdown-item disabled"{% else %}class="dropdown-item"{% endif %}
+                                               type="button" href="?pri_filter={{pri}}" style="font-size:9pt;">
+                                                {{pri|upper}}
+                                                {% if counts != 0 %}<span class="badge badge-pill badge-dark" style="font-size:9pt;">{{counts}}</span>{% endif %}
+                                            </a>
+                                        {% endfor %}
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" type="button" href="{% url 'AgentRoot:monitoring_atiba_uilogs' %}" style="font-size:9pt;">REMOVE FILTER & SORT</a>
+                                    </div>
+                                </div>
+
+                            </th>
+                            <th>
+                                <a href="?sort_by=1{% if request.GET.pri_filter %}&pri_filter={{ request.GET.pri_filter }}{% endif %}" title="Sort Table">
+                                    LOG SERVICE
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=2{% if request.GET.pri_filter %}&pri_filter={{ request.GET.pri_filter }}{% endif %}" title="Sort Table">
+                                    LOG DATE
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=3{% if request.GET.pri_filter %}&pri_filter={{ request.GET.pri_filter }}{% endif %}" title="Sort Table">
+                                    FUNCTION<br>NAME
+                                </a>
+                            </th>
+                            <th>
+<!--                                <a href="?sort_by=4">-->
+                                    CODE<br>LINE NO
+<!--                                </a>-->
+                            </th>
+                            <th>
+<!--                                <a href="?sort_by=5">-->
+                                    PROCESS<br>ID
+<!--                                </a>-->
+                            </th>
+                            <th>
+<!--                                <a href="?sort_by=6">-->
+                                    THREAD<br>ID
+<!--                                </a>-->
+                            </th>
+                            <th>
+<!--                                <a href="?sort_by=7">-->
+                                    LOG EVENT
+<!--                                </a>-->
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a, b, c, d, e, f, g, h in parsed_logs %}
+                        <tr class="priority-{{a}}">
+                            <td>{{ a }}</td>
+                            <td>{{ b }}</td>
+                            <td>{{ c|date:"j/n/Y  H:i:s.u" }}</td>
+                            <td>{{ d }}</td>
+                            <td>{{ e }}</td>
+                            <td>{{ f }}</td>
+                            <td>{{ g }}</td>
+                            <td>{{ h }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <hr>
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if parsed_logs.has_previous %}
+                            <a href="?page=1{% if request.GET.pri_filter %}&pri_filter={{ request.GET.pri_filter }}{% endif %}{% if request.GET.sort_by %}&sort_by={{ request.GET.sort_by }}{% endif %}">&laquo; jump to first </a>/
+                            <a href="?page={{ parsed_logs.previous_page_number }}{% if request.GET.pri_filter %}&pri_filter={{ request.GET.pri_filter }}{% endif %}{% if request.GET.sort_by %}&sort_by={{ request.GET.sort_by }}{% endif %}"> previous </a>/
+                        {% endif %}
+
+                        <span class="current">
+                            <i>{{ parsed_logs.number }}. of {{ parsed_logs.paginator.num_pages }} pages </i>
+                        </span>
+
+                        {% if parsed_logs.has_next %}
+                            /<a href="?page={{ parsed_logs.next_page_number }}{% if request.GET.pri_filter %}&pri_filter={{ request.GET.pri_filter }}{% endif %}{% if request.GET.sort_by %}&sort_by={{ request.GET.sort_by }}{% endif %}"> next </a>
+                            /<a href="?page={{ parsed_logs.paginator.num_pages }}{% if request.GET.pri_filter %}&pri_filter={{ request.GET.pri_filter }}{% endif %}{% if request.GET.sort_by %}&sort_by={{ request.GET.sort_by }}{% endif %}"> jump to last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>{# /pagination #}
+                <br>
+                <div class="container-fluid row justify-content-between">
+                    <a class="asLink" href="{% url 'home' %}">RETURN HOME</a>
+                    <button class="btn btn-sm btn-outline-info" {%if not my_logs%}disabled{%endif%} onclick="downloadLogs()"
+                            style="font-size:9pt;">DOWNLOAD LOGS</button>
+                </div>
+
+                <br>
+                <br>
+                <hr>
+            </div>
+
+            <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+                <small>{% include 'messages.html' %}</small>
+            </div>
+
+        </div> <!-- / PAGE PART -->
+
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/popper.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            // colors -> [green, red, orange, blue, yellow, grey, purple];
+            var graphColors = ['rgba(75, 192, 192, 0.85)','rgba(255, 99, 132, 0.85)','rgba(255, 159, 64, 0.85)','rgba(54, 162, 235, 0.85)','rgba(255, 206, 86, 0.85)','rgba(150, 150, 150, 0.85)','rgba(106, 92, 112, 0.85)'];
+            var labelNames = ['Alert ', 'Cause ', 'Sub'];
+
+            $(document).ready(function () {
+                $("#loading").hide();
+                $("#page").show();
+                $(".alert").fadeTo(8000, 0);
+                setTimeout(function () {$(".alert").alert("close")}, 10000);
+            });
+
+            function saveAs(fileName, content){
+                var element = document.createElement("a");
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+                element.setAttribute("download", fileName);
+                element.style.display = "none";
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+
+            function downloadLogs(){
+                var myLogs = {{my_logs|safe}};
+                var file_name = "{{serviceName}}_{{startDate}}_{{endDate}}.txt"
+                saveAs(file_name, myLogs);
+            }
+        </script>
+    </body>
+</html>

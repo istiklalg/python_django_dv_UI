@@ -1,0 +1,137 @@
+
+
+
+<div class="topBlock">
+
+</div>
+
+<div class="row" style="margin-left:5px;">
+    <div class="brandIcon inSchema"
+         style="font-size:4vw;padding-top:0;opacity:0.25;"> Λ
+    </div>
+
+    <div class="navLinks inSchema">
+    {# HOME LINK #}
+        {%if request.path == '/'%}
+            <a class="navItem inLink" href="{% url 'home' %}"> Home </a>
+        {%else%}
+            <a class="navItem"  href="{% url 'home' %}"> Home </a>
+        {%endif%}
+
+    {# MONITOR LINK #}
+        {%if 'monitor' in request.path%}
+            <a class="navItem inLink" href="{% url 'AgentRoot:general_monitor' %}"> Monitoring </a>
+        {%else%}
+            <a class="navItem" href="{% url 'AgentRoot:general_monitor' %}"> Monitoring </a>
+        {%endif%}
+
+    {# CONFIGURATIONS LINK #}
+        {%if 'system_configurations' in request.path%}
+            <a class="navItem inLink" href="{% url 'system_configurations' %}"> Configurations </a>
+        {%else%}
+            <a class="navItem" href="{% url 'system_configurations' %}"> Configurations </a>
+        {%endif%}
+
+    {# LOG SOURCES LINK #}
+        {%if 'log_source' in request.path%}
+            <a class="navItem inLink" href="{% url 'log_sources' %}"> Log Sources </a>
+        {%else%}
+            <a class="navItem" href="{% url 'log_sources' %}"> Log Sources </a>
+        {%endif%}
+
+    {# PROFILES LINK #}
+        {%if 'profiles' in request.path%}
+            <a class="navItem inLink" href="{% url 'profiles' %}"> Profiles </a>
+        {%else%}
+            <a class="navItem" href="{% url 'profiles' %}"> Profiles </a>
+        {%endif%}
+
+<!--        {# REPORTS LINK #}-->
+<!--            {%if 'inventories/module' in request.path%}-->
+<!--                <a class="navItem inLink" href="{% url 'inventories:report_list' %}"> Reports </a>-->
+<!--            {%else%}-->
+<!--                <a class="navItem" href="{% url 'inventories:report_list' %}"> Reports </a>-->
+<!--            {%endif%}-->
+
+    {# PARAMETER LINK #}
+        {%if 'logdefinitions/' in request.path%}
+            <a class="navItem inLink" href="{% url 'logdefinitions_analysis' %}"> Log Definitions </a>
+        {%else%}
+            <a class="navItem" href="{% url 'logdefinitions_analysis' %}"> Log Definitions </a>
+        {%endif%}
+
+        {# LOGOUT LINK #}
+            {%if 'maintenance/' in request.path%}
+                <a class="navItem inLink" href="{% url 'maintenance' %}"> Maintenance </a>
+            {%else%}
+                <a class="navItem" href="{% url 'maintenance' %}"> Maintenance </a>
+            {%endif%}
+    </div>
+
+    <div class="shadowBrand inSchema"
+         style="font-size:16pt;right:0;margin-top:10px;opacity:0.45;width:25%;">
+        <div class="row container-fluid justify-content-end" style="margin:0 0;padding:0 0;">
+            <div class="col-sm-6">
+            {%if request.user.is_authenticated %}
+                <div class="row justify-content-end">
+                    <a class="col-sm-2 navItem" title="Change Password" href="{% url 'accounts:accounts_change_password' %}">
+                        <small style="border:0.5px solid white;border-radius:20%;"> *** </small>
+                    </a>
+                    <div class="col-sm-2"><a class="navItem" title="Logout" href="{% url 'accounts:accounts_logout' %}"> &#x1F6AA; </a></div>
+                    <div class="col-sm-4"><span style="font-size:1vw;">{{request.user.username}}</span></div>
+                </div>
+            {%endif%}
+            </div>
+            <div class="col-sm-6">
+                <span class="navItem form-inline">
+                    <form method="post" class="form-inline" action="{% url 'AgentRoot:search_from_nav' %}">
+                        {% csrf_token %}
+                        <input class="form-control-sm" placeholder="&#8981; Search" type="text"
+                               name="key_word" id="key_word" style="font-size:9pt;width:100%;" />
+                    </form>
+                </span>
+            </div>
+        </div>
+    </div>
+<!--        <div class="shadowBrand inSchema" style="font-size:16pt;right:10px;margin-top:10px;opacity:0.25;">-->
+<!--            ΛTIBΛreport-->
+<!--        </div>-->
+</div>
+
+
+
+<div class="leftBlock" style="overflow:hidden;">
+    .
+
+    <div class="row">
+        .<br>.
+    </div>
+<!--    <div class="row">-->
+<!--        <p style="color:white;writing-mode:vertical-lr;">HELPS</p>-->
+<!--    </div>-->
+<!--    <div class="row justify-content-center" style="color:white;font-size:2vw;margin-left:0.20vw;">-->
+<!--        {%if request.user.is_authenticated %}-->
+<!--            <a class="navItem" title="Exit" href="{% url 'accounts:accounts_logout' %}"> &#x1F6AA; </a>-->
+<!--        {%endif%}-->
+<!--    </div>-->
+<!--    <div class="row">-->
+<!--        <p style="color:white;text-orientation:upright;writing-mode:vertical-lr;">HELPS</p>-->
+<!--    </div>-->
+<!--    <div class="row">-->
+<!--        <p style="color:white;text-orientation:mixed;writing-mode:vertical-rl;">HELPS</p>-->
+<!--    </div>-->
+    <div class="row">
+        {%if 'help/' in request.path%}
+            <a class="leftNavItem navItem inLink" href="{% url 'help_pages' %}">Help</a>
+        {% else %}
+            <a class="leftNavItem navItem" href="{% url 'help_pages' %}">Help</a>
+        {% endif %}
+    </div>
+<!--    <div class="row justify-content-center" style="color:white;font-size:1vw;margin-left:0.20vw;">-->
+<!--        {%if request.user.is_authenticated %}-->
+<!--            <a class="navItem" title="Change Password" href="{% url 'accounts:accounts_change_password' %}"> CP </a>-->
+<!--        {%endif%}-->
+<!--    </div>-->
+</div>
+
+

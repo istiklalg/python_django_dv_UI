@@ -1,0 +1,408 @@
+
+
+{% extends 'base.html' %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Diagnostics {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+
+{% if route == "general" %}
+
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+
+    <h5 align="center">INCIDENT SETS</h5>
+    <hr>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <a href="{% url 'AgentRoot:diagnosis_monitor' %}">Click to See All Diagnoses</a>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <table class="table table-sm table-hover">
+            <caption>
+                Associative Sets of Incidents and Root-Causes
+                {% if request.GET %}
+                    <br />( Results for {% if request.GET.uniqueid_q %} <b>{{request.GET.uniqueid_q}}</b> log source's {% endif %}{% if request.GET.status_q %} <b>{{request.GET.status_q}}</b> incidents{% endif %} )
+                {% endif %}
+            </caption>
+            <thead class="thead-light">
+                <tr>
+                    <th>#</th>
+                    <th>LOGS</th>
+                    <th>LAST UPDATE</th>
+                    <th>STATUS</th>
+                    <th>DIAGNOSES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for incident in incident_list %}
+                    <tr>
+                        <td>
+                            <span class="asLink"
+                                  title=""
+                                  onclick="let url=location.href.split('?')[0]+{{incident.id}};location.assign(url);">{{incident.id}}</span>
+                        </td>
+                        <td>
+                            <ul>
+                                {% for log in incident.get_incident_logs %}
+                                    <li>{{log}}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{incident.lastupdatetime}}</td>
+<!--                        <td>{% if incident.isopen %} OPEN {% else %} CLOSED {% endif %}</td>-->
+                        <td data-toggle="tooltip" data-placement="left" data-html="true" title="<p>Close it as resolved or open it as unresolved</p>">
+                            <form method="POST" name="change_incident_status" enctype="multipart/form-data">
+                            {% csrf_token %}
+                                <div class="row justify-content-between">
+                                {% if incident.isopen %}
+                                    <div class="col-sm-8"><span style="color:green">Open</span></div>
+                                    <div class="col-sm-4">
+                                        <button name="change_status" value="{{incident.id}}" type="submit" style="float:right;height:18px;width:18px;padding:0;overflow:hidden;" class="btn btn-outline-danger btn-sm">
+                                            <small>off</small>
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <div class="col-sm-8"><span style="color:red">Closed <small>on {{incident.closedate}}</small></span></div>
+                                    <div class="col-sm-4">
+                                        <button name="change_status" value="{{incident.id}}" type="submit" style="float:right;height:18px;width:18px;padding:0;overflow:hidden;" class="btn btn-outline-success btn-sm">
+                                            <small>on</small>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                                </div>
+                            </form>
+                        </td>
+                        <td>
+                            {% if incident.get_rcgraphs %}
+                                {% for rc in incident.get_rcgraphs %}
+                                    <a href="{{rc.get_analyse_url}}" target="_blank" title="Click to see directly diagnosis details">{{rc}}</a><br>
+                                {% endfor %}
+                            {% else %}
+                                process in progress or not diagnosed for cause
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <hr />
+        {# PAGINATION #}
+        <div class="pagination">
+            <span class="step-links">
+                {% if incident_list.has_previous %}
+                    <a href="?page=1{% if request.GET %}&uniqueid_q={{request.GET.uniqueid_q}}&status_q={{request.GET.status_q}}{% endif %}">&laquo; jump to first </a>/
+                    <a href="?page={{ incident_list.previous_page_number }}{% if request.GET %}&uniqueid_q={{request.GET.uniqueid_q}}&status_q={{request.GET.status_q}}{% endif %}"> previous </a>/
+                {% endif %}
+
+                <span class="current">
+                    <i>{{ incident_list.number }}. of {{ incident_list.paginator.num_pages }} pages </i>
+                </span>
+
+                {% if incident_list.has_next %}
+                    /<a href="?page={{ incident_list.next_page_number }}{% if request.GET %}&uniqueid_q={{request.GET.uniqueid_q}}&status_q={{request.GET.status_q}}{% endif %}"> next </a>
+                    /<a href="?page={{ incident_list.paginator.num_pages }}{% if request.GET %}&uniqueid_q={{request.GET.uniqueid_q}}&status_q={{request.GET.status_q}}{% endif %}"> jump to last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>{# /pagination #}
+    </div>
+
+</div>
+
+{% elif route == "detail" %}
+
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+    <h5 align="center">DIAGNOSIS</h5>
+    <hr>
+    <div class="container-fluid">
+        <form method="post" class="form-inline">
+            {% csrf_token %}
+            <label class="form-control" for="parameter_name" style="font-size:9pt;">Filter diagnosis with parameter and values </label> :
+            <select class="form-control" name="parameter_name" id="parameter_name" style="font-size:9pt;">
+                <option value="">---</option>
+                {% for opt in selection_choices %}
+                    <option>{{opt}}</option>
+                {% endfor %}
+            </select>
+            <input class="form-control" name="parameter_value" type="text" style="font-size:9pt;" />
+            <button type="submit" class="btn btn-sm btn-outline-info form-control" style="font-size:9pt;">SEARCH</button>
+            {% if result_sentence %}
+<!--            <p>-->
+                <input class=" form-control btn btn-sm btn-outline-secondary" type="submit" name="reset_search" value="RESET SEARCH" style="font-size:9pt;" />
+<!--            </p>-->
+                <ul>
+                    <li>{{result_sentence}}</li>
+                </ul>
+            {% endif %}
+        </form>
+    </div>
+    <hr>
+    <div class="container-fluid">
+        <table class="table table-sm table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th style="font-weight:bold;">#</th>
+<!--                    <th>LOG SOURCE</th>-->
+                    <th>INCIDENT</th>
+<!--                    <th>ROOTS</th>-->
+<!--                    <th>LOG ABOUT <br> INCIDENT</th>-->
+<!--                    <th>NODES</th>-->
+<!--                    <th>LEAVES</th>-->
+                    <th>POSSIBLE <br> ROOT-CAUSE</th>
+<!--                    <th>LOG ABOUT <br> ROOT-CAUSE</th>-->
+                    <th>LAST <br> UPDATE TIME</th>
+<!--                    <th>GRAPH</th>-->
+<!--                    <th>GRAPH PATHS</th>-->
+                </tr>
+            </thead>
+            <tbody>
+                {% for rc in rc_list %}
+                    <tr>
+                        <td style="font-weight:bold;">{{rc.id}}</td>
+                        <td data-toggle="tooltip" data-placement="top" data-html="true"
+                            title="<b>LOG ABOUT INCIDENT</b> : <i>{{rc.get_root_logs.0}}</i>">
+                            <a href="{{rc.get_analyse_url}}" target="_blank">
+                                <b>{{rc.get_root_logs.0.get_type_definition}} </b>
+                                <i> on </i>
+                                {{rc.get_root_logs.0.get_device.brandModel.devicetype}} with unique identifier
+                                <b> {{rc.get_root_logs.0.get_device.uniqueid}}</b>
+                            </a>
+                        </td>
+<!--                        <td>{{rc.get_root_logs.0.get_type_definition}}</td>-->
+<!--                        <td>{{rc.rootlist}}</td>-->
+<!--                        <td>{{rc.get_root_logs.0}}</td>-->
+<!--                        <td>{{rc.nodelist}}</td>-->
+<!--                        <td>{{rc.leaflist}}</td>-->
+                        <td>
+                            <ul>
+                                {% for log in rc.get_leaf_logs %}
+                                    <li data-toggle="tooltip" data-placement="top" data-html="true"
+                                        title="<b>LOG ABOUT THIS</b> : <i>{{log}}</i>" style="cursor:pointer;">
+                                        <b>{{log.get_type_definition}} </b>
+                                        <i> on </i>
+                                        {{log.get_device.brandModel.devicetype}} with unique identifier <b> {{log.get_device.uniqueid}} </b>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+<!--                            {{rc.get_leaf_logs.0.get_type_definition}} <i>on</i> {{rc.get_leaf_logs.0.get_device.uniqueid}}-->
+                        </td>
+<!--                        <td>{{rc.get_leaf_logs.0}}</td>-->
+                        <td>{{rc.graphupdatetime}} <small>({{rc.graphupdatetime|timesince}})</small></td>
+<!--                        <td>{{rc.rcgraph}}</td>-->
+<!--                        <td>{{rc.graphpaths}}</td>-->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <hr />
+        {# PAGINATION #}
+        <div class="pagination">
+            <span class="step-links">
+                {% if rc_list.has_previous %}
+                    <a href="?page=1">&laquo; jump to first </a>/
+                    <a href="?page={{ rc_list.previous_page_number }}"> previous </a>/
+                {% endif %}
+
+                <span class="current">
+                    <i>{{ rc_list.number }}. of {{ rc_list.paginator.num_pages }} pages </i>
+                </span>
+
+                {% if rc_list.has_next %}
+                    /<a href="?page={{ rc_list.next_page_number }}"> next </a>
+                    /<a href="?page={{ rc_list.paginator.num_pages }}"> jump to last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>{# /pagination #}
+    </div>
+
+</div>
+
+{% elif route == "inincident" %}
+
+    <div class="innerBodies container-fluid" style="padding-top:10px;">
+        <h5 align="center">DIAGNOSIS IN INCIDENT SET {{ setID }}</h5>
+        <hr>
+        {% if dataWarning %}<div class="container-fluid"><h6 align="center">{{ dataWarning }}</h6></div>{% endif %}
+        <div class="container-fluid">
+            {% for rc in rc_list %}
+                <div class="row my-1 justify-content-around">
+                    <div class="col-md-2">
+                        <div class="row m-1">{{rc.id}} - {{rc}}</div>
+                        <div class="row m-1">
+                            <h6>Incident</h6>
+                            <ul>
+                                <li data-toggle="tooltip" data-placement="top" data-html="true"
+                                    title="<b>LOG ABOUT INCIDENT</b> : <i>{{rc.get_root_logs.0}}</i>">
+                                    <span>
+                                        <b>{{rc.get_root_logs.0.get_type_definition}} </b>
+                                        <i> on </i>
+                                        {{rc.get_root_logs.0.get_device.brandModel.devicetype}} with unique identifier
+                                        <b> {{rc.get_root_logs.0.get_device.uniqueid}}</b>
+                                    </span>
+                                    {% if rc.get_root_logs.0.anomalytype == 1301 or rc.get_root_logs.0.anomalytype.anomalytype == 1303 or rc.get_root_logs.0.anomalytype.anomalytype == 1304 %}
+                                        <br /><span><i><u>{{ rc.get_root_logs.0.paramvariable }} </u> {% if rc.get_root_logs.0.paramvalue %} with value <u> {{ rc.get_root_logs.0.paramvalue }}</u>{% else %} : No Dominant Value {% endif %}</i></span>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="row m-1">
+                            <h6>Possible root-cause(s)</h6>
+                            <ul>
+                                {% for log in rc.get_leaf_logs %}
+                                    <li data-toggle="tooltip" data-placement="top" data-html="true"
+                                        title="<b>LOG ABOUT THIS</b> : <i>{{log}}</i>" style="cursor:pointer;">
+                                        <b>{{log.get_type_definition}} </b>
+                                        <i> on </i>
+                                        {{log.get_device.brandModel.devicetype}} with unique identifier <b> {{log.get_device.uniqueid}} </b>
+                                        {% if log.anomalytype == 1301 or log.anomalytype.anomalytype == 1303 or log.anomalytype.anomalytype == 1304 %}
+                                            <br /><span><i><u>{{ log.paramvariable }} </u> {% if log.paramvalue %} with value <u> {{ log.paramvalue }}</u>{% else %} : No Dominant Value {% endif %}</i></span>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="row m-1">
+                            <a href="{{rc.get_analyse_url}}" target="_blank">See Detail</a>
+                        </div>
+                    </div>
+                    <div class="col-md-10" style="border-left: 0.5px solid lightgrey;max-height:50vh;overflow-y:auto;">
+
+                        <div class="row m-1">
+                            <div class="col-md-3">
+                                {% for log in rc.get_node_loglist %}
+                                    <div class="row my-3">
+                                        <div class="container-fluid">
+                                            {{log}} {% if log.anomalytype != 1 and not log.logtimes %}<small style="color:rgba(255, 99, 132, 0.85);"> - (No times data !) </small> {% endif %}
+                                            {% if log.get_its_anomaly %}
+                                                {% for anmly in log.get_its_anomaly %}
+                                                    <br />
+                                                    <small> Generated Alert on
+                                                        <a class="asLink" href="{{anmly.get_absolute_url}}"
+                                                           target="_blank" title="See Alert Details">
+                                                            {{anmly.credate}}
+                                                        </a>
+                                                    </small>
+                                                {% endfor %}
+                                            {% else %}
+                                                <br /><small style="color:rgba(255, 99, 132, 0.85);">No Alerts Generated</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-9">
+                                {% if not rc.get_log_times_chart_data.1 %}
+                                <div class="row justify-content-center">No Times Data to Draw !</div>
+                                {% else %}
+                                <div class="row justify-content-center">
+                                    <div class="col col-xl-10 col-lg-11 col-md-12 col-sm-12" align="center"
+                                         name="logTimesChart" id="logTimesChart_{{rc.id}}">
+                                        <canvas id="chart_time_bubbles_{{rc.id}}" height="120"></canvas>
+                                        <hr/>
+                                        <span>Info About Flow</span>
+                                        <data id="{{rc.get_log_times_chart_data.0}}*{{rc.get_log_times_chart_data.1}}"
+                                              value="{{rc.get_log_times_chart_data.2}}" style="display:none;">line</data>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <hr />
+            {# PAGINATION #}
+            <div class="pagination">
+                <span class="step-links">
+                    {% if rc_list.has_previous %}
+                        <a href="?page=1">&laquo; jump to first </a>/
+                        <a href="?page={{ rc_list.previous_page_number }}"> previous </a>/
+                    {% endif %}
+
+                    <span class="current">
+                        <i>{{ rc_list.number }}. of {{ rc_list.paginator.num_pages }} pages </i>
+                    </span>
+
+                    {% if rc_list.has_next %}
+                        /<a href="?page={{ rc_list.next_page_number }}"> next </a>
+                        /<a href="?page={{ rc_list.paginator.num_pages }}"> jump to last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>{# /pagination #}
+        </div>
+    </div>
+
+{% else %}
+{% endif %}
+
+<script type="text/javascript" lang="javascript">
+
+    /* To prevent the form from being submitted again when the page is refreshed. */
+    if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+    var graphColors = ['rgba(75, 192, 192, 0.85)','rgba(255, 99, 132, 0.85)','rgba(255, 159, 64, 0.85)','rgba(54, 162, 235, 0.85)','rgba(255, 206, 86, 0.85)','rgba(150, 150, 150, 0.85)','rgba(106, 92, 112, 0.85)']
+
+    function drawGivenLine(divElement){
+        var canvasElement = divElement.firstElementChild;
+        var dataElement = divElement.lastElementChild;
+        var nodeAndDateStrings = dataElement.id.split("*");
+        var nodeIdList = nodeAndDateStrings[0].replace(/ /g, "").replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+        var dateStringsList = nodeAndDateStrings[1].replace(/ /g, "").replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+        var resultList = dataElement.value.replace(/ /g, "").replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+        dataSet = [{
+            label: "Time of Event",
+            data: resultList,
+            backgroundColor: graphColors[0],
+            borderColor: graphColors[0],
+            showLine: false,
+            borderWidth: 1,
+            pointRadius: 5,
+            pointHoverBackgroundColor: graphColors[1],
+            pointHoverRadius: 6,
+            fill: false,
+        }]
+        var ctx = canvasElement.getContext("2d");
+        var myLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dateStringsList,
+                datasets: dataSet
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {display: true, labelString: 'Exact Time Info'},
+                        ticks: {fontSize: 11}
+                    }],
+                    yAxes: [{
+                        scaleLabel: {display: true, labelString: 'Identifier Numbers'},
+                        ticks: {stepSize: 1}
+                    }]
+                },
+                elements: {center: {text: "",}},
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        var chartDivs = document.getElementsByName("logTimesChart");
+        if(chartDivs.length>0){
+            for(var i=0;i<chartDivs.length;i++){
+                drawGivenLine(chartDivs[i]);
+            }
+        }
+    });
+
+</script>
+
+{% endblock %}

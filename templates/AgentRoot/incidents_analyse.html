@@ -1,0 +1,591 @@
+
+
+{% extends 'base.html' %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Root-Cause Analyse {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+{% if route == "general" %}
+<style>
+    .rowline{
+        /*border:1px solid red;*/
+        margin-bottom:5px;
+    }
+    * {box-sizing: border-box;}
+
+    .img-zoom-container {
+        position: relative;
+        //overflow:auto;
+    }
+
+    .img-zoom-lens {
+        position: absolute;
+        border: 1px solid #d4d4d4;
+        border-radius: 5px;
+        /*set the size of the lens:*/
+        width: 5%;
+        height: 40px;
+    }
+
+    .img-zoom-result {
+        border: 1px solid #d4d4d4;
+        margin-bottom: 1rem;
+        /*set the size of the result div:*/
+        width: 50%;
+        //height: 300px;
+    }
+</style>
+
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+    {% csrf_token %}
+    <legend>Diagnosis Analyse</legend>
+    <hr style="margin:0;padding:0;" />
+    <div class="container-fluid">
+        {% if rcMap %}
+
+        <div class="row justify-content-around my-1">
+            <div class="col-md-3" style="border-right: 0.5px solid lightgrey;">
+                <div class="row justify-content-center m-1"><legend>Diagnosis</legend></div>
+                <hr style="margin-top:0"/>
+                <div class="row mx-1 my-3 shadowBox" style="overflow:auto;">
+                    <h6> Incident(s)</h6>
+                    <ul>
+                        {% for type, nodeList in definition_and_incident %}
+                        <li>
+                            <span style="font-weight:bold;font-size:10pt;">{{type}} detected</span>
+
+                            {% for node in nodeList %}
+                                <br />{{node}}<br />
+                                {% if node.get_its_anomaly %}
+                                    {% for alerts in node.get_its_anomaly %}
+                                        <a href="{{alerts.get_absolute_url}}" target="_blank"
+                                           title="Detail page of this {{alerts.get_type_definition}} alert with id {{node.id}}">
+                                            Generated alert on {{alerts.credate}} because {{alerts.define_anomaly}}
+                                        </a> <br />
+                                    {% endfor %}
+                                {% else %}
+                                    <span style="color:rgba(255, 99, 132, 0.85);">No Alerts Generated</span>
+                                {% endif %}
+                            {% endfor %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                <div class="row mx-1 my-3 shadowBox" style="overflow:auto;">
+<!--                    <h6>{{rcMap.leaflist|length}} Possible root-cause(s)</h6>-->
+                    <h6> Possible root-cause(s)</h6>
+                    <ul>
+                        {% for node in rcMap.get_leaf_logs %}
+                            <li>
+                                <span style="font-weight:bold;font-size:10pt;">{{node.get_type_definition}}</span>
+                                <br />{{node}}<br />
+                                {% if node.get_its_anomaly %}
+                                    {% for alerts in node.get_its_anomaly %}
+                                        <a href="{{alerts.get_absolute_url}}" target="_blank"
+                                           title="Detail page of this {{alerts.get_type_definition}} alert with id {{node.id}}">
+                                            Generated alert on {{alerts.credate}} because {{alerts.define_anomaly}}
+                                        </a> <br />
+                                    {% endfor %}
+                                {% else %}
+                                    <span style="color:rgba(255, 99, 132, 0.85);">No Alerts Generated</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <hr />
+                {% if givenTotalFeed is None %}
+                <form class="form-inline form-group row m-1 justify-content-between" method="POST"
+                      name="rcTotalFeed" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label class="col-xl-6" for="rc_total_feedback">Give feedback to whole diagnosis</label>
+                    <select class="form-control-sm col-xl-4" name="rc_total_feedback" id="rc_total_feedback" style="font-size:9pt;">
+                        <option value="None">----</option>
+                        <option value="True">All Correct</option>
+                        <option value="False">All False</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline-info col-xl-2" type="submit" style="font-size:9pt;overflow:hidden;">SEND</button>
+                </form>
+                <div class="row mx-3" style="color:rgba(255, 159, 64, 0.85);">
+                    <small>
+                        * Note that the feedback you give here will be applied for all relational paths.
+                    </small>
+                </div>
+                {% elif givenTotalFeed %}
+                <div class="row mx-3" style="color:rgba(75, 192, 192, 0.85);">
+                    <small>
+                        * Feedback has already been given as "All {{ givenTotalFeed }}" for this diagnosis
+                    </small>
+                </div>
+                {% else %}
+                <div class="row mx-3" style="color:rgba(255, 99, 132, 0.85);">
+                    <small>
+                        * Feedback has already been given as "All {{ givenTotalFeed }}" for this diagnosis
+                    </small>
+                </div>
+                {% endif %}
+                <hr />
+                <div class="row mx-3" id="incident_set_id_{{rcMap.incidentid}}">
+                    {% if rcMap.incident_closedate %}
+                        {% if rcMap.incident_closedate == "Not Have an Incident Set" or rcMap.incident_closedate == "No Info" %}
+                            <span style="color:rgba(255, 99, 132, 0.85);">{{rcMap.incident_closedate}}</span>
+                        {% else %}
+                            This incident closed at {{rcMap.incident_closedate}}
+                        {% endif %}
+                    {% else %}
+                        <form class="form-inline form-group row m-1 justify-content-between" method="POST"
+                              name="closeIncident" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input class="btn btn-sm btn-outline-info form-control" type="submit" style="font-size:9pt;"
+                                   name="close_incident" value="CLOSE INCIDENT AS SOLVED" />
+                        </form>
+                    {% endif %}
+                </div>
+                <hr />
+            </div>
+            <div class="col-md-9" style="margin-bottom:0;padding-bottom:0;max-height:75vh;overflow-y:auto;">
+                <div class="row justify-content-center m-1"><legend>Details</legend></div>
+                <hr style="margin-top:0;" />
+                <div class="row m-2">
+                    <h6>Date & Time</h6>
+                    <ul>
+                        <li>{{rcMap.graphupdatetime}} <small> ({{rcMap.graphupdatetime|timesince}})</small></li>
+                    </ul>
+
+                </div>
+
+                <div class="row m-2">
+                    <h6>Log Source</h6>
+                    <ul>
+                        <li>
+                            <b>{{ rcMap.get_root_devices.0.brandModel.devicetype }}</b> with unique identifier <b>{{ rcMap.get_root_devices.0.uniqueid }}</b>
+                            <br/>
+                            <i>
+                                <u>Brand & Model</u> : {{rcMap.get_root_devices.0.brand}} / {{rcMap.get_root_devices.0.brandModel}} <br/>
+                                <u>Name & IP</u> : {{rcMap.get_root_devices.0}} / {{rcMap.get_root_devices.0.ipaddress}}
+                            </i>
+                        </li>
+                    </ul>
+                </div>
+                <div class="row mx-1 my-3 shadowBox">
+                    <h6>Relational Map</h6>
+                    <div class="col-md-12">
+
+                        <div id="waitDiv" class="row justify-content-center m-1">{{analysisCase}}</div>
+                        {% if rcMap.graphimage %}
+                            <div class="row justify-content-center img-zoom-container" style="padding:0;margin:0;">
+                                <iframe class="col-sm-6" id="loadingFrame" src="{% url 'AgentRoot:loading_view'%}" frameborder="0"></iframe>
+                                <img class="col-sm-6" id="mapGraph" style="display:none;" src="{{rcMap.graphimage.url}}"
+                                     onload="document.getElementById('loadingFrame').style.display='none';document.getElementById('mapGraph').style.display='block';"
+                                     alt="Whole Root Cause Map" title="Root Cause Map" />
+                                <div class="col-sm-6 img-zoom-result" id="zoom_result"></div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-sm-6">
+                                    <button class="btn btn-sm btn-outline-info" style="width:100%;font-size:9pt;"
+                                            onclick="reDrawGraph('mapGraph');">RE-DRAW GRAPH</button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button class="btn btn-sm btn-outline-info" style="width:100%;font-size:9pt;"
+                                            onclick="imageZoom('mapGraph', 'zoom_result');">ADJUST ZOOM</button>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="row justify-content-center" style="padding:10px;margin:0;">
+                                Incident & Root-Cause Mapping Graph couldn't prepared
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mx-1 my-3 shadowBox">
+                    <h6>Path Details & Feedback for paths</h6>
+                    <div class="col-md-12">
+
+                        <ul>
+                        {% for root, codes, leaves in root_leaves %}
+                            <li>
+                                <div class="row">
+                                    <div class="col-md-5">
+                                       <h6>{{ root.get_type_definition }}  diagnosed as an incident</h6>
+                                        <a type="button" class="asLink" title="Click to manage whether to show alert"
+                                           data-toggle="modal" data-target="#modal_{{root.id}}">Click to manage whether to show alert</a>
+                                        <br />
+                                        {% if root.alerts_are_open %}
+                                        <form class="form-inline" method="POST"
+                                              name="disableAlert" enctype="multipart/form-data" style="margin:0;">
+                                            {% csrf_token %}
+                                            <i><u>Log Code</u> : {{ root.logcode }} </i>
+                                            <button class="btn btn-sm btn-outline-secondary" style="font-size:7pt;margin-left:10px;" type="submit"
+                                                    name="_disable_alers_for_logcode" value="{{root.logcode}}"
+                                                    title="Disable alerts for log code {{root.logcode}}">Disable Alerts</button>
+                                        </form>
+                                        {% else %}
+                                            <i><u>Log Code</u> : {{ root.logcode }} </i>
+                                            <span style="color:rgba(255, 99, 132, 0.85);margin-left:10px">Alerts are disabled</span>
+                                            <br />
+                                        {% endif %}
+
+                                        <i><u>Definition</u> : {{ root.define_incident }} </i>
+                                        <br />
+                                        {% if root.anomalytype == 1 %}
+                                            <i><u>Log Details</u> : {{ root }} </i>
+                                        {% elif root.anomalytype == 2 %}
+                                            <i><u>Log Event Details</u> : {{ root.logevent }} </i>
+                                        {% elif root.anomalytype == 1201 or root.anomalytype == 1203 or root.anomalytype == 1204 %}
+                                            <i><u>Log Event Details</u> : {{ root.logevent }} </i>
+                                        {% elif root.anomalytype == 1301 or root.anomalytype == 1303 or root.anomalytype == 1304 %}
+                                            <i><u>Parameter & Value</u> : {{ root.paramvariable }} = {% if root.paramvalue %}{{ root.paramvalue }}{% else %} No Dominant Value {% endif %}</i>
+                                        {% else %}
+                                            <i><u>Log Details </u> : {{ root }} </i>
+                                        {% endif %}
+                                    </div>
+                                    {% if root.get_its_anomaly.0.get_simple_chart_data.0 %}
+                                    <div class="col-md-7" name="charts">
+                                        <canvas id="simpleRootChart_{{forloop.counter}}" height="100px"></canvas>
+                                        <br />
+<!--                                        <span style="display:none;">Log Counts</span>-->
+                                        <data id="{{root.get_its_anomaly.0.get_simple_chart_data.0}}"
+                                              value="{{root.get_its_anomaly.0.get_simple_chart_data.1}}" style="display:none;">simple_logs_line</data>
+                                    </div>
+                                    {% else %}
+                                    <div class="col-md-7" name="nochart">{{root.get_its_anomaly.0.get_simple_chart_data}}</div>
+                                    {% endif %}
+                                </div>
+                            </li>
+
+                            <br />
+
+                            <div class="row justify-content-center" id="rc_{{forloop.counter}}"><!-- Root-Causes row -->
+                                <div class="container-fluid">
+                                    <h6>Root-Cause(s) for {{ root.get_type_definition }} incident</h6>
+                                    {% if codes.1 %}<small>{{ codes|length }} different log codes were identified among the root causes</small><br/>{% endif %}
+                                    {% for code in codes %}
+<!--                                        <i><u>Log Code</u> : {{ code }}</i>-->
+<!--                                        <form class="form-inline" method="POST"-->
+<!--                                              name="disableAlert" enctype="multipart/form-data" style="margin:0;">-->
+<!--                                            {% csrf_token %}-->
+<!--                                            <i><u>Log Code</u> : {{ code }} </i>-->
+<!--                                            <button class="btn btn-sm btn-outline-info" style="font-size:7pt;margin-left:10px;" type="submit"-->
+<!--                                                    name="_disable_alers_for_logcode" value="{{code}}">Disable Alerts</button>-->
+<!--                                        </form>-->
+                                        <ol>
+                                            {% for log, path in leaves %}
+                                            {% if log.logcode == code %}
+                                                <li>
+                                                    <div class="row">
+                                                        <div class="col-md-5">
+<!--                                                    <i>{{ path }}</i>-->
+                                                        <b>{{ log.get_type_definition }} </b> diagnosed as a root-cause
+                                                        <br />
+                                                        {% if log.alerts_are_open %}
+                                                            <form class="form-inline" method="POST"
+                                                                  name="disableAlert" enctype="multipart/form-data" style="margin:0;">
+                                                                {% csrf_token %}
+                                                                <i><u>Log Code</u> : {{ log.logcode }} </i>
+                                                                <button class="btn btn-sm btn-outline-secondary" style="font-size:7pt;margin-left:10px;" type="submit"
+                                                                        name="_disable_alers_for_logcode" value="{{log.logcode}}"
+                                                                        title="Disable alerts for log code {{log.logcode}}">Disable Alerts</button>
+                                                            </form>
+                                                        {% else %}
+                                                            <i><u>Log Code</u> : {{ code }} </i>
+                                                            <span style="color:rgba(255, 99, 132, 0.85);margin-left:10px">Alerts are disabled</span>
+                                                            <br />
+                                                        {% endif %}
+
+                                                        <i><u>Definition</u> : {{ log.define_incident }} </i>
+                                                        <br />
+                                                        {% if log.anomalytype == 1 %}
+                                                            <i><u>Log Details</u> : {{ log }} </i>
+                                                        {% elif log.anomalytype == 2 %}
+                                                            <i><u>Log Event Details</u> : {{ log.logevent }} </i>
+                                                        {% elif log.anomalytype == 1201 or log.anomalytype == 1203 or log.anomalytype == 1204 %}
+                                                            <i><u>Log Event Details</u> : {{ log.logevent }} </i>
+                                                        {% elif log.anomalytype == 1301 or log.anomalytype == 1303 or log.anomalytype == 1304 %}
+                                                            <i><u>Parameter & Value</u> : {{ log.paramvariable }} = {% if log.paramvalue %}{{ log.paramvalue }}{% else %} No Dominant Value {% endif %}</i>
+                                                        {% else %}
+                                                            <i><u>Log Details </u> : {{ log }} </i>
+                                                        {% endif %}
+
+                                                        <br />
+                                                        <i><a class="asLink" type="button" title="Do you want to search in google?"
+                                                              name="{{log.get_device.brand}} {{log.get_log_code}} {{log.logevent}}"
+                                                              onclick="search_it(this)">Click to search for help</a>
+                                                        </i>
+                                                        <br />
+                                                        <a type="button" class="asLink" data-toggle="modal"
+                                                           title="Relation Map & Feedback"
+                                                           data-target="#path_{{root.id}}_{{log.id}}">
+                                                            See the relational paths  {{ root.id }}-{{ log.id }}
+                                                        </a>
+                                                        </div>
+                                                        {% if log.get_its_anomaly.0.get_simple_chart_data.0 %}
+                                                        <div class="col-md-7" name="charts">
+                                                            <canvas id="simpleCauseCharts_{{forloop.counter}}" height="100px"></canvas>
+                                                            <br />
+                                                            <span style="display:none;">Log Counts</span>
+                                                            <data id="{{log.get_its_anomaly.0.get_simple_chart_data.0}}"
+                                                                  value="{{log.get_its_anomaly.0.get_simple_chart_data.1}}" style="display:none;">simple_logs_line</data>
+                                                        </div>
+                                                        {% else %}
+                                                        <div class="col-md-7" name="nochart">{{log.get_its_anomaly.0.get_simple_chart_data}}</div>
+                                                        {% endif %}
+                                                    </div>
+                                                </li>
+                                                <div class="modal fade" id="path_{{root.id}}_{{log.id}}" tabindex="-1" role="dialog" aria-labelledby="correctionModalLabel" aria-hidden="true"><!-- Root-Cause Path Modal -->
+                                                    <div class="modal-dialog modal-xl" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="correctionModalLabel">Incident & Root-cause relation Map {{ root.id }}-{{ log.id }}</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body"><!-- Modal Body -->
+                                                                <div class="row justify-content-around">
+                                                                    <div class="col-md-11" align="center">
+                                                                        Path form incident to root-cause<br/>
+                                                                        {% for k in paths %}
+                                                                            {% for x, y in k.items %}
+                                                                                {% if y.0 == root.id and log.id in y %}
+                                                                                    {{y}}<br/>
+                                                                                {% endif %}
+                                                                            {% endfor %}
+                                                                        {% endfor %}
+                                                                        <br/>
+                                                                        <form method="POST" enctype="multipart/form-data" name="correction_feedback_form"><!-- user feedback form -->
+                                                                            {% csrf_token %}
+                                                                            {% for node, rel, feedback in path %}
+                                                                                {% if node.id %}
+                                                                                    {% if forloop.counter == 1 %}
+                                                                                        <p class="item">
+                                                                                            <span style="color:rgba(75, 192, 192, 0.85);">
+                                                                                                Log Source
+                                                                                                | uniqueid : {{ node.get_device.uniqueid }}
+                                                                                                | IP address :{{ node.get_device.ipaddress }}
+                                                                                                | Brand : {{ node.get_device.brand }}
+                                                                                                | Model : {{ node.get_device.brandModel }}
+                                                                                            </span>
+                                                                                            <br>
+                                                                                            <b>{{ node }}</b>
+                                                                                        </p>
+                                                                                    {% else %}
+                                                                                        <span class="arrow">|</span><br/>
+                                                                                        <span>Related Because Detected <i>{{ rel }}</i></span><br/>
+                                                                                        <span class="arrow">|</span><br/>
+                                                                                        <label for="{{node.id}}_in_{{root.id}}-{{log.id}}">Give Feedback About This Relation (Correct or Not) : </label>
+                                                                                        <select class="form-control-sm" style="font-size:9pt;"
+                                                                                                name="correction_feedbacks" id="{{node.id}}_in_{{root.id}}-{{log.id}}">
+                                                                                            <option value="{{node.id}}-True-{{root.id}}-{{log.id}}">Correct</option>
+                                                                                            <option value="{{node.id}}-False-{{root.id}}-{{log.id}}" {%if not feedback and feedback is not None%} selected {%endif%}>False</option>
+                                                                                        </select>
+                                                                                        <br/>
+                                                                                        <span class="arrow">&#65516;</span><br>
+                                                                                        <p class="item">
+                                                                                            <span  style="color:rgba(75, 192, 192, 0.85);">
+                                                                                                Log Source
+                                                                                                | uniqueid : {{ node.get_device.uniqueid }}
+                                                                                                | IP address :{{ node.get_device.ipaddress }}
+                                                                                                | Brand : {{ node.get_device.brand }}
+                                                                                                | Model : {{ node.get_device.brandModel }}
+                                                                                            </span>
+                                                                                            <br>
+                                                                                            <b>{{ node }}</b>
+                                                                                        </p>
+                                                                                    {% endif %}
+                                                                                {% else %}
+                                                                                    <h5 style="text-align:center;color:rgba(255, 99, 132, 0.85);">DATA IS CORRUPTED !!!</h5>
+                                                                                {% endif %}
+                                                                            {% endfor %}
+                                                                            <input class="btn btn-outline-info btn-sm"
+                                                                                   type="submit" {% if dataWarning %} disabled value="DATA IS CORRUPTED !!" {% else %} value="SEND" {% endif %}
+                                                                                   style="font-size:9pt;"/>
+                                                                        </form><!-- / user feedback form -->
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row"></div>
+                                                            </div><!-- / Modal Body -->
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div><!-- / Root-Cause Path Modal -->
+                                            {% else %}
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ol>
+                                        <hr/>
+                                    {% endfor %}
+                                </div>
+                            </div><!--/ Root-Causes row -->
+                            <div class="modal fade" id="modal_{{root.id}}" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true"><!-- Show & No Show Modal -->
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalLabel">id: {{root.id}} - {{root.get_type_definition}} Incident</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+            <!--                                <div class="row">-->
+            <!--                                    <div class="col-md-12" align="center" name="charts">&lt;!&ndash; chart div &ndash;&gt;-->
+            <!--                                        <canvas id="chartLogs"></canvas>-->
+            <!--                                        <data id="{{log_chart_labels}}" value="{{log_chart_values}}" style="display:none;">bar</data>-->
+            <!--                                    </div>&lt;!&ndash; / chart div &ndash;&gt;-->
+            <!--                                </div>-->
+                                            <form method="POST" enctype="multipart/form-data" name="alert_management_form"><!-- Show & No Show Form -->
+                                            {% csrf_token %}
+                                            <div class="row justify-content-center">
+
+                                                <label for="{{root.id}}">Do you wanna see this alert </label>
+                                                <select class="form-control form-control-sm" name="alert_managements" id="{{root.id}}">
+                                                    <option value="{{root.id}}-True">Show Alert</option>
+                                                    <option value="{{root.id}}-False" {%if not root.isshow%} selected {%endif%}>Do not Show Alert</option>
+                                                </select>
+                                                <input class="btn btn-outline-info btn-sm" type="submit" value="SAVE" />
+                                            </div>
+                                            </form><!-- Show & No Show Form -->
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- / Show & No Show Modal -->
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <p>Couldn't found this record, there may be data corruption</p>
+        {% endif %}
+    </div>
+</div>
+
+{% elif route == "detail" %}
+
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+
+</div>
+
+{% else %}
+
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+
+</div>
+
+{% endif %}
+
+<script type="text/javascript" lang="javascript">
+    var route = '{{route}}';
+
+    /* To prevent the form from being submitted again when the page is refreshed. */
+    if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+    // to zoom rcgraph image ;
+    function imageZoom(imgID, resultID) {
+          var img, lens, result, cx, cy;
+          img = document.getElementById(imgID);
+          result = document.getElementById(resultID);
+          /* Creating a lens for zoom area: */
+          lens = document.createElement("DIV");
+          lens.setAttribute("class", "img-zoom-lens");
+          /* Insert lens: */
+          img.parentElement.insertBefore(lens, img);
+          /* Calculate the ratio between result DIV and lens: */
+          cx = result.offsetWidth / lens.offsetWidth;
+          cy = result.offsetHeight / lens.offsetHeight;
+          /* Set background properties for the result DIV */
+          result.style.backgroundImage = "url('" + img.src + "')";
+          result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
+          /* Execute a function when someone moves the cursor over the image, or the lens: */
+          lens.addEventListener("mousemove", moveLens);
+          img.addEventListener("mousemove", moveLens);
+          /* And also for touch screens: */
+          lens.addEventListener("touchmove", moveLens);
+          img.addEventListener("touchmove", moveLens);
+          function moveLens(e) {
+                var pos, x, y;
+                /* Prevent any other actions that may occur when moving over the image */
+                e.preventDefault();
+                /* Get the cursor's x and y positions: */
+                pos = getCursorPos(e);
+                /* Calculate the position of the lens: */
+                x = pos.x - (lens.offsetWidth / 2);
+                y = pos.y - (lens.offsetHeight / 2);
+                /* Prevent the lens from being positioned outside the image: */
+                if (x > img.width - lens.offsetWidth) {x = img.width - lens.offsetWidth;}
+                if (x < 0) {x = 0;}
+                if (y > img.height - lens.offsetHeight) {y = img.height - lens.offsetHeight;}
+                if (y < 0) {y = 0;}
+                /* Set the position of the lens: */
+                lens.style.left = x + "px";
+                lens.style.top = y + "px";
+                /* Display what the lens "sees": */
+                result.style.backgroundPosition = "-" + (x * cx) + "px -" + (y * cy) + "px";
+          }
+          function getCursorPos(e) {
+                var a, x = 0, y = 0;
+                e = e || window.event;
+                /* Get the x and y positions of the image: */
+                a = img.getBoundingClientRect();
+                /* Calculate the cursor's x and y coordinates, relative to the image: */
+                x = e.pageX - a.left;
+                y = e.pageY - a.top;
+                /* Consider any page scrolling: */
+                x = x - window.pageXOffset;
+                y = y - window.pageYOffset;
+                return {x : x, y : y};
+          }
+    }
+
+    function update(imgTagId) {
+        var source = document.getElementById(imgTagId).src,
+            timestamp = (new Date()).getTime(),
+            newUrl = source + '?_=' + timestamp;
+        //console.log(source+" "+timestamp+" "+newUrl);
+        document.getElementById(imgTagId).src = newUrl;
+    }
+
+    if(route=='general'){
+        imageZoom("mapGraph", "zoom_result");
+        //console.log(location.pathname);
+        function reDrawGraph(imgTagID){
+            var csrf = $("input[name=csrfmiddlewaretoken]").val();
+            var waitDiv = $("#waitDiv")
+            $.ajax({
+                url: location.pathname,
+                type: "post",
+                data: {csrfmiddlewaretoken: csrf, action: "re_draw"},
+                beforeSend: function (){waitDiv.html("Please wait while graph is drawing again...");},
+                success: function(response){
+                    if(response.command!=0){
+                        console.log("re_draw action success. "+response.result);
+                        update(imgTagID);
+                        imageZoom(imgTagID, "zoom_result");
+                        waitDiv.html(response.result);
+                    }else{
+                        console.log("re_draw action failed. "+response.result);
+                        waitDiv.html(response.result);
+                    }
+                }
+            });
+        }
+        //setTimeout(function (){update("mapGraph");imageZoom("mapGraph", "zoom_result");}, 10000);
+        //update("mapGraph");
+    }
+
+</script>
+
+{% endblock %}

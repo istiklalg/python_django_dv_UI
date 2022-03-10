@@ -1,0 +1,191 @@
+
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    All Logs {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "general" %}
+
+<div class="container-fluid innerBodies">
+    <h5>ALL COLLECTED LOGS</h5>
+    <div class="row justify-content-center innerBodies">
+        <div class="col col-xl-6 col-lg-8 col-md-12 col-sm-12" align="center" name="charts">
+            <canvas id="chart_all_logs" title="Log Counts"></canvas>
+            <hr/>
+            <data id="{{all_logs_chart_labels}}" value="{{all_logs_chart_values}}" style="display:none;">logs_bar</data>
+        </div>
+    </div>
+    <form method="GET" enctype="multipart/form-data">
+        <div class="row justify-content-center">
+
+            <div class="col col-xl-5 col-lg-6 col-md-8 col-sm-12" style="border-left:0.5px solid grey;border-right:0.5px solid grey;">
+                Select a Date Time Interval <span style="padding-left:20px;"><small>(logs in {{interval_in_hours}} hours interval selected)</small></span>
+                <hr>
+                <small>
+                    <label for="from_date">From : </label>
+                    <input id="from_date" type="datetime-local" name="fromDate_q" value="{% if request.GET %}{{request.GET.fromDate_q}}{% else %}{{yesterday}}{% endif %}" />
+                </small>
+                <small>
+                    <label for="to_date">To : </label>
+                    <input id="to_date" type="datetime-local" name="toDate_q" value="{% if request.GET %}{{request.GET.toDate_q}}{% else %}{{today}}{% endif %}" />
+                </small>
+
+            </div>
+            <div class="col col-xl-2 col-lg-2 col-md-8 col-sm-12" style="border-left:0.5px solid grey;border-right:0.5px solid grey;">
+                Select a Log Source
+                <hr>
+                <small>
+                    <select name="device_q">
+                        <option value="">Select a log source</option>
+                        {% for device in deviceList %}
+                        <option value="{{device.uniqueid}}" {%if request.GET.device_q == device.uniqueid%}selected{%endif%}>{{device.uniqueid}}</option>
+                        {% endfor %}
+                    </select>
+                </small>
+            </div>
+            <div class="col col-xl-2 col-lg-2 col-md-8 col-sm-12" style="border-left:0.5px solid grey;border-right:0.5px solid grey;">
+                Limit Record Count
+                <hr>
+                <small>
+                    <input type="number" name="limit_q" placeholder="Limit of count" value="{{request.GET.limit_q}}" />
+                </small>
+            </div>
+            <div class="col col-xl-2 col-lg-2 col-md-8 col-sm-12" style="border-left:0.5px solid grey;border-right:0.5px solid grey;">
+                <small>
+                    <input type="text" name="event_q" placeholder="Search in logs" value="{{request.GET.event_q}}" />
+                </small>
+                <hr>
+                <small>
+                    <a class="asLink" href="{% url 'AgentRoot:all_logs' %}" style="text-decoration:None;">Clear All Searches</a>
+                    <button style="display:block;float:right;height:21px;width:50px;padding:0;overflow:hidden;" class="btn btn-outline-success btn-sm" type="submit"><small>&#8981;</small></button>
+                </small>
+            </div>
+
+        </div>
+    </form>
+    <hr/>
+    <small>
+        <div class="col-lg-9 col-md-8 col-sm-7 col-6" style="position:relative;float:left;">last {{ caption }} in {{filtered_count}} of total {{totalCount}}</div>
+        <table class="table table-sm table-hover">
+    <!--            <caption>{{ caption }} (TOTAL : {{totalCount}})</caption>-->
+            <thead class="thead-light">
+                <tr>
+                    <th>IP</th>
+                    <th>LOG CODE</th>
+    <!--                    <th>RAW LOG</th>-->
+                    <th>DATE</th>
+                    <th>LOG EVENT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logList %}
+                <tr>
+                    <td><small><a href="#">{{ log.inetaddress }}</a></small></td>
+                    <td><small>{{ log.logndx }}</small></td>
+    <!--                    <td><small>{{ log.logdata }}</small></td>-->
+    <!--                    <td><small>{{ log.source }}</small></td>-->
+                    <td><small>{{ log.credate }}</small></td>
+                    <td><small>{{ log.event }}</small></td>
+    <!--                    <td>{% if  log.userdisabled == True %}&#x2713;{% else %}&#x2717;{% endif %}</td>-->
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <hr />
+
+        <div class="pagination">{# my pagination #}
+            <span class="step-links">
+                {% if request.GET.page_q and request.GET.page_q != '1' %}
+                    <a href="?page_q=1{% if request.GET %}&limit_q={{request.GET.limit_q}}&fromDate_q={{request.GET.fromDate_q}}&toDate_q={{request.GET.toDate_q}}&device_q={{request.GET.device_q}}&event_q={{request.GET.event_q}}{% endif %}">&laquo; jump to first </a>/
+                    <a href="?page_q={{ request.GET.page_q|add:-1 }}{% if request.GET %}&limit_q={{request.GET.limit_q}}&fromDate_q={{request.GET.fromDate_q}}&toDate_q={{request.GET.toDate_q}}&device_q={{request.GET.device_q}}&event_q={{request.GET.event_q}}{% endif %}"> previous </a>/
+                {% endif %}
+                <span class="current">
+                    {% if request.GET.page_q and request.GET.page_q != '' %}
+                    <i>{{request.GET.page_q}}. of {{ totalPages }} pages </i>
+                    {% else %}
+                    <i>1. of {{ totalPages }} pages </i>
+                    {% endif %}
+                </span>
+                {% if request.GET.page_q != totalPagesString and totalPages != 1 %}
+                    {% if request.GET.page_q and request.GET.page_q != '' %}
+                        /<a href="?page_q={{ request.GET.page_q|add:1 }}{% if request.GET %}&limit_q={{request.GET.limit_q}}&fromDate_q={{request.GET.fromDate_q}}&toDate_q={{request.GET.toDate_q}}&device_q={{request.GET.device_q}}&event_q={{request.GET.event_q}}{% endif %}"> next </a>
+                        /<a href="?page_q={{totalPages}}{% if request.GET %}&limit_q={{request.GET.limit_q}}&fromDate_q={{request.GET.fromDate_q}}&toDate_q={{request.GET.toDate_q}}&device_q={{request.GET.device_q}}&event_q={{request.GET.event_q}}{% endif %}"> jump to last &raquo;</a>
+                    {% else %}
+                        /<a href="?page_q=2{% if request.GET %}&limit_q={{request.GET.limit_q}}&fromDate_q={{request.GET.fromDate_q}}&toDate_q={{request.GET.toDate_q}}&device_q={{request.GET.device_q}}&event_q={{request.GET.event_q}}{% endif %}"> next </a>
+                        /<a href="?page_q={{totalPages}}{% if request.GET %}&limit_q={{request.GET.limit_q}}&fromDate_q={{request.GET.fromDate_q}}&toDate_q={{request.GET.toDate_q}}&device_q={{request.GET.device_q}}&event_q={{request.GET.event_q}}{% endif %}"> jump to last &raquo;</a>
+                    {% endif %}
+                {% endif %}
+            </span>
+        </div>{# /my pagination #}
+
+    </small>
+</div>
+
+
+
+{% elif route == "detail" %}
+
+<div class="container-fluid innerBodies">
+    <table class="table table-striped table-sm table-hover">
+        <caption>{{ caption }}</caption>
+        <thead class="thead-light">
+            <tr>
+                <th>IP Address & Port</th>
+                <th>{{ log.inetaddress }} : {{ log.port }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Log Code</td>
+                <td>{{ log.logno }}</td>
+            </tr>
+            <tr>
+                <td>Log Device Name</td>
+                <td>{{ log.devicename }}</td>
+            </tr>
+            <tr>
+                <td>Log Date</td>
+                <td>{{ log.olusturmatarih }}</td>
+            </tr>
+            <tr>
+                <td>Log Event</td>
+                <td>{{  log.logevent }}</td>
+            </tr>
+            <tr>
+                <td>Log Severity</td>
+                <td>{{ log.severity}}</td>
+            </tr>
+            <tr>
+                <td>Raw Log</td>
+                <td>{{ log.logdata }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div></div>
+    <div><a href="{% url 'inventories:logs' %}"> BACK TO LOGS </a></div>
+
+</div>
+
+
+{% endif %}
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,271 @@
+
+
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Monitor ATIBA {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "general" %}
+{% csrf_token %} <!--for ajax-->
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+    <div class="row justify-content-center">
+        <h5>ATIBA OUTPUTS</h5>
+    </div>
+    <hr>
+
+    <div class="container-fluid" id="charts">
+        <div class="row" name="monitoring_atiba" id="charts1">
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" style="border-right: 1px solid black;" align="center" name="charts">
+                <canvas id="anomalies"></canvas>
+                <hr/>
+<!--                <span style="display:none"></span>-->
+                <p>Total Alarm : {{ totalAlarm | intcomma }}</p>
+                <p>Alarms for Detected Anomalies</p>
+                <data id="{{anomaly_labels}}" value="{{anomaly_values}}" style="display:none;">horizontalBar</data>
+            </div>
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" style="border-right: 1px solid black;" align="center" name="customCharts">
+                <div id="canvas_container"><canvas id="page_times"></canvas></div>
+                <hr/>
+                <p>Today's Total Process Duration : {{ todaysTotalTime | intcomma }} seconds</p>
+                <p>UI Views Process Times</p>
+                <select name="view_selection" id="view_selection" onchange="drawSelectedPageTimeChart(this.value, 'page_times', 'line')">
+                    {% for x in views_list %}
+                        <option value="{{x}}" {%if x == 'home_view'%}selected{%endif%}>{{x}}</option>
+                    {% endfor%}
+                </select>
+            </div>
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" align="center" name="customCharts">
+                <div id="canvas_container2"><canvas id="memory_usage"></canvas></div>
+                <hr/>
+                <p>Todays Total Memory Allocation : {{ todaysTotalMemory | intcomma }} MB</p>
+                <p>UI Views Memory Usages</p>
+                <select name="view_selection" id="view_selection2" onchange="drawSelectedPageMemoryChart(this.value, 'memory_usage', 'line')">
+                    {% for x in m_views_list %}
+                        <option value="{{x}}" {%if x == 'home_view'%}selected{%endif%}>{{x}}</option>
+                    {% endfor%}
+                </select>
+            </div>
+        </div>
+        <hr>
+        <div class="row" name="monitoring_atiba" id="charts2">
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" style="text-align:center;">
+                <p></p>
+            </div>
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" style="text-align:center;">
+                <p></p>
+            </div>
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" style="text-align:center;">
+                <p></p>
+            </div>
+        </div>
+        <div class="row" name="atiba_logs">
+            <div class="col-xl-4 col-lg-6 col-md-6" style="text-align:center;">
+                <a type="button" class="btn btn-sm btn-outline-info" href="{% url 'AgentRoot:monitoring_atiba_uilogs' %}"
+                   target="_blank" style="font-size:9pt;">Read ATIBA's Logs</a>
+            </div>
+        </div>
+        <hr>
+        <div class="row" name="monitoring_atiba" id="charts3">
+<!--            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12" id="pop_it_up"><p class="blinking">reloading part</p></div>-->
+        </div>
+        <hr>
+    </div>
+
+</div>
+
+{% elif route == "detail" %}
+
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+    DETAIL
+</div>
+
+{% endif %}
+
+
+<script type="text/javascript" language="JavaScript" src="{% static 'js/Chart.js' %}"></script>
+<script type="text/javascript" lang="javascript">
+var route = "{{route}}";
+if(route=="general"){
+    /*
+    setInterval(function(){
+        $("#pop_it_up").html($("#pop_it_up").html());
+    }, 50000);
+    */
+    var charDatas = [{%for x in chart_jsons%}{{x|safe}},{%endfor%}];
+    var m_charDatas = [{%for x in m_chart_jsons%}{{x|safe}},{%endfor%}];
+    var viewSelectionForChart = document.getElementById("view_selection");
+    var viewSelectionForChart2 = document.getElementById("view_selection2");
+    $(document).ready(function () {
+        drawSelectedPageTimeChart(viewSelectionForChart.value, 'page_times', 'line');
+        drawSelectedPageMemoryChart(viewSelectionForChart2.value, 'memory_usage', 'line');
+    });
+    //var chartType = 'line';
+    //console.log(charDatas);
+    //drawSelectedPageTimeChart(viewSelectionForChart.value, 'page_times', 'line');
+    //drawSelectedPageTimeChart('home_view', 'page_times');
+
+    function drawSelectedPageTimeChart(viewName, canvasID, chartType){
+        console.log(viewName+" for timer");
+        var parent = $('#'+canvasID).parent();
+        parent.html("");
+        //$('#'+canvasID).remove();
+        parent.append('<canvas id="'+canvasID+'"><canvas>');
+        var json_data;
+        charDatas.forEach(function (el){if(el.name == viewName){json_data=el}});
+        if(json_data){
+            var pagesChart;
+            var cnvs = document.getElementById(canvasID);
+            var ctx = cnvs.getContext("2d");
+            pagesChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: json_data.dates,
+                    datasets:[
+                        {
+                            label: "Max",
+                            data: json_data.max_durations,
+                            backgroundColor: 'rgba(100, 35, 35, 0.20)',
+                            borderColor: 'rgba(255, 99, 132, 0.70)',
+                            pointBackgroundColor: 'rgba(255, 99, 132, 0.20)',
+                            borderWidth: 0.75,
+                            pointRadius: 2,
+                            fill: '1',
+                        },
+                        {
+                            label: "Min",
+                            data: json_data.min_durations,
+                            backgroundColor: 'rgba(75, 192, 192, 0.50)',
+                            borderColor: 'rgba(75, 192, 192, 0.85)',
+                            pointBackgroundColor: 'rgba(75, 192, 192, 0.50)',
+                            borderWidth: 0.75,
+                            pointRadius: 2,
+                            fill: false,
+                        },
+                        {
+                            label: "Average",
+                            data: json_data.avrg_durations,
+                            backgroundColor: 'rgba(54, 162, 235, 0.50)',
+                            borderColor: 'rgba(54, 162, 235, 0.85)',
+                            pointBackgroundColor: 'rgba(54, 162, 235, 0.50)',
+                            borderWidth: 0.75,
+                            pointRadius: 2,
+                            fill: false,
+                        },
+                        {
+                            label: "Total",
+                            data: json_data.total,
+                            backgroundColor: 'rgba(150, 150, 150, 0.50)',
+                            borderColor: 'rgba(150, 150, 150, 0.85)',
+                            pointBackgroundColor: 'rgba(150, 150, 150, 0.50)',
+                            borderWidth: 0.75,
+                            pointRadius: 2,
+                            fill: false,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        xAxes: [{scaleLabel: {display: true, labelString: 'Dates'}}],
+                        yAxes: [{scaleLabel: {display: true, labelString: 'Process Time (Seconds)'}, ticks: {beginAtZero: true,}}]
+                    },
+                    elements: {
+                        center: {
+                            text: " ",
+                        }
+                    },
+                }
+            });
+        }
+    }
+
+    function drawSelectedPageMemoryChart(viewName, canvasID, chartType){
+        console.log(viewName+" for memorytracer");
+        var parent = $('#'+canvasID).parent();
+        parent.html("");
+        //$('#'+canvasID).remove();
+        parent.append('<canvas id="'+canvasID+'"><canvas>');
+        var json_data;
+        m_charDatas.forEach(function (el){if(el.name == viewName){json_data=el}});
+        if(json_data){
+            var pagesChart;
+            var cnvs = document.getElementById(canvasID);
+            var ctx = cnvs.getContext("2d");
+            pagesChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: json_data.dates,
+                    datasets:[
+                        {
+                            label: "Max",
+                            data: json_data.max_durations,
+                            backgroundColor: 'rgba(100, 35, 35, 0.20)',
+                            borderColor: 'rgba(255, 99, 132, 0.70)',
+                            pointBackgroundColor: 'rgba(255, 99, 132, 0.20)',
+                            borderWidth: 0.75,
+                            pointRadius: 2,
+                            fill: '1',
+                        },
+                        {
+                            label: "Min",
+                            data: json_data.min_durations,
+                            backgroundColor: 'rgba(75, 192, 192, 0.50)',
+                            borderColor: 'rgba(75, 192, 192, 0.85)',
+                            pointBackgroundColor: 'rgba(75, 192, 192, 0.50)',
+                            borderWidth: 0.75,
+                            pointRadius: 2,
+                            fill: false,
+                        },
+                        {
+                            label: "Average",
+                            data: json_data.avrg_durations,
+                            backgroundColor: 'rgba(54, 162, 235, 0.50)',
+                            borderColor: 'rgba(54, 162, 235, 0.85)',
+                            pointBackgroundColor: 'rgba(54, 162, 235, 0.50)',
+                            borderWidth: 0.75,
+                            pointRadius: 2,
+                            fill: false,
+                        },
+                        {
+                            label: "Total",
+                            data: json_data.total,
+                            backgroundColor: 'rgba(150, 150, 150, 0.50)',
+                            borderColor: 'rgba(150, 150, 150, 0.85)',
+                            pointBackgroundColor: 'rgba(150, 150, 150, 0.50)',
+                            borderWidth: 0.75,
+                            pointRadius: 2,
+                            fill: false,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        xAxes: [{scaleLabel: {display: true, labelString: 'Dates'}}],
+                        yAxes: [{scaleLabel: {display: true, labelString: 'Memory Allocation (MB)'}, ticks: {beginAtZero: true,}}]
+                    },
+                    elements: {
+                        center: {
+                            text: " ",
+                        }
+                    },
+                }
+            });
+        }
+    }
+}
+</script>
+
+{% endblock %}

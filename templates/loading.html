@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> ATIBAreport - {{route}} </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body>
+        {% if route == 'loading' %}
+            <div class="container-fluid" id="loading" style="font-size:18pt;position:relative;height:400px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);">
+                    <p class="blinking">LOADING...</p>
+                </div>
+            </div>
+        {% elif route == 'not_found' %}
+            <div class="container-fluid" id="not_found" style="font-size:18pt;position:relative;height:400px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);">
+                    <p class="blinking">NOT FOUND...</p>
+                </div>
+            </div>
+        {% elif route == 'atiba_loading' %}
+            <div class="container-fluid" id="atiba_loading">
+                <h2 class="atiba_loading_h">ΛTIBΛ</h2>
+            </div>
+<!--            <div class="container-fluid" id="atiba_loading" style="font-size:18pt;position:relative;height:400px;">-->
+<!--                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);">-->
+<!--                    <p class="blinking">NOT FOUND...</p>-->
+<!--                </div>-->
+<!--            </div>-->
+        {% endif %}
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+        // colors -> [green, red, orange, blue, yellow, grey, purple]
+        var graphColors = ['rgba(75, 192, 192, 0.85)','rgba(255, 99, 132, 0.85)','rgba(255, 159, 64, 0.85)','rgba(54, 162, 235, 0.85)','rgba(255, 206, 86, 0.85)','rgba(150, 150, 150, 0.85)','rgba(106, 92, 112, 0.85)']
+
+        $(document).ready(function () {
+
+        });
+        </script>
+    </body>
+
+</html>
+

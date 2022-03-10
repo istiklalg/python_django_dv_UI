@@ -1,0 +1,187 @@
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> ATIBAreport - Incidents </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+
+    <body>
+<!--        <div class="container-fluid" id="loading" style="font-size:18pt;position:relative;height:400px;">-->
+<!--            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);">-->
+<!--                <p class="blinking">LOADING...</p>-->
+<!--            </div>-->
+<!--        </div>-->
+    {% if route == 'general' %}
+        {% csrf_token %}
+        <div class="container-fluid" id="page_content">
+            <div class="row justify-content-around" id="log_sources">
+                {% for inc in incident_list %}
+                    <div class="col-md-4 shadowBox m-2">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                {% if inc.0.status == 'A' %}
+                                    <div class="activePoint" title="Active Log Source"></div>
+                                {% elif inc.0.status == 'P' %}
+                                    <div class="passivePoint" title="Passive Log Source"></div>
+                                {% else %}
+                                    <div class="unknownPoint" title="Unknown Status"></div>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-10"><h6>{{inc.0.uniqueid|upper}}</h6></div>
+                        </div>
+                        <hr>
+                        <div class="row justify-content-around">
+                            <div class="col-sm-6" style="border-right: 0.5px solid lightgrey;">
+                                <div class="row justify-content-center" style="font-size:10pt;font-weight:bold;">INCIDENTS</div>
+                                <div class="row justify-content-center"><i>Most Recent : {{inc.1.0|timesince}}</i></div>
+                                <div class="row justify-content-center">
+                                    <div class="col-sm-6">
+                                        <div class="row justify-content-center">OPEN</div>
+                                        {% if inc.1.1 > 0 %}
+                                        <div class="row justify-content-center asLink" style="cursor:pointer;"
+                                             onclick="window.open(location.href.replace(location.pathname, '/monitor/incidents/?status_q=open&uniqueid_q={{inc.0.uniqueid}}'), '_blank');">
+                                            {{inc.1.1}}
+                                        </div>
+                                        {% else %}
+                                        <div class="row justify-content-center">{{inc.1.1}}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="row justify-content-center">CLOSED</div>
+                                        {% if inc.1.2 > 0 %}
+                                        <div class="row justify-content-center asLink" style="cursor:pointer;"
+                                             onclick="window.open(location.href.replace(location.pathname, '/monitor/incidents/?status_q=closed&uniqueid_q={{inc.0.uniqueid}}'), '_blank');">
+                                            {{inc.1.2}}
+                                        </div>
+                                        {% else %}
+                                        <div class="row justify-content-center">{{inc.1.2}}</div>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="row justify-content-center" style="font-size:10pt;font-weight:bold;">ALERTS</div>
+                                <div class="row justify-content-center"><i>Most Recent : {{inc.2.0|timesince}}</i></div>
+                                <div class="row justify-content-center">
+                                    <div class="col-sm-6">
+                                        <div class="row justify-content-center">OPEN</div>
+                                        {% if inc.2.1 > 0 %}
+                                        <div class="row justify-content-center asLink" style="cursor:pointer;"
+                                             onclick="window.open(location.href.replace(location.pathname, '/monitor/?status_q=open&uniqueid_q={{inc.0.uniqueid}}'), '_blank');">
+                                            {{inc.2.1}}
+                                        </div>
+                                        {% else %}
+                                        <div class="row justify-content-center">{{inc.2.1}}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="row justify-content-center">CLOSED</div>
+                                        {% if inc.2.2 > 0 %}
+                                        <div class="row justify-content-center asLink" style="cursor:pointer;"
+                                             onclick="window.open(location.href.replace(location.pathname, '/monitor/?status_q=close&uniqueid_q={{inc.0.uniqueid}}'), '_blank');">
+                                            {{inc.2.2}}
+                                        </div>
+                                        {% else %}
+                                        <div class="row justify-content-center">{{inc.2.2}}</div>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    {% elif route == 'timeout' %}
+
+        <div class="innerBodies" id="timeout_page" style="text-align:center;font-size:9pt;">
+            <p>Your session timed out</p>
+        </div>
+
+    {% endif %}
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            $(document).ready(function () {
+                //$("#loading").hide();
+                //$("#page_content").show();
+                //console.log("ready");
+            });
+
+            var sourcesDiv = $("#log_sources");
+            var sourcesCount = sourcesDiv ? sourcesDiv.children().length : null;
+            //console.log(sourcesDiv);
+            //console.log(sourcesDiv.children().length);
+            if(sourcesCount && sourcesCount > 0){
+                setInterval(function(){
+                    var csrf = $("input[name=csrfmiddlewaretoken]").val();
+                    $.ajax({
+                        url: "/monitor/incidents_home/",
+                        type: "post",
+                        data: {csrfmiddlewaretoken: csrf, action: "check_for_new"},
+                        success: function(response){
+                            if(response.command==1){
+                                location.reload();
+                            }else if(response.command==0){
+                                console.log("No new incident or alert");
+                            }
+                        }
+                    });
+                }, 25000);
+            }
+
+
+        /*
+            window.scroll({top: 0, left: 0, behavior: 'smooth'});
+            //var newCount = localStorage.getItem("newCount");
+            //for(var i=1;i<newCount;i++){
+            //    var smallEl = id="small_"+i
+            //    var blinker = document.getElementById(smallEl);
+            //    blinker.className="blinking";
+            //}
+            //newCount = 0;
+            //localStorage.setItem("newCount", newCount);
+            //var id_text_list = $(".rcitem");
+            if(id_text_list.length>0){
+                var id_text = $(".rcitem")[0].id;
+                var first_id = id_text.replace(".","");
+                var count = {{rcTotalCount}};
+                setInterval(function(){
+                    var csrf = $("input[name=csrfmiddlewaretoken]").val();
+                    //console.log(count + " " + first_id);
+                    $.ajax({
+                        url: "/monitor/flowing/",
+                        type: "post",
+                        data: {csrfmiddlewaretoken: csrf, count: count, first_id: parseInt(first_id)},
+                        success: function(response){
+                            if(response.command!=0){
+                                newCount = response.newCount;
+                                localStorage.setItem("newCount", newCount);
+                                location.reload(true);
+                            }
+                        }
+                    });
+                }, 30000);
+            }else{
+                setInterval(function(){location.reload();}, 30000);
+            }
+
+        */
+        </script>
+    </body>
+</html>

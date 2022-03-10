@@ -1,0 +1,110 @@
+
+
+
+{% extends 'base.html' %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Sytem Users {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+
+{% if route == "general" %}
+
+    <div class="innerBodies">
+        <table class="table table-striped table-sm table-hover">
+            <caption>SYSTEM USERS</caption>
+            <thead class="thead-light">
+                <tr>
+                    <th>USER NAME</th>
+                    <th>FIRST NAME & LAST NAME</th>
+                    <th>IS ACTIVE</th>
+                    <th>IS AUTHORIZED</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in systemUserList %}
+                <tr>
+                    <td><a href="">{{ user.kullanicikod }}</a></td>
+                    <td><a href="">{{ user.adsoyad }}</a></td>
+                    <td>{% if  user.aktif == True %}&#x2713;{% else %}&#x2717;{% endif %}</td>
+                    <td>{% if  user.yetki == True %}&#x2713;{% else %}&#x2717;{% endif %}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <div></div>
+
+        <hr />
+        {# PAGINATION #}
+        <div class="pagination">
+            <span class="step-links">
+                {% if systemUserList.has_previous %}
+                    <a href="?page=1">&laquo; jump to first </a>/
+                    <a href="?page={{ systemUserList.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"> previous </a>/
+                {% endif %}
+
+                <span class="current">
+                    <i>{{ systemUserList.number }}. of {{ systemUserList.paginator.num_pages }} pages </i>
+                </span>
+
+                {% if systemUserList.has_next %}
+                    /<a href="?page={{ systemUserList.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"> next </a>
+                    /<a href="?page={{ systemUserList.paginator.num_pages }}"> jump to last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>{# /pagination #}
+
+    </div>
+
+
+
+{% elif route == "detail" %}
+
+<div class="container-fluid innerBodies">
+    <table class="table table-striped table-sm table-hover">
+        <caption>NETWORK DETAILS</caption>
+        <thead class="thead-light">
+            <tr>
+                <th>Name</th>
+                <th>{{ systemNetwork.networkname }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>IP Address</td>
+                <td>{{systemNetwork.ipaddress}}</td>
+            </tr>
+            <tr>
+                <td>Sub Network Mask</td>
+                <td>{{systemNetwork.subnetmask}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div></div>
+    <div><a href="{% url 'inventories:networks' %}"> BACK TO NETWORKS </a></div>
+
+
+
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+{% endblock %}

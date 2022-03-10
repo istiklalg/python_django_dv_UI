@@ -1,0 +1,346 @@
+
+
+
+{% extends 'base.html' %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Logs {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+
+{% if route == "general" %}
+
+    <div class="innerBodies" style="font-size:9pt;">
+        <div class="container" id="wait" style="display:none;text-align:center;color:rgba(255, 159, 64, 0.85);"></div>
+        <div class="container">
+<!--            <form method="post" name="byIP" onkeydown="return event.key != 'Enter';">-->
+                {% csrf_token %}
+            <div class="form-group row" style="border:0.5px solid lightgrey;border-radius:5px;padding:5px;">
+                <div class="col-md-2" style="border:0.5px solid white;border-radius:5px;background-color:lightgrey;">RETRY PARSING ACCUMULATED LOGS</div>
+                <div class="col-md-10" style="margin:0;padding-top:5px;padding-bottom:0;">
+                    <div class="row">
+                        <label for="inetaddress" class="col-md-2 col-lg-2 col-xl-2 col-form-label">By IP Address</label>
+                        <div class="col-md-3 col-lg-3 col-xl-3">
+                            <select id="inetaddress" style="font-size:9pt;" name="inetaddress" class="form-control form-control-sm" onchange="document.getElementById('mappedlogsource').value='';document.getElementById('retryInLogs').value=this.value;document.getElementById('retryInLogs').name=this.name;">
+                                <option value="">Select a ip address</option>
+                                <option disabled>------</option>
+                                {% for ip in ipList %}
+                                    <option value="{{ip}}">{{ip}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label class="col-md-1 col-lg-1 col-xl-1 col-form-label">OR</label>
+<!--                        <div class="col-md-1">OR</div>-->
+                        <label for="mappedlogsource" class="col-md-2 col-lg-2 col-xl-2 col-form-label">By Source Unique ID</label>
+                        <div class="col-md-3 col-lg-3 col-xl-3">
+                            <select id="mappedlogsource" style="font-size:9pt;" name="mappedlogsource" class="form-control form-control-sm" onchange="document.getElementById('inetaddress').value='';document.getElementById('retryInLogs').value=this.value;document.getElementById('retryInLogs').name=this.name;">
+                                <option value="">Select a unique id</option>
+                                <option disabled>------</option>
+                                {% for uniqueid in uniqueidList %}
+                                    <option value="{{uniqueid}}">{{uniqueid}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-1 col-lg-1 col-xl-1">
+                            <button id="retryInLogs" class="btn btn-sm btn-outline-secondary" value="" style="font-size:9pt;width:100%;margin:0;" onclick="retryParseLogs(this.value, this.name)">RETRY</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+<!--            </form>-->
+        </div>
+
+        <table class="table table-striped table-sm table-hover">
+            <caption>{{ caption }}</caption>
+            <thead class="thead-light">
+                <tr>
+                    <th><a href="?sort=inetaddress{%if request.GET%}&page={{request.GET.page}}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{%endif%}">IP</a></th>
+                    <th><a href="?sort=mappedlogsource{%if request.GET%}&page={{request.GET.page}}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{%endif%}">MAPPED<br>SOURCE</a></th>
+                    <th><a href="?sort=recerror{%if request.GET%}&page={{request.GET.page}}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{%endif%}">ERROR</a></th>
+                    <th><a href="?sort=logno{%if request.GET%}&page={{request.GET.page}}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{%endif%}">LOG<br>CODE</a></th>
+                    <th><a href="?sort=classificationgroup{%if request.GET%}&page={{request.GET.page}}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{%endif%}">CLASSIFICATION<br>GROUP</a></th>
+                    <th><a href="?sort=olusturmatarih{%if request.GET%}&page={{request.GET.page}}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{%endif%}">DATE</a></th>
+                    <th><a href="?sort=logdata{%if request.GET%}&page={{request.GET.page}}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{%endif%}">RAW LOG</a></th>
+                </tr>
+                <tr>
+                    <th>
+                        <select name="filter"
+                                onchange="location.href='?filterIP='+this.value{%if request.GET.filterID%}+'&filterID={{request.GET.filterID}}'{%endif%};">
+                            <option value="">No Filter</option>
+                            <option disabled>------</option>
+                            {% for ip in filterIpList %}
+                                <option value="{{ip}}" {% if request.GET.filterIP == ip %}selected{% endif %}>{{ip}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th>
+                        <select name="filter"
+                                onchange="location.href='?filterID='+this.value{%if request.GET.filterIP%}+'&filterIP={{request.GET.filterIP}}'{%endif%};">
+                            <option value="">No Filter</option>
+                            <option disabled>------</option>
+                            {% for uniqueid in filterUniqueidList %}
+                                <option value="{{uniqueid}}" {% if request.GET.filterID == uniqueid %}selected{% endif %}>{{uniqueid}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logList %}
+                <tr>
+                    <td><a href="{{ log.get_absolute_url }}">{{ log.inetaddress }}</a></td>
+                    <td {%if log.mappedlogsource%}data-toggle="tooltip" data-placement="right" data-html="true" title="<h6>SOURCE</h6><p>{{log.get_logsource.brand}} / {{log.get_logsource.brandModel}}</p>"{%endif%}>
+                        {{ log.mappedlogsource|default_if_none:"" }}
+                    </td>
+                    <td>{{ log.recerror }}</td>
+                    <td>{{ log.logno|default_if_none:"" }}</td>
+                    <td>{{ log.classificationgroup|default_if_none:"" }}</td>
+                    <td>{{ log.olusturmatarih }}</td>
+                    <td>{{ log.logdata }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <div></div>
+
+        <hr />
+        {# PAGINATION #}
+        <div class="pagination">
+            <span class="step-links">
+                {% if logList.has_previous %}
+                    <a href="?page=1{% if request.GET %}&sort={{ request.GET.sort }}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{% endif %}">&laquo; jump to first </a>/
+                    <a href="?page={{ logList.previous_page_number }}{% if request.GET %}&sort={{ request.GET.sort }}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{% endif %}"> previous </a>/
+                {% endif %}
+
+                <span class="current">
+                    <i>{{ logList.number }}. of {{ logList.paginator.num_pages }} pages </i>
+                </span>
+
+                {% if logList.has_next %}
+                    /<a href="?page={{ logList.next_page_number }}{% if request.GET %}&sort={{ request.GET.sort }}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{% endif %}"> next </a>
+                    /<a href="?page={{ logList.paginator.num_pages }}{% if request.GET %}&sort={{ request.GET.sort }}&filterIP={{request.GET.filterIP}}&filterID={{request.GET.filterID}}{% endif %}"> jump to last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>{# /pagination #}
+
+    </div>
+
+{% elif route == "source" %}
+
+    <div class="innerBodies" style="font-size:9pt;">
+        <div class="container" id="wait" style="display:none;text-align:center;color:rgba(255, 159, 64, 0.85);"></div>
+        <div class="container" align="center">
+                {% csrf_token %}
+            <div class="form-group row justify-content-center" style="border:0.5px solid lightgrey;border-radius:5px;padding:5px;width:30%;">
+                <div class="col-md-12" style="margin:0;padding:0;">
+                    <button id="retryInSource" name="mappedlogsource" value="{{logSource.uniqueid}}" class="btn btn-sm btn-outline-secondary" onclick="retryParseLogs(this.value, this.name)" style="font-size:9pt;width:100%;margin:0;">
+                        RETRY PARSING ACCUMULATED LOGS FOR {{ logSource.uniqueid }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-striped table-sm table-hover">
+            <caption>{{ caption }}</caption>
+            <thead class="thead-light">
+                <tr>
+                    <th><a href="?sort=inetaddress{%if request.GET%}&page={{request.GET.page}}{%endif%}">IP</a></th>
+                    <th><a href="?sort=mappedlogsource{%if request.GET%}&page={{request.GET.page}}{%endif%}">MAPPED<br>SOURCE</a></th>
+                    <th><a href="?sort=recerror{%if request.GET%}&page={{request.GET.page}}{%endif%}">ERROR</a></th>
+                    <th><a href="?sort=logno{%if request.GET%}&page={{request.GET.page}}{%endif%}">LOG<br>CODE</a></th>
+                    <th><a href="?sort=classificationgroup{%if request.GET%}&page={{request.GET.page}}{%endif%}">CLASSIFICATION<br>GROUP</a></th>
+                    <th><a href="?sort=olusturmatarih{%if request.GET%}&page={{request.GET.page}}{%endif%}">DATE</a></th>
+                    <th><a href="?sort=logdata{%if request.GET%}&page={{request.GET.page}}{%endif%}">RAW LOG</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logList %}
+                <tr>
+                    <td><a href="{{ log.get_absolute_url }}">{{ log.inetaddress }}</a></td>
+                    <td>
+                        {{ log.mappedlogsource|default_if_none:"" }}
+                    </td>
+                    <td>{{ log.recerror }}</td>
+                    <td>{{ log.logno|default_if_none:"" }}</td>
+                    <td>{{ log.classificationgroup|default_if_none:"" }}</td>
+                    <td>{{ log.olusturmatarih }}</td>
+                    <td>{{ log.logdata }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <div></div>
+
+        <hr />
+        {# PAGINATION #}
+        <div class="pagination">
+            <span class="step-links">
+                {% if logList.has_previous %}
+                    <a href="?page=1{% if request.GET %}&sort={{ request.GET.sort }}{% endif %}">&laquo; jump to first </a>/
+                    <a href="?page={{ logList.previous_page_number }}{% if request.GET %}&sort={{ request.GET.sort }}{% endif %}"> previous </a>/
+                {% endif %}
+
+                <span class="current">
+                    <i>{{ logList.number }}. of {{ logList.paginator.num_pages }} pages </i>
+                </span>
+
+                {% if logList.has_next %}
+                    /<a href="?page={{ logList.next_page_number }}{% if request.GET %}&sort={{ request.GET.sort }}{% endif %}"> next </a>
+                    /<a href="?page={{ logList.paginator.num_pages }}{% if request.GET %}&sort={{ request.GET.sort }}{% endif %}"> jump to last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>{# /pagination #}
+
+    </div>
+
+{% elif route == "detail" %}
+
+    <div class="container-fluid innerBodies" style="font-size:9pt;">
+    <div class="container" id="wait" style="display:none;text-align:center;color:rgba(255, 159, 64, 0.85);"></div>
+    <table class="table table-striped table-sm table-hover">
+        <caption>{{ caption }}</caption>
+        <thead class="thead-light">
+            <tr>
+                <th>IP Address & Port</th>
+                <th>{{ log.inetaddress }} : {{ log.port }}</th>
+            </tr>
+            <tr>
+                <th>Mapped Log Source</th>
+                <th>{{ log.mappedlogsource|default_if_none:"UNMAPPED" }}</th>
+            </tr>
+            <tr>
+                <th>Error</th>
+                <th>{{ log.recerror|default_if_none:"" }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if log.mappedlogsource %}
+
+            <tr>
+                <td>Log Source Brand & Model</td>
+                <td>{{ log.get_logsource.brand|default_if_none:"" }} / {{log.get_logsource.brandModel|default_if_none:"" }}</td>
+            </tr>
+            <tr>
+                <td>Log Source Type</td>
+                <td>{{ log.get_logsource.modeltype|default_if_none:"" }}</td>
+            </tr>
+            <tr>
+                <td>Parser profile</td>
+                <td>{{  log.get_logsource.parserProfile|default_if_none:"No Custom Parser Profile" }}</td>
+            </tr>
+
+            {% endif %}
+            <tr>
+                <td>Log Code</td>
+                <td>{{ log.logno|default_if_none:"No value" }}</td>
+            </tr>
+            <tr>
+                <td>Log Clasification Group</td>
+                <td>{{ log.classificationgroup|default_if_none:"No value" }}</td>
+            </tr>
+            <tr>
+                <td>Log Severity</td>
+                <td>{{ log.severity|default_if_none:"" }}</td>
+            </tr>
+            <tr>
+                <td>Log Date</td>
+                <td>{{ log.olusturmatarih }}</td>
+            </tr>
+            <tr>
+                <td>Log PRI</td>
+                <td>{{ log.logid|default_if_none:"" }}</td>
+            </tr>
+            <tr>
+                <td>Log Service No</td>
+                <td>{{ log.logserviceno|default_if_none:"" }}</td>
+            </tr>
+            <tr>
+                <td>Log Event</td>
+                <td>{{  log.logevent }}</td>
+            </tr>
+            <tr style="color:rgba(255, 99, 132, 0.85);">
+                <td>Raw Log</td>
+                <td>{{ log.logdata }}</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <div></div>
+    <div><a href="{% url 'inventories:logs' %}"> BACK TO LOGS </a></div>
+
+</div>
+
+{% else %}
+
+    <div class="container-fluid innerBodies" style="font-size:9pt;">
+        <div class="container" id="wait" style="display:none;text-align:center;color:rgba(255, 159, 64, 0.85);"></div>
+        <h5>{{ caption }}</h5>
+    </div>
+
+
+{% endif %}
+
+
+<script type="text/javascript" lang="javascript">
+    var urlPath = location.pathname;
+    console.log(urlPath);
+    var waitDiv = $("#wait");
+
+    function retryParseLogs(value, valueType){
+        if(value!=""&&valueType!=""){
+            console.log(value+" "+valueType);
+            var csrf = $("input[name=csrfmiddlewaretoken]").val();
+            var dataString = {};
+            dataString['csrfmiddlewaretoken']=csrf;
+            dataString[valueType]=value;
+            $.ajax({
+                url: urlPath,
+                type: "post",
+                dataType: "json",
+                data: dataString,
+                beforeSend: function (){waitDiv.html("Please wait while updating logs...");waitDiv.show();},
+                success: function(response){
+                    if(response.command!=0){
+                        console.log(response);
+                        if(response.updated>0){
+                            waitDiv.html("Update called for "+response.updated+" logs in "+response.duration+" seconds. Page will be reloaded in 10 seconds");
+                        }else{
+                            waitDiv.html("Update called in "+response.duration+" seconds. Page will be reloaded in 10 seconds");
+                        }
+                        waitDiv.fadeTo(6000, 0);
+                        setInterval(function(){location.reload();}, 8000);
+                    }else{
+                        console.log(response);
+                        waitDiv.html("Failed to update in "+response.duration+" seconds. Because "+response.error);
+                    }
+                }
+            });
+        }else{
+            console.log("Empty value for : "+valueType)
+        }
+    }
+
+</script>
+
+
+
+{% endblock %}

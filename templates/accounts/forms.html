@@ -1,0 +1,124 @@
+
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    {{route}} {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+
+{% if route == "CHANGE PASSWORD" %}
+
+    <div class="container-fluid innerBodies" style="font-size:9pt;">
+        <div class="row justify-content-center">
+
+            <form method="POST" enctype="multipart/form-data">
+                {%csrf_token%}
+                <h5>{{route}}</h5>
+                {{form|crispy}}
+                <input class="btn btn-sm btn-outline-success" type="submit" value="{{ route }}">
+            </form>
+
+        </div>
+    </div>
+
+
+
+{% elif route == "RESET PASSWORD" %}
+
+    <div class="container-fluid innerBodies">
+
+
+    </div>
+
+
+{% elif route == "NEW LICENSE" %}
+
+    <div class="container-fluid innerBodies" style="font-size:9pt;">
+
+        <form method="POST" enctype="multipart/form-data">
+            {%csrf_token%}
+            <h5>{{route}}</h5>
+            {%crispy form%}
+        </form>
+        <br>
+        <hr>
+        <br>
+        <div class="container-fluid">
+            <table class="table table-sm table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Order</th>
+                        <th>License<br>Owner</th>
+                        <th>License<br>Type</th>
+                        <th style="text-align:center;">License<br>Content</th>
+                        <th>Expiration<br>Date</th>
+                        <th>Product<br>Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lic in licenseList %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                {% if lic.isExpired %}
+                                    <div class="passivePoint" title="Active"></div>
+                                {% else %}
+                                    <div class="activePoint" title="Passive"></div>
+                                {% endif %}
+                            </td>
+                            <td>{{ lic.get_order }}</td>
+                            <td>{{ lic.get_license_owner }}</td>
+                            <td>{{ lic.lictype }}</td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-sm-4">Product</div>
+                                    <div class="col-sm-4">Types</div>
+                                    <div class="col-sm-4">Counts</div>
+                                </div>
+                                <hr>
+                                {% for prd in lic.get_product_list %}
+                                    {% if prd.liccount != 0 %}
+                                    <div class="row">
+                                        <div class="col-sm-4">{{ prd.licname }}</div>
+                                        <div class="col-sm-4">{{ prd.licdevtype }}</div>
+                                        <div class="col-sm-4">{{ prd.liccount }}</div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>{{ lic.get_license_expiration|default_if_none:"No Expiration Date" }} <small style="color:lightgrey;"> / ( {{ lic.get_license_expiration|timeuntil }} )</small></td>
+                            <td>{{ lic.productcodes }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+
+
+{% endif %}
+
+<script type="text/javascript" language="JavaScript">
+
+/* To prevent the form from being submitted again when the page is refreshed. */
+if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+</script>
+
+
+{% endblock %}

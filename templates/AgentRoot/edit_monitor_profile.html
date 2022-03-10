@@ -1,0 +1,60 @@
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> Edit - {{route}} </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body  style="padding-top:15px;">
+
+        {% if route == 'Monitor Profile' %} <!-- -->
+
+        <div class="container" style="text-align:center;">
+
+
+        </div>
+
+        {% elif route == 'detail' %}  <!-- -->
+
+        <div class="container" style="text-align:center;">
+
+        </div>
+
+        {% elif route == 'noedit' %}  <!-- -->
+
+        <div class="container" style="text-align:center;">
+
+        </div>
+
+        {% else %}
+
+         <div class="container" style="text-align:center;">
+            <h5>SOON ...</h5>
+            <hr>
+         </div>
+
+        {% endif %}
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.maskedinput.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,589 @@
+
+
+
+{% extends 'base.html' %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    {{route}} {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "maintenance" %}
+
+    <div class="innerBodies">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <h4>MAINTENANCE & REPAIR OF ΛTIBΛ ENVIRONMENT</h4>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div class="card m-1 shadow">
+                        <div class="card-header"><h5>SERVICES</h5></div>
+                        <div class="card-body">
+                            <ul>
+                                <li>You can use the services section <i>'check services'</i> button to monitor,
+                                    stop or restart the status of background services.</li>
+                                <li>You can use the services section <i>'check logs'</i> button to monitor logs of background services.</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group">
+                                <a class="btn btn-sm btn-outline-info" href="{% url 'iamatiba_services' %}">
+                                    CHECK SERVICES
+                                </a>
+                                <a class="btn btn-sm btn-outline-info" target="_blank"
+                                   href="{% url 'AgentRoot:monitoring_atiba_uilogs' %}"> CHECK LOGS </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-12"></div>
+                <div class="col-md-11"></div>
+                <div class="col-md-11"></div>
+            </div>
+<!--            <div class="row justify-content-center">-->
+<!--                <div class="col-md-12">-->
+<!--                    <div class="card m-1 shadow">-->
+<!--                        <div class="card-header"><h5>ΛTIBΛ SERVICES LOGS</h5></div>-->
+<!--                        <div class="card-body">-->
+<!--                            <ul>-->
+<!--                                <li>You can use this section to monitor backup structure or manage the horizontal growth of ΛTIBΛ.</li>-->
+<!--                            </ul>-->
+<!--                        </div>-->
+<!--                        <div class="card-footer">-->
+<!--                            <div class="btn-group">-->
+<!--                                <a class="btn btn-sm btn-outline-info" target="_blank"-->
+<!--                                   href="{% url 'AgentRoot:monitoring_atiba_uilogs' %}"> SEE LOGS </a>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-md-12"></div>-->
+<!--                <div class="col-md-11"></div>-->
+<!--            </div>-->
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div class="card m-1 shadow">
+                        <div class="card-header"><h5>MASTER AND BACKUP CLUSTERS</h5></div>
+                        <div class="card-body">
+                            <ul>
+                                <li>You can use this section to monitor backup structure or manage the horizontal growth of ΛTIBΛ.</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group">
+                                <a class="btn btn-sm btn-outline-info" href="{% url 'cluster' %}"> CHECK OR MANAGE STATUS </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12"></div>
+                <div class="col-md-11"></div>
+            </div>
+        </div>
+    </div>
+
+
+{% elif route == "services" %}
+
+    <div class="innerBodies">
+
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <h4>SERVICES OF ΛTIBΛ ENVIRONMENT</h4>
+                {% csrf_token %}
+            </div>
+            <hr>
+            <div class="row justify-content-center m-1">
+                <button type="button" style="width:100%;"
+                        class="btn btn-sm btn-outline-info"
+                        id="check_all_button"
+                        onclick="check_all_services()"> CHECK ALL AGAIN </button>
+            </div>
+
+            <br>
+
+            <div class="row">
+                <table class="table table-sm">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>STATUS</th>
+                            <th>SERVICE NAME</th>
+                            <th>STATUS INFORMATION</th>
+                            <th>ACTIONS</th>
+                            <th>SERVICE LOGS</th>
+                            <th>SERVICE INFORMATION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for service in service_list %}
+                        <tr>
+                            <td>
+                                <div class="spinner-border" role="status"
+                                     style="color:rgba(54, 162, 235, 0.85);display:none;"
+                                     id="circle_{{service.service_name}}"> </div>
+                                <div>
+                                    <span id="checkMark_{{service.service_name}}" style="display:none;">&#10004;</span>
+                                    <span id="crossMark_{{service.service_name}}" style="display:none;">&#10006;</span>
+                                </div>
+                            </td>
+                            <td style="background-color:#f0f5f2;">
+                                <div id="cardHeader_{{service.service_name}}">
+                                    <h6>{{ service.name }}</h6>
+                                </div>
+                            </td>
+                            <td>
+                                <p style="display:none" id="p_{{service.service_name}}"></p>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group"
+                                     aria-label="Basic example" id="buttons_{{service.service_name}}">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-info"
+                                            id="check_{{service.service_name}}"
+                                            onclick="check_status('{{service.service_name}}')">CHECK</button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-success"
+                                            id="start_{{service.service_name}}"
+                                            onclick="start_service('{{service.service_name}}')">START</button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            id="restart_{{service.service_name}}"
+                                            onclick="restart_service('{{service.service_name}}')">RE-START</button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            id="stop_{{service.service_name}}"
+                                            onclick="stop_service('{{service.service_name}}')">STOP</button>
+                                </div>
+                            </td>
+                            <td>
+                                {% if service.log_screen_url %}
+                                    <a target="_blank"
+                                       href="{{service.log_screen_url}}">READ LOGS</a>
+                                {% else %}
+
+                                {% endif %}
+                            </td>
+                            <td style="max-width:350px;">
+                                <p>{{ service.info }}</p>
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <br>
+
+<!--            <div class="row">-->
+<!--                {% for service in service_list %}-->
+<!--                    <div class="col-md-4" id="container_{{service.service_name}}">-->
+<!--                        <div class="card m-1 text-center" id="card_{{service.service_name}}">-->
+<!--                            <div class="card-header" id="cardHeader_{{service.service_name}}">-->
+<!--                                <h5>{{ service.name }}</h5>-->
+<!--                            </div>-->
+
+<!--                            <div class="card-body" id="cardBody_{{service.service_name}}">-->
+<!--                                <p style="display:none" id="p_{{service.service_name}}"></p>-->
+<!--                                <div class="spinner-border" role="status"-->
+<!--                                     style="color:rgba(54, 162, 235, 0.85);display:none;"-->
+<!--                                     id="circle_{{service.service_name}}"> </div>-->
+<!--                                <div class="btn-group" role="group"-->
+<!--                                     aria-label="Basic example" id="buttons_{{service.service_name}}">-->
+<!--                                    <button type="button"-->
+<!--                                            class="btn btn-sm btn-outline-info"-->
+<!--                                            id="check_{{service.service_name}}"-->
+<!--                                            onclick="check_status('{{service.service_name}}')">CHECK</button>-->
+<!--                                    <button type="button"-->
+<!--                                            class="btn btn-sm btn-outline-success"-->
+<!--                                            id="start_{{service.service_name}}"-->
+<!--                                            onclick="start_service('{{service.service_name}}')">START</button>-->
+<!--                                    <button type="button"-->
+<!--                                            class="btn btn-sm btn-outline-secondary"-->
+<!--                                            id="restart_{{service.service_name}}"-->
+<!--                                            onclick="restart_service('{{service.service_name}}')">RE-START</button>-->
+<!--                                    <button type="button"-->
+<!--                                            class="btn btn-sm btn-outline-danger"-->
+<!--                                            id="stop_{{service.service_name}}"-->
+<!--                                            onclick="stop_service('{{service.service_name}}')">STOP</button>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            <div class="card-footer text-muted" id="cardFooter_{{service.service_name}}">-->
+<!--                                <span id="checkMark_{{service.service_name}}" style="display:none;">&#10004;</span>-->
+<!--                                <span id="crossMark_{{service.service_name}}" style="display:none;">&#10006;</span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                {% endfor %}-->
+
+<!--            </div>-->
+        </div>
+
+    </div>
+
+    <script type="text/javascript" language="JavaScript">
+        var serviceList = {{service_list|safe}};
+        //console.log(serviceList);
+        //console.log(serviceList.length);
+        var currentURL = window.location.pathname;
+        //console.log(currentURL);
+        //var loadingCircle = '<div class="spinner-border" role="status" style="color:rgba(54, 162, 235, 0.85);"> </div>';
+
+        $(document).ready(function () {check_all_services();});
+
+        function check_status(serviceName) {
+            var csrf = $("input[name=csrfmiddlewaretoken]").val();
+            var p = $("#p_"+serviceName);
+            var header = $("#cardHeader_"+serviceName);
+            var circle = $("#circle_"+serviceName);
+            var buttons = $("#buttons_"+serviceName);
+            var checkButton = $("#check_"+serviceName);
+            var startButton = $("#start_"+serviceName);
+            var restartButton = $("#restart_"+serviceName);
+            var stopButton = $("#stop_"+serviceName);
+            var checkMark = $("#checkMark_"+serviceName);
+            var crossMark = $("#crossMark_"+serviceName);
+
+            $.ajax({
+                url: currentURL,
+                type: "post",
+                data: {
+                    csrfmiddlewaretoken: csrf,
+                    action: "serviceCheck",
+                    name: serviceName
+                },
+                beforeSend: function (){
+                    buttons.hide(); p.text(""); p.hide(); circle.show(); checkMark.hide(); crossMark.hide();
+                    startButton.attr("disabled", false); restartButton.attr("disabled", false);
+                    stopButton.attr("disabled", false); header.css("color", "initial");
+                },
+                success: function(response){
+                    console.log(response);
+                    console.log(response.result);
+                    console.log(response.result.name);
+                    if(response.command!=0){
+                        circle.hide();
+                        p.show();
+                        p.text(response.error);
+                        buttons.show();
+                        startButton.attr("disabled", true);
+                        restartButton.attr("disabled", true);
+                        stopButton.attr("disabled", true);
+                        header.css("color", "rgba(255, 99, 132, 0.85)"); //red
+                    }else if(response.command==0){
+                        var serviceResult = response.result;
+                        console.log(serviceResult.is_running);
+                        //if(serviceResult.code == 0){
+                        if(serviceResult.is_running){
+                            circle.hide();
+                            p.show();
+                            p.text(serviceResult.status);
+                            checkMark.show();
+                            buttons.show();
+                            startButton.attr("disabled", true);
+                            header.css("color", "rgba(75, 192, 192, 0.85)"); //green
+                        }else{
+                            circle.hide();
+                            p.show();
+                            p.text(serviceResult.status);
+                            crossMark.show();
+                            buttons.show();
+                            stopButton.attr("disabled", true);
+                            header.css("color", "rgba(255, 99, 132, 0.85)");  //red
+                        }
+                    }else{
+                        circle.hide();
+                        p.show();
+                        p.text("No response about service status");
+                        buttons.show();
+                        startButton.attr("disabled", true);
+                        restartButton.attr("disabled", true);
+                        stopButton.attr("disabled", true);
+                        header.css("color", "rgba(255, 99, 132, 0.85)");  //red
+                    }
+                }
+            });
+        }
+
+        function check_all_services() {
+            for(var i=0; i<serviceList.length; i++){
+                check_status(serviceList[i].service_name);
+            }
+        }
+
+        function start_service(serviceName){
+            var csrf = $("input[name=csrfmiddlewaretoken]").val();
+            var p = $("#p_"+serviceName);
+            var header = $("#cardHeader_"+serviceName);
+            var circle = $("#circle_"+serviceName);
+            var buttons = $("#buttons_"+serviceName);
+            var checkButton = $("#check_"+serviceName);
+            var startButton = $("#start_"+serviceName);
+            var restartButton = $("#restart_"+serviceName);
+            var stopButton = $("#stop_"+serviceName);
+            var checkMark = $("#checkMark_"+serviceName);
+            var crossMark = $("#crossMark_"+serviceName);
+
+            $.ajax({
+                url: currentURL,
+                type: "post",
+                data: {
+                    csrfmiddlewaretoken: csrf,
+                    action: "serviceStart",
+                    name: serviceName
+                },
+                beforeSend: function (){
+                    buttons.hide(); p.text(""); p.hide(); circle.show(); checkMark.hide(); crossMark.hide();
+                    startButton.attr("disabled", false); restartButton.attr("disabled", false);
+                    stopButton.attr("disabled", false); header.css("color", "initial");
+                },
+                success: function(response){
+                    console.log(response);
+                    console.log(response.result);
+                    console.log(response.result.name);
+                    if(response.command!=0){
+                        circle.hide();
+                        p.show();
+                        p.text(response.error);
+                        buttons.show();
+                        startButton.attr("disabled", true);
+                        restartButton.attr("disabled", true);
+                        stopButton.attr("disabled", true);
+                        header.css("color", "rgba(255, 99, 132, 0.85)");
+                    }else if(response.command==0){
+                        var serviceResult = response.result;
+                        console.log(serviceResult.is_running);
+                        //if(serviceResult.code == 0){
+                        if(serviceResult.is_running){
+                            circle.hide();
+                            p.show();
+                            p.text(serviceResult.status);
+                            checkMark.show();
+                            buttons.show();
+                            startButton.attr("disabled", true);
+                            header.css("color", "rgba(75, 192, 192, 0.85)");
+                        }else{
+                            circle.hide();
+                            p.show();
+                            p.text(serviceResult.status);
+                            crossMark.show();
+                            buttons.show();
+                            stopButton.attr("disabled", true);
+                            header.css("color", "rgba(255, 99, 132, 0.85)");
+                        }
+                    }else{
+                        circle.hide();
+                        p.show();
+                        p.text("No response about service status");
+                        buttons.show();
+                        startButton.attr("disabled", true);
+                        restartButton.attr("disabled", true);
+                        stopButton.attr("disabled", true);
+                        header.css("color", "rgba(255, 99, 132, 0.85)");
+                    }
+                }
+            });
+        }
+
+        function restart_service(serviceName){
+            var csrf = $("input[name=csrfmiddlewaretoken]").val();
+            var p = $("#p_"+serviceName);
+            var header = $("#cardHeader_"+serviceName);
+            var circle = $("#circle_"+serviceName);
+            var buttons = $("#buttons_"+serviceName);
+            var checkButton = $("#check_"+serviceName);
+            var startButton = $("#start_"+serviceName);
+            var restartButton = $("#restart_"+serviceName);
+            var stopButton = $("#stop_"+serviceName);
+            var checkMark = $("#checkMark_"+serviceName);
+            var crossMark = $("#crossMark_"+serviceName);
+
+            $.ajax({
+                url: currentURL,
+                type: "post",
+                data: {
+                    csrfmiddlewaretoken: csrf,
+                    action: "serviceRestart",
+                    name: serviceName
+                },
+                beforeSend: function (){
+                    buttons.hide(); p.text(""); p.hide(); circle.show(); checkMark.hide(); crossMark.hide();
+                    startButton.attr("disabled", false); restartButton.attr("disabled", false);
+                    stopButton.attr("disabled", false); header.css("color", "initial");
+                },
+                success: function(response){
+                    console.log(response);
+                    console.log(response.result);
+                    console.log(response.result.name);
+                    if(response.command!=0){
+                        circle.hide();
+                        p.show();
+                        p.text(response.error);
+                        buttons.show();
+                        startButton.attr("disabled", true);
+                        restartButton.attr("disabled", true);
+                        stopButton.attr("disabled", true);
+                        header.css("color", "rgba(255, 99, 132, 0.85)");
+                    }else if(response.command==0){
+                        var serviceResult = response.result;
+                        console.log(serviceResult.is_running);
+                        //if(serviceResult.code == 0){
+                        if(serviceResult.is_running){
+                            circle.hide();
+                            p.show();
+                            p.text(serviceResult.status);
+                            checkMark.show();
+                            buttons.show();
+                            startButton.attr("disabled", true);
+                            header.css("color", "rgba(75, 192, 192, 0.85)");
+                        }else{
+                            circle.hide();
+                            p.show();
+                            p.text(serviceResult.status);
+                            crossMark.show();
+                            buttons.show();
+                            stopButton.attr("disabled", true);
+                            header.css("color", "rgba(255, 99, 132, 0.85)");
+                        }
+                    }else{
+                        circle.hide();
+                        p.show();
+                        p.text("No response about service status");
+                        buttons.show();
+                        startButton.attr("disabled", true);
+                        restartButton.attr("disabled", true);
+                        stopButton.attr("disabled", true);
+                        header.css("color", "rgba(255, 99, 132, 0.85)");
+                    }
+                }
+            });
+        }
+
+        function stop_service(serviceName){
+            var csrf = $("input[name=csrfmiddlewaretoken]").val();
+            var p = $("#p_"+serviceName);
+            var header = $("#cardHeader_"+serviceName);
+            var circle = $("#circle_"+serviceName);
+            var buttons = $("#buttons_"+serviceName);
+            var checkButton = $("#check_"+serviceName);
+            var startButton = $("#start_"+serviceName);
+            var restartButton = $("#restart_"+serviceName);
+            var stopButton = $("#stop_"+serviceName);
+            var checkMark = $("#checkMark_"+serviceName);
+            var crossMark = $("#crossMark_"+serviceName);
+
+            $.ajax({
+                url: currentURL,
+                type: "post",
+                data: {
+                    csrfmiddlewaretoken: csrf,
+                    action: "serviceStop",
+                    name: serviceName
+                },
+                beforeSend: function (){
+                    buttons.hide(); p.text(""); p.hide(); circle.show(); checkMark.hide(); crossMark.hide();
+                    startButton.attr("disabled", false); restartButton.attr("disabled", false);
+                    stopButton.attr("disabled", false); header.css("color", "initial");
+                },
+                success: function(response){
+                    console.log(response);
+                    console.log(response.result);
+                    console.log(response.result.name);
+                    if(response.command!=0){
+                        circle.hide();
+                        p.show();
+                        p.text(response.error);
+                        buttons.show();
+                        startButton.attr("disabled", true);
+                        restartButton.attr("disabled", true);
+                        stopButton.attr("disabled", true);
+                        header.css("color", "rgba(255, 99, 132, 0.85)");
+                    }else if(response.command==0){
+                        var serviceResult = response.result;
+                        console.log(serviceResult.is_running);
+                        //if(serviceResult.code == 0){
+                        if(serviceResult.is_running){
+                            circle.hide();
+                            p.show();
+                            p.text(serviceResult.status);
+                            checkMark.show();
+                            buttons.show();
+                            startButton.attr("disabled", true);
+                            header.css("color", "rgba(75, 192, 192, 0.85)");
+                        }else{
+                            circle.hide();
+                            p.show();
+                            p.text(serviceResult.status);
+                            crossMark.show();
+                            buttons.show();
+                            stopButton.attr("disabled", true);
+                            header.css("color", "rgba(255, 99, 132, 0.85)");
+                        }
+                    }else{
+                        circle.hide();
+                        p.show();
+                        p.text("No response about service status");
+                        buttons.show();
+                        startButton.attr("disabled", true);
+                        restartButton.attr("disabled", true);
+                        stopButton.attr("disabled", true);
+                        header.css("color", "rgba(255, 99, 132, 0.85)");
+                    }
+                }
+            });
+        }
+
+    </script>
+
+
+
+{% elif route == "detail" %}
+
+<div class="container-fluid innerBodies">
+    <table class="table table-striped table-sm table-hover">
+        <caption>NETWORK DETAILS</caption>
+        <thead class="thead-light">
+            <tr>
+                <th>Name</th>
+                <th>{{ systemNetwork.networkname }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>IP Address</td>
+                <td>{{systemNetwork.ipaddress}}</td>
+            </tr>
+            <tr>
+                <td>Sub Network Mask</td>
+                <td>{{systemNetwork.subnetmask}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div></div>
+    <div><a href="{% url 'inventories:networks' %}"> BACK TO NETWORKS </a></div>
+
+
+
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+{% endblock %}

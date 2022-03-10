@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+{% load crispy_forms_tags %}
+{% load static %}
+<html lang="en-US">
+    <head>
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> ATIBAreport - Mailing Settings & Details </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+        <style>
+
+        </style>
+    </head>
+    <body>
+
+    <div id="loading"><!-- LOADING PART -->
+        <div class="container-fluid" id="atiba_loading">
+            <h2 class="atiba_loading_h">ΛTIBΛ</h2>
+        </div>
+    </div><!-- / LOADING PART -->
+
+    <div class="container-fluid" id="page" style="margin:0;padding:0;"><!-- PAGE PART -->
+        <h5 align="center">MAILING SETTINGS AND DETAILS</h5>
+        <hr>
+        <div class="container-fluid" name="formContainer">
+            {% csrf_token %}
+            {% crispy form %}
+
+        </div>
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+    </div> <!-- / PAGE PART -->
+
+    <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            // colors -> [green, red, orange, blue, yellow, grey, purple]
+            var graphColors = ['rgba(75, 192, 192, 0.85)','rgba(255, 99, 132, 0.85)','rgba(255, 159, 64, 0.85)','rgba(54, 162, 235, 0.85)','rgba(255, 206, 86, 0.85)','rgba(150, 150, 150, 0.85)','rgba(106, 92, 112, 0.85)']
+            var labelNames = ['Alert ', 'Cause ', 'Sub']
+
+            $(document).ready(function () {
+                $("#loading").hide();
+                $("#page").show();
+                $(".alert").fadeTo(8000, 0);
+                setTimeout(function () {$(".alert").alert("close")}, 10000);
+            });
+
+        </script>
+    </body>
+</html>

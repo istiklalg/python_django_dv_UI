@@ -1,0 +1,609 @@
+
+
+
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Log Sources {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "general" %}
+
+<div class="container-fluid innerBodies">
+
+    <div class="row innerBodies justify-content-center">
+        <h5>LOG SOURCE MANAGEMENT</h5>
+    </div>
+    <hr>
+    <div class="row innerBodies justify-content-center">
+        <div class="col-lg-2 col-md-2 asLink" style="text-align:center;" name="logSources" onclick="open_only(this, 'parts')">ACTIVE LOG<br/>SOURCES<br/>({{logSourcesList|length}})</div>
+        <div class="col-lg-2 col-md-2 asLink" style="text-align:center;" name="instaging" onclick="open_only(this, 'parts')">SOURCES <br/>IN STAGING<br/>({{stagingSourcesList|length}})</div>
+        <div class="col-lg-2 col-md-2 asLink" style="text-align:center;" name="inhistory" onclick="open_only(this, 'parts')">SOURCES <br/>IN HISTORY<br/>({{historySourcesList|length}})</div>
+        <div class="col-lg-2 col-md-2 asLink" style="text-align:center;" name="components" onclick="open_only(this, 'parts')">SERVICES<br/>({{componentList|length}})</div>
+        <div class="col-lg-2 col-md-2 asLink" style="text-align:center;" name="applications" onclick="open_only(this, 'parts')">APPLICATIONS<br/>({{applicationList|length}})</div>
+<!--        <div class="col-lg-2 col-md-2 asLink" style="text-align:center;" name="profiles" onclick="open_only(this, 'parts')">PROFILES</div>-->
+<!--        <div class="col-lg-2 col-md-2 asLink" style="text-align:center;" name="profiles"><a href="{% url 'profiles' %}">PROFILES</a></div>-->
+    </div>
+    <hr>
+    <div class="container-fluid" id="logSources" style="display:block;" name="parts"><!--Sources in Logging div-->
+        <div class="row">
+            <div class="col-md-4 asLink plusBefore"  name="addingLogSources" data-toggle="modal" data-target="#add_log_sources">
+                ADD NEW LOG SOURCES
+            </div>
+            <div class="col-md-4 asLink"  name="addingLogSources">
+                <a class="asLink" href="{% url 'inventories:add_device_driver' %}">
+                    &#128448; ADD LOG SOURCE DRIVER FILE
+                </a>
+            </div>
+            <div class="col-md-4">
+                <form method="get">
+                    <small>
+                    <div class="form-row align-items-center" style="float:right;">
+                        <a class="asLink" href="{% url 'log_sources' %}" style="text-decoration:None;">Clear Search</a>
+                        <input type="text" name="q" placeholder="Search in list" value="{{request.GET.q}}" />
+                        <button style="width:25px;height:25px;padding:0;overflow:hidden;" class="btn btn-outline-success btn-sm" type="submit">
+                            <small>&#8981;</small>
+                        </button>
+                    </div>
+                    </small>
+                </form>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>SOURCES ACTIVELY COLLECTED LOG</caption>
+
+                <thead class="thead-light">
+                    <tr>
+<!--                        <th></th>-->
+                        <th></th>
+                        <th></th>
+                        <th>Unparsed<br/>Logs</th>
+                        <th>Name of<br/>Log Source</th>
+                        <th>Unique<br/>Identifier</th>
+                        <th>Current Source<br/>Status</th>
+                        <th>Type of<br/>Device</th>
+                        <th>Type of<br/>Monitor Profile</th>
+                        <th>Type of<br/>Log Source</th>
+                        <th>IP<br/>Address</th>
+                        <th>Brand & Model</th>
+                        <th>Service Which<br>Include That</th>
+                        <th>Application Which<br>Include That</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for source in logSourcesList %}
+                    <tr>
+<!--                        <td>-->
+<!--                            <div class="asLink" name="editSource" data-toggle="modal" data-target="#modal{{source.id}}">-->
+<!--                                &#9998;-->
+<!--                            </div>-->
+<!--                        </td>-->
+                        <td>
+                            <form method="POST" name="staging_button" enctype="multipart/form-data">
+                            {% csrf_token %}
+                                <button title="Send Log Source to Staging Area" name="sendToStaging" value="{{source.id}}" type="submit" style="float:right;height:18px;width:18px;padding:0;overflow:hidden;" class="btn btn-outline-warning btn-sm">
+                                    <small>S</small>
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            {% if source.status == 'A' %}
+                                <div class="activePoint" title="Active"></div>
+                            {% elif source.status == 'P' %}
+                                <div class="passivePoint" title="Passive"></div>
+                            {% else %}
+                                <div class="unknownPoint" title="Passive"></div>
+                            {% endif %}
+                        </td>
+                        <td>{%if source.get_unparsed_log_count > 0 %}<a href="{{source.get_logs_for_source_url}}" title="SEE & RETRY PARSE">{{ source.get_unparsed_log_count }}</a>{% endif %}</td>
+                        <td>{{ source.sourcename }}</td>
+                        <td>{{ source.uniqueid|default_if_none:"" }}</td>
+                        <td>{{ source.mean_scan_status|default_if_none:"" }}</td>
+                        <td>{{ source.devicetype|default_if_none:"" }}</td>
+                        <td>{{ source.get_monitor_profile.monitorProfile.monitorprofiletype|default_if_none:"" }}</td>
+                        <td>{{ source.logsourceselection|default_if_none:"" }}</td>
+                        <td>{{ source.ipaddress|default_if_none:"" }}</td>
+                        <td>{{ source.brand|default_if_none:"" }} / {{ source.brandModel|default_if_none:"" }}</td>
+                        <td>{% for component in source.get_component_in %}{{ component.componentname|default_if_none:"" }}, {% endfor %}</td>
+                        <td>{% for app in source.get_application_in %}{{ app.appname|default_if_none:"" }}, {% endfor %}</td>
+                    </tr>
+<!--                        <div class="modal fade" id="modal{{source.id}}" tabindex="-1" role="dialog" aria-labelledby="source{{source.id}}ModalLabel" aria-hidden="true">&lt;!&ndash;edit source modal&ndash;&gt;-->
+<!--                            <div class="modal-dialog modal-xl" role="document">-->
+<!--                                <div class="modal-content">-->
+<!--                                    <div class="modal-header">-->
+<!--                                        <h5 class="modal-title" id="source{{source.id}}ModalLabel"> See & Edit Details </h5>-->
+<!--                                        <button name="closeModal" type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                                            <span aria-hidden="true">&times;</span>-->
+<!--                                        </button>-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-body">-->
+<!--                                        <div class="container-fluid">-->
+<!--                                            <iframe style="width:100%;height:600px;" id="edit_source_frame" src="{{source.get_absolute_url}}" frameborder="0"></iframe>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-footer">-->
+<!--                                        <button name="closeModal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>&lt;!&ndash;/edit source modal&ndash;&gt;-->
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <hr>
+        {# PAGINATION #}
+        <div class="pagination">
+            <span class="step-links">
+                {% if logSourcesList.has_previous %}
+                    <a href="?page=1">&laquo; jump to first </a>/
+                    <a href="?page={{ logSourcesList.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"> previous </a>/
+                {% endif %}
+
+                <span class="current">
+                    <i>{{ logSourcesList.number }}. of {{ logSourcesList.paginator.num_pages }} pages </i>
+                </span>
+
+                {% if logSourcesList.has_next %}
+                    /<a href="?page={{ logSourcesList.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"> next </a>
+                    /<a href="?page={{ logSourcesList.paginator.num_pages }}"> jump to last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>{# /pagination #}
+    </div><!--/Sources in Logging div-->
+    <div class="modal fade" id="add_log_sources" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true"><!--Log sources modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel"> Add New Log Source </h5>
+                    <button name="close_form_modal" type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="add_log_sources_frame" src="{% url 'add_log_sources' %}" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="close_form_modal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/Log sources modal-->
+
+    <div class="container-fluid" id="instaging" style="display:none;" name="parts"><!--Sources in Staging div-->
+        <div class="row">
+
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>SOURCES IN STAGING AREA</caption>
+
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Unparsed<br/>Logs</th>
+                        <th>Name of<br/>Log Source</th>
+                        <th>Unique<br/>Identifier</th>
+                        <th>Current Source<br/>Status</th>
+                        <th>Unique Identifier <br/>Type</th>
+                        <th>Type of<br/>Log Source</th>
+                        <th>Type of<br/>Monitor Profile</th>
+                        <th>Brand & Model</th>
+                        <th>Service Which<br>Include That</th>
+                        <th>Application Which<br>Include That</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for source in stagingSourcesList %}
+                    <tr>
+                        <td>
+                            <div class="asLink" name="editSource" title="Edit Log Source" data-toggle="modal" data-target="#editSourceModal"
+                                 onclick="document.getElementById('edit_source_frame').src='{{source.get_absolute_url}}';">
+                                &#9998;
+                            </div>
+                        </td>
+                        <td>
+                            <form method="POST" name="history_button" enctype="multipart/form-data">
+                            {% csrf_token %}
+                                <button title="Send Log Source to History" name="sendToHistory" value="{{source.id}}" type="submit" style="float:right;height:18px;width:18px;padding:0;overflow:hidden;" class="btn btn-outline-danger btn-sm">
+                                    <small>🗑</small>
+                                </button>
+                            </form>
+                        </td>
+                        <td>{%if source.get_unparsed_log_count > 0 %}<a href="{{source.get_logs_for_source_url}}">{{ source.get_unparsed_log_count }}</a>{% endif %}</td>
+                        <td>{{ source.sourcename }}</td>
+                        <td>{{ source.uniqueid|default_if_none:"" }}</td>
+                        <td>{{ source.mean_scan_status|default_if_none:"" }}</td>
+                        <td>{{ source.uniqueidtype|default_if_none:"" }}</td>
+                        <td>{{ source.devicetype|default_if_none:"" }}</td>
+                        <td>{{ source.get_monitor_profile.monitorProfile.monitorprofiletype|default_if_none:"" }}</td>
+                        <td>{{ source.brand|default_if_none:"" }} / {{ source.brandModel|default_if_none:"" }}</td>
+                        <td>{% for component in source.get_component_in %}{{ component.componentname|default_if_none:"" }}, {% endfor %}</td>
+                        <td>{% for app in source.get_application_in %}{{ app.appname|default_if_none:"" }}, {% endfor %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <hr>
+    </div><!--/Sources in Staging div-->
+
+    <div class="container-fluid" id="inhistory" style="display:none;" name="parts"><!--Sources in History div-->
+        <div class="row">
+
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>SOURCES IN HISTORY</caption>
+
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th>Name of<br/>Log Source</th>
+                        <th>Unique<br/>Identifier</th>
+                        <th>Current Source<br/>Status</th>
+                        <th>Unique Identifier <br/>Type</th>
+                        <th>Type of<br/>Log Source</th>
+                        <th>Type of<br/>Monitor Profile</th>
+                        <th>Brand & Model</th>
+                        <th>Service Which<br>Include That</th>
+                        <th>Application Which<br>Include That</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for source in historySourcesList %}
+                    <tr>
+                        <td>
+                            <div class="asLink" name="editSource" title="Edit Log Source" data-toggle="modal" data-target="#editSourceModal"
+                                 onclick="document.getElementById('edit_source_frame').src='{{source.get_absolute_url}}';">
+                                &#9998;
+                            </div>
+                        </td>
+                        <td>{{ source.sourcename }}</td>
+                        <td>{{ source.uniqueid|default_if_none:"" }}</td>
+                        <td>{{ source.mean_scan_status|default_if_none:"" }}</td>
+                        <td>{{ source.uniqueidtype|default_if_none:"" }}</td>
+                        <td>{{ source.devicetype|default_if_none:"" }}</td>
+                        <td>{{ source.get_monitor_profile.monitorProfile.monitorprofiletype|default_if_none:"" }}</td>
+                        <td>{{ source.brand|default_if_none:"" }} / {{ source.brandModel|default_if_none:"" }}</td>
+                        <td>{% for component in source.get_component_in %}{{ component.componentname|default_if_none:"" }}, {% endfor %}</td>
+                        <td>{% for app in source.get_application_in %}{{ app.appname|default_if_none:"" }}, {% endfor %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <hr>
+
+    </div><!--/Sources in History div-->
+
+    <div class="modal fade" id="editSourceModal" tabindex="-1" role="dialog" aria-labelledby="editSourceModalLabel" aria-hidden="true"><!--edit source modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editSourceModalLabel"> EDIT LOG SOURCE </h5>
+                    <button name="close_form_modal" type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="edit_source_frame" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="close_form_modal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/edit source modal-->
+
+    <div class="container-fluid" id="components" style="display:none;" name="parts"><!--Components div-->
+        <div class="row asLink plusBefore" name="addingComponent" data-toggle="modal" data-target="#add_component">
+            ADD NEW SERVICE
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>SERVICES</caption>
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th>Name of<br/>Service</th>
+                        <th>Log Sources <br/>Count</th>
+                        <th>Names of<br/>Log Sources</th>
+                        <th>Application Which<br>Include That</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for component in componentList %}
+                    <tr>
+                        <td>
+                            <div class="asLink" name="editComponent" title="Edit Component" data-toggle="modal" data-target="#edit_component"
+                                 onclick="document.getElementById('edit_component_frame').src='{{component.get_absolute_url}}';">
+                                &#9998;
+                            </div>
+                        </td>
+                        <td>{{ component.componentname }}</td>
+                        <td>{{ component.get_log_sources|length }}</td>
+                        <td>
+                            {% for source in component.get_log_sources %}
+                                {{ source }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for app in component.get_application_in %}
+                                {{ app.appname }}<br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div><!--/Components div-->
+    <div class="modal fade" id="add_component" tabindex="-1" role="dialog" aria-labelledby="componentModalLabel" aria-hidden="true"><!--Add Components modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="componentModalLabel"> Add New Service </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container-fluid">
+                        <form action="{% url 'log_sources' %}" method="post" onkeydown="return event.key != 'Enter';" name="component">
+                            {% csrf_token %}
+                            <div class="form-row align-items-center">
+                                <label for="component_name" class="col-md-6 col-form-label">Service Name</label>
+                                <div class="col-md-6">
+                                    <input type="text" id="component_name" name="component_name" maxlength="35" required onblur="check_if_exist(this)"/>
+                                </div>
+                            </div>
+                            <br>
+
+                            <div class="container-fluid" style="height:20px;color:red;" id="component"></div>
+
+                            <br>
+                            <div class="form-row align-items-center">
+                                <table class="table table-sm table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Unique Identifier</th>
+                                            <th>Log Source Name</th>
+                                            <th align="center"><div class="asLink" onclick="check_and_release_all('id_list')">ALL</div></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for source in logSources %}
+                                        <tr>
+                                            <td>{% if source.uniqueid %}{{source.uniqueid}}{% endif %}</td>
+                                            <td><label for="source{{source.id}}">{{source.sourcename}}</label></td>
+                                            <td><input type="checkbox" id="source{{source.id}}" name="id_list" value="{{source.id}}"></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-outline-info btn-sm" type="submit">SAVE</button>
+                        </form>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="close_form_modal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/Add Components modal-->
+
+    <div class="modal fade" id="edit_component" tabindex="-1" role="dialog" aria-labelledby="editComponentModalLabel" aria-hidden="true"><!--Edit Components modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editComponentModalLabel">Edit Service</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="edit_component_frame" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="close_form_modal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/Edit Components modal-->
+
+    <div class="container-fluid" id="applications" style="display:none;" name="parts"><!--Applications div-->
+        <div class="row asLink plusBefore" name="addingApplication" data-toggle="modal" data-target="#add_application">
+            ADD NEW APPLICATION
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                    <caption>APPLICATIONS</caption>
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th>Name of<br/>Application</th>
+                        <th>Services <br/>Count</th>
+                        <th>Names of<br/>Services</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applicationList %}
+                    <tr>
+                        <td>
+                            <div class="asLink" name="editApplication" title="Edit Application" data-toggle="modal" data-target="#edit_application"
+                                 onclick="document.getElementById('edit_application_frame').src='{{application.get_absolute_url}}';">
+                                &#9998;
+                            </div>
+                        </td>
+                        <td>{{ application.appname }}</td>
+                        <td>{{ application.get_components|length }}</td>
+                        <td>
+                            {% for component in application.get_components %}{{ component }}<br>{% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div><!--/Applications div-->
+    <div class="modal fade" id="add_application" tabindex="-1" role="dialog" aria-labelledby="applicationModalLabel" aria-hidden="true"><!--Applications modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="applicationModalLabel"> Add New Application </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"  onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container-fluid">
+                        <form action="{% url 'log_sources' %}" method="post" onkeydown="return event.key != 'Enter';" name="application">
+                            {% csrf_token %}
+                            <div class="form-row align-items-center">
+                                <label for="application_name" class="col-md-6 col-form-label">Application Name</label>
+                                <div class="col-md-6">
+                                    <input type="text" id="application_name" name="application_name" maxlength="35" required onblur="check_if_exist(this)" />
+                                </div>
+                            </div>
+                            <br>
+
+                            <div class="container-fluid" style="height:20px;color:red;" id="application"></div>
+
+                            <br>
+                            <div class="form-row align-items-center">
+                                <table class="table table-sm table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Service Name</th>
+                                            <th>Count of <br>Log Sources</th>
+                                            <th align="center"><div class="asLink" onclick="check_and_release_all('component_ids')">ALL</div></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for component in componentList %}
+                                        <tr>
+                                            <td>{{component.componentname}}</td>
+                                            <td><label for="component{{component.id}}">{{component.get_log_sources|length}}</label></td>
+                                            <td><input type="checkbox" id="component{{component.id}}" name="component_ids" value="{{component.id}}"></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-outline-info btn-sm" type="submit">SAVE</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="close_form_modal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/Add applications modal-->
+
+    <div class="modal fade" id="edit_application" tabindex="-1" role="dialog" aria-labelledby="editApplicationModalLabel" aria-hidden="true"><!--Edit application modal-->
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editApplicationModalLabel">Edit Application</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="edit_application_frame" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button name="close_form_modal" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="location.reload();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div><!--/Edit Application modal-->
+</div>
+
+<script type="text/javascript" lang="javascript">
+
+    var closeFormModalButtons = document.getElementsByName("close_form_modal");
+
+    if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+    //console.log(document.getElementsByTagName('INPUT'));
+    function check_if_exist(inputElement){
+        // to control given component and application names is used before;
+        //console.log(inputElement.parentElement.parentElement.parentElement.name);
+        var result = document.getElementById(inputElement.parentElement.parentElement.parentElement.name)
+        //console.log(result);
+        //console.log(inputElement.value);
+        if(inputElement.name=="component_name"){
+            var componentNameList = [{%for x in componentList%}{{x.get_json|safe}}.componentname, {%endfor%}]
+            //console.log(componentNameList);
+            if(componentNameList.includes(inputElement.value)){
+                inputElement.focus();
+                result.innerHTML = "<ul><li>This name is used before please give a unique name</li></ul>";
+                return false;
+            }else if(inputElement.value==""){
+                inputElement.focus();
+                result.innerHTML = "<ul><li>Please give a unique name for service</li></ul>";
+                return false;
+            }
+        }else if(inputElement.name=="application_name"){
+            var applicationNameList = [{%for x in applicationList%}{{x.get_json|safe}}.appname, {%endfor%}]
+            //console.log(applicationNameList);
+            if(applicationNameList.includes(inputElement.value)){
+                inputElement.focus();
+                result.innerHTML = "<ul><li>This name is used before please give a unique name</li></ul>";
+                return false;
+            }else if(inputElement.value==""){
+                inputElement.focus();
+                result.innerHTML = "<ul><li>Please give a unique name for application</li></ul>";
+                return false;
+            }
+        }
+        result.innerHTML = "";
+        return true
+    }
+
+
+</script>
+
+
+
+{% elif route == "detail" %}
+
+<div class="container-fluid innerBodies">
+
+
+</div>
+
+
+{% endif %}
+
+
+
+{% endblock %}

@@ -1,0 +1,303 @@
+
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Cluster {{route}} {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "Status" %}
+
+    <div class="innerBodies">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <h4>STATUS OF ΛTIBΛ BACKUP CLUSTERS</h4>
+            </div>
+            <hr />
+            <div class="row justify-content-center">
+                <div class="col-md-{{nodeCount|add:1}} shadowBox m-2" align="center">
+                    <h4>ΛTIBΛ</h4>
+                    <h5>{{vrip|default_if_none:"Virtual Router IP is missing in db!"}}</h5>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                {% if nodeList %}
+
+                    {% for node in nodeList %}
+
+                        {% if node.is_master %}
+                            <div class="col-md-2" align="center">
+                                <div class="card shadowBox" style="border: 0.5px solid rgba(75, 192, 192, 0.85);">
+                                    <img class="card-img-top" src="{% static 'img/servermaster.png' %}" alt="image cap">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            {{ node.ipaddress }}
+                                            <span style="padding-left:5px;">
+                                                <a href="{{node.get_absolute_url}}" title="settings">
+                                                    <img width="18" height="18" src="{% static 'img/settings.png' %}" alt="settings link">
+                                                </a>
+                                            </span>
+                                        </h5>
+                                        <p class="card-text">
+<!--                                            <a href="{{node.get_absolute_url}}" title="settings">-->
+<!--                                                <img width="18" height="18" src="{% static 'img/settings.png' %}" alt="settings link">-->
+<!--                                            </a>-->
+                                        </p>
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            ROLE : <span style="color: rgba(75, 192, 192, 0.85);">MASTER</span>
+                                        </li>
+                                        <li class="list-group-item">
+                                            API SERVICE : {% if node.is_api_alive %}<span style="color: rgba(75, 192, 192, 0.85);">ACTIVE</span>{% else %}<span style="color: rgba(255, 159, 64, 0.85);">PASSIVE</span>{% endif %}
+                                        </li>
+                                        <li class="list-group-item">
+                                            POSTGRESQL : {% if node.pgstatus == 1 %}<span style="color: rgba(75, 192, 192, 0.85);">ACTIVE</span>{% else %}<span style="color: rgba(255, 159, 64, 0.85);">PASSIVE</span>{% endif %}
+                                        </li>
+                                        <li class="list-group-item">
+                                            ELASTICSEARCH : {% if node.elasticstatus == 1 %}<span style="color: rgba(75, 192, 192, 0.85);">ACTIVE</span>{% else %}<span style="color: rgba(255, 159, 64, 0.85);">PASSIVE</span>{% endif %}
+                                        </li>
+                                        <li class="list-group-item">
+                                            LOGGER SERVICE : {% if node.loggerstatus == 1 %}<span style="color: rgba(75, 192, 192, 0.85);">ACTIVE</span>{% else %}<span style="color: rgba(255, 159, 64, 0.85);">PASSIVE</span>{% endif %}
+                                        </li>
+                                    </ul>
+                                    <div class="card-body">
+                                        <a href="{{node.get_add_slave_url}}" class="card-link asLink"> ADD BACKUP NODE </a>
+<!--                                        {% if nodeCount == 1 %}-->
+<!--                                        <br>-->
+<!--                                        <a href="{{node.get_make_slave_url}}" class="card-link asLink"> MAKE IT BACKUP NODE </a>-->
+<!--                                        {% endif %}-->
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-md-2" align="center">
+                                <div class="card shadowBox" style="border: 0.5px solid rgba(255, 159, 64, 0.85);">
+                                    <img class="card-img-top" src="{% static 'img/serversingle.png' %}" alt="image cap">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            {{ node.ipaddress }}
+                                            <span style="padding-left:5px;">
+                                                <a href="{{node.get_absolute_url}}" title="settings">
+                                                    <img width="18" height="18" src="{% static 'img/settings.png' %}" alt="settings link">
+                                                </a>
+                                            </span>
+                                        </h5>
+                                        <p class="card-text">
+<!--                                            <a href="{{node.get_absolute_url}}" title="settings">-->
+<!--                                                <img width="18" height="18" src="{% static 'img/settings.png' %}" alt="settings link">-->
+<!--                                            </a>-->
+                                        </p>
+
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            ROLE : <span style="color: rgba(255, 159, 64, 0.85);">{{forloop.counter|add:-1}}. BACKUP</span>
+                                        </li>
+                                        <li class="list-group-item">
+                                            API SERVICE : {% if node.is_api_alive %}<span style="color: rgba(75, 192, 192, 0.85);">ACTIVE</span>{% else %}<span style="color: rgba(255, 159, 64, 0.85);">PASSIVE</span>{% endif %}
+                                        </li>
+                                        <li class="list-group-item">
+                                            POSTGRESQL : {% if node.pgstatus == 1 %}<span style="color: rgba(75, 192, 192, 0.85);">ACTIVE</span>{% else %}<span style="color: rgba(255, 159, 64, 0.85);">PASSIVE</span>{% endif %}
+                                        </li>
+                                        <li class="list-group-item">
+                                            ELASTICSEARCH : {% if node.elasticstatus == 1 %}<span style="color: rgba(75, 192, 192, 0.85);">ACTIVE</span>{% else %}<span style="color: rgba(255, 159, 64, 0.85);">PASSIVE</span>{% endif %}
+                                        </li>
+                                        <li class="list-group-item">
+                                            LOGGER SERVICE : {% if node.loggerstatus == 1 %}<span style="color: rgba(75, 192, 192, 0.85);">ACTIVE</span>{% else %}<span style="color: rgba(255, 159, 64, 0.85);">PASSIVE</span>{% endif %}
+                                        </li>
+                                    </ul>
+                                    <div class="card-body">
+                                        {% if nodeCount < 4 %}
+                                        <span style="color:lightgrey"> REMOVE NODE </span>
+                                        {% else %}
+                                        <a href="{{node.get_remove_url}}" class="card-link asLink"> REMOVE NODE </a>
+                                        {% endif %}
+    <!--                                    <a href="#" class="card-link">Another link</a>-->
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                    {% endfor %}
+                {% else %}
+                    <div class="row justify-content-center">
+                        <h5>Cluster Structure Information Is Missing In DB!</h5>
+                        <div class="btn-group">
+        <!--                    <a class="btn btn-sm btn-outline-success" href="{% url 'cluster' %}"> ADD BACKUP NODE TO THIS</a>-->
+<!--                            <a class="btn btn-sm btn-outline-danger" href="{% url 'cluster' %}"> ADD THIS TO A MASTER AS BACKUP NODE </a>-->
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+{% elif route == "Add Slave" %}
+
+    <div class="innerBodies">
+
+        <div class="container-fluid">
+            Adding a new node to : <i>{{node}}</i>
+            <br />
+            Backup nodes that already added : <i>{{ existing_backups }}</i>
+            <hr>
+            {% csrf_token %}
+            {% crispy form %}
+        </div>
+
+    </div>
+
+{% elif route == "Make Slave" %}
+
+    <div class="innerBodies">
+
+        <div class="container-fluid">
+            {{node}}
+        </div>
+
+    </div>
+
+{% elif route == "Node Settings" %}
+
+    <div class="innerBodies">
+
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <h4>DETAILS OF NODE "{{node}}"</h4>
+            </div>
+            <hr />
+            <div class="row justify-content-center">
+                <div class="col-md-10 shadowBox" align="center" name="usages_graph" id="usages_graph">
+                    <canvas id="usages" height="70"></canvas>
+                    <hr/>
+                    <span>NODE RESOURCE USAGES</span>
+                    <br>
+                    <data id="usages_data" value="{{chart_values}}" style="display:none;">line</data>
+                </div>
+            </div>
+            <hr>
+<!--            <div class="row justify-content-center shadowBox">-->
+                <form method="POST" name="node_settings_form" class="shadowBox" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                    <div class="row justify-content-center"><h5>SETTINGS</h5></div>
+                    <div class="form-group row">
+
+                            <label class="col-md-8 col-form-label" style="font-size:9pt;"
+                                   for="check_interval">
+                                Node resource usage check interval (seconds)
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control form-control-sm" style="font-size:9pt;"
+                                       type="number" id="check_interval" name="check_interval"
+                                       max="120" min="10" value="{{node.usagecheckinterval}}" placeholder="No saved Value" />
+                            </div>
+
+                    </div>
+                    <div class="form-group row justify-content-center">
+                        <button type="submit" class="btn btn-sm btn-outline-info col-md-4">SAVE</button>
+                    </div>
+                </form>
+<!--            </div>-->
+
+
+        </div>
+
+    </div>
+
+{% elif route == "Remove Slave" %}
+
+    <div class="innerBodies">
+
+        <div class="container-fluid">
+            {{node}}
+        </div>
+
+    </div>
+
+{% endif %}
+
+<script type="text/javascript" language="JavaScript">
+
+/* To prevent the form from being submitted again when the page is refreshed. */
+if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+$(document).ready(function () {
+    var route = "{{route}}";
+    // colors -> [green, red, orange, blue, yellow, grey, purple]
+    var graphColors = ['rgba(75, 192, 192, 0.85)','rgba(255, 99, 132, 0.85)','rgba(255, 159, 64, 0.85)','rgba(54, 162, 235, 0.85)','rgba(255, 206, 86, 0.85)','rgba(150, 150, 150, 0.85)','rgba(106, 92, 112, 0.85)']
+    var labelNames = ['Alert ', 'Cause ', 'Sub']
+
+    if(route=="Node Settings"){
+        let xLabels = {{chart_labels|safe}};
+        var _div = document.getElementById("usages_graph");
+        var _canvas = document.getElementById("usages");
+        var _data = document.getElementById("usages_data");
+        var ctx = _canvas.getContext("2d");
+        let xLabelString = `Results of Last ${xLabels.length} Reading`;
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: xLabels,
+                datasets: [
+                    {
+                        label: {{chart_values|safe}}[0].length>0?"CPU (%)":"No Data for CPU",
+                        data: {{chart_values|safe}}[0],
+                        backgroundColor: graphColors[3],
+                        borderColor: graphColors[3],
+                        borderWidth: 1,
+                        pointRadius: 1,
+                        fill: false,
+                    },
+                    {
+                        label: {{chart_values|safe}}[1].length>0?"RAM (%)":"No Data for RAM",
+                        data: {{chart_values|safe}}[1],
+                        backgroundColor: graphColors[1],
+                        borderColor: graphColors[1],
+                        borderWidth: 1,
+                        pointRadius: 1,
+                        fill: false,
+                    },
+                    {
+                        label: {{chart_values|safe}}[2].length>0?"DISK (%)":"No Data for DISK",
+                        order: 1,
+                        data: {{chart_values|safe}}[2],
+                        backgroundColor: graphColors[2],
+                        borderColor: graphColors[2],
+                        borderWidth: 1,
+                        pointRadius: 1,
+                        fill: false,
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    xAxes: [{scaleLabel: {display: true, labelString: xLabelString}}],
+                    yAxes: [{scaleLabel: {display: true, labelString: 'Usage Level'}, ticks: {beginAtZero: true,}}]
+                },
+                elements: {
+                    center: {
+                        text: " ",
+                    }
+                },
+            }
+        });
+    }
+}); // end of document ready
+
+</script>
+
+
+{% endblock %}
+

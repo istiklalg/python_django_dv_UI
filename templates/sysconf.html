@@ -1,0 +1,697 @@
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block titleBlock %}
+
+     System Configurations {{ block.super }}
+
+{% endblock %}
+
+
+{% block bodyBlock %}
+
+<style></style>
+
+<div class="innerBodies container-fluid" style="padding-top:10px;font-size:9pt;">
+
+    <div class="container-fluid">
+
+        <div class="card shadow" id="systemHeaderCard"><!-- SYSTEM HEADER CARD -->
+            <div class="card-body">
+                <list>
+                    <li>System IP : {{sp.systemip}} <small><i> (To change ip address you may use CLI)</i></small></li>
+                    <li>ATIBA Version : {{sp.atibaver}}.{{sp.atibasubver}}</li>
+<!--                    <li>ATIBA Subversion : {{sp.atibasubver}}</li>-->
+                    <li>ATIBA AI-Correlation Initial Training Status : <span style="color:{{sp.coreAiStatus.0}};">{{sp.coreAiStatus.1}}</span></li>
+                    <li>ATIBA AI-Incident Initial Training Status : <span style="color:{{sp.incAiStatus.0}};">{{sp.incAiStatus.1}}</span></li>
+                </list>
+            </div>
+        </div><!-- / SYSTEM HEADER CARD -->
+
+        <br/>
+
+        <div class="card shadow" id="disableAlertsCard"><!-- DISABLE ALERTS CARD -->
+            <div class="card-header">
+                <h5>ENABLE / DISABLE ALERTS</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col col-lg-6 col-md-6 col-sm-12" align="center" name="charts">
+                        <canvas id="chartLDDuserDis"></canvas>
+                        <hr/>
+                        <data id="{{ldd_user_dis_labels}}" value="{{ldd_user_dis_values}}" style="display:none;"
+                              title="Enabled / Disabled Alerts">horizontalBar</data>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                <div class="col col-lg-3 col-md-4 col-sm-6">
+                    <form method="GET" class="form-inline">
+                        <input class="form-control form-control-sm" type="text" name="log_q"
+                               placeholder="Search for alerts to edit" value="{{ request.GET.log_q }}"
+                               aria-label="search" style="font-size:9pt;"/>
+                        <button class="btn btn-outline-success btn-sm" type="submit" style="font-size:9pt;">&#128270;</button>
+                    </form>
+                </div>
+                <div class="col col-lg-3 col-md-3 col-sm-6">
+                    <a class="btn btn-sm btn-outline-info" href="#" type="button" data-toggle="modal"
+                       data-target="#disableAlertsModal" style="font-size:9pt;">
+                        EDIT FOUND {{ldd_log_list|length}} FOR "{{ request.GET.log_q }}"
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div><!-- / DISABLE ALERTS CARD -->
+
+        <br/>
+
+        <div class="card shadow" id="licenseCard"><!-- LICENSE CARD -->
+            <div class="card-header">
+                <h5>LICENSE MANAGEMENT</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-hover">
+                    <caption>EXISTING LICENSES</caption>
+                    <thead class="thead-light">
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Order</th>
+                            <th>License<br>Owner</th>
+                            <th>License<br>Type</th>
+                            <th style="text-align:center;">License<br>Content</th>
+                            <th>Expiration<br>Date</th>
+                            <th>Product<br>Code</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lic in licenseList %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    {% if lic.isExpired %}
+                                        <div class="passivePoint" title="Active"></div>
+                                    {% else %}
+                                        <div class="activePoint" title="Passive"></div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ lic.get_order }}</td>
+                                <td>{{ lic.get_license_owner }}</td>
+                                <td>{{ lic.lictype }}</td>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-sm-4">Product</div>
+                                        <div class="col-sm-4">Type</div>
+                                        <div class="col-sm-4">Amount</div>
+                                    </div>
+                                    <hr>
+                                    {% for prd in lic.get_product_list %}
+                                        {% if prd.liccount != 0 %}
+                                        <div class="row">
+                                            <div class="col-sm-4">{{ prd.licname }}</div>
+                                            <div class="col-sm-4">{{ prd.licdevtype }}</div>
+                                            <div class="col-sm-4">{{ prd.liccount }}</div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>{{ lic.get_license_expiration|default_if_none:"No Expiration Date" }} <small style="color:lightgrey;"> / ( {{ lic.get_license_expiration|timeuntil }} )</small></td>
+                                <td>{{ lic.productcodes }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a class="btn btn-sm btn-outline-info" style="font-size:9pt;" href="{% url 'accounts:add_license' %}">ADD NEW LICENSE</a>
+            </div>
+        </div><!-- / LICENSE CARD -->
+
+        <br/>
+
+        <div class="card shadow" id="userPreferencesCard"><!-- SYSTEM PREFERENCES CARD -->
+            <div class="card-header">
+                <h5 id="title_systemPreferences">SYSTEM PREFERENCES</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <caption>LIFETIMES IN ATIBA</caption>
+                    <thead>
+                        <tr>
+                            <th>Log Life Time</th>
+                            <th>Un-Parsed Log Life Time</th>
+                            <th>Alert Life Time</th>
+                            <th>New Behaviour Time</th>
+                            <th>Time Series Interval</th>
+                            <th>Incident Set Interval</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span>{{sp.loglifetime}}</span> DAYS</td>
+                            <td><span>{{sp.errstatloglife}}</span> DAYS</td>
+                            <td><span>{{sp.alertlife}}</span> DAYS</td>
+                            <td><span>{{sp.newbehaviortime}}</span> DAYS</td>
+                            <td><span>{{sp.timeseriesinterval}}</span> MINUTES</td>
+                            <td><span>{{sp.incidenttimeout}}</span> SECONDS</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+                <table class="table table-sm">
+                    <caption>SCHEDULED SERVICES</caption>
+                    <thead>
+                        <tr>
+                            <th>Parameter Analyst Work Period</th>
+                            <th>Parameter Analyst Working Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span>{{sp.autoparaminterval}}</span></td>
+                            <td><span>{{sp.autoparamtime}}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+                <table class="table table-sm">
+                    <caption>AI STATIC THRESHOLDS</caption>
+                    <thead>
+                        <tr>
+                            <th>AI-Correlation Point Threshold</th>
+                            <th>AI-Correlation Count Threshold</th>
+                            <th>AI-Incident Count Threshold</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span>{{sp.corepointthreshold}}</span></td>
+                            <td><span>{{sp.corepiecethreshold}}</span></td>
+                            <td><span>{{sp.incpiecethreshold}}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a class="btn btn-sm btn-outline-info" href="#" type="button" data-toggle="modal"
+                   data-target="#systemParamsEdit1" style="font-size:9pt;">EDIT</a>
+            </div>
+        </div><!-- / SYSTEM PREFERENCES CARD -->
+
+        <br/>
+
+        <div class="card shadow" id="aiSensitivityCard"><!-- AI SENSITIVITY CARD -->
+            <div class="card-header">
+                <h5 id="title_aiSensitivity">AI SENSITIVITY</h5>
+            </div>
+            <div class="card-body">
+                You can increase or decrease AI sensitivity
+            </div>
+            <div class="card-footer">
+                <a class="btn btn-sm btn-outline-info" href="#" type="button" data-toggle="modal"
+                   data-target="#aiSensitivityModal" style="font-size:9pt;" onclick="document.getElementById('aiSensitivityFrame').src='{% url 'ai_sensitivity' %}'">EDIT</a>
+            </div>
+        </div><!-- / AI SENSITIVITY CARD -->
+
+        <br>
+
+        <div class="card shadow" id="systemLogPrioritiesCard"><!-- SYSTEM LOG PRIORITIES CARD -->
+            <div class="card-header">
+                <h5>SYSTEM LOG PRIORITIES</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>System Log Priorities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="sysLogPriorities" title="{{sp.syslogpriorities}}">{{sysLogPriorityLabels|truncatewords:20}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a class="btn btn-sm btn-outline-info" href="#" type="button" data-toggle="modal"
+                   data-target="#systemParamsEdit2" style="font-size:9pt;">EDIT</a>
+            </div>
+        </div><!-- / SYSTEM LOG PRIORITIES CARD -->
+
+        <br/>
+
+        <div class="card shadow" id="mailSettingsCard"><!-- MAIL SETTINGS CARD -->
+            <div class="card-header">
+                <h5>MAIL SETTINGS</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <caption>SYSTEM NOTIFICATIONS</caption>
+                    <thead>
+                        <tr>
+                            <th>Notification e-mails</th>
+                            <th>E-mail Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if sp.notifyemails %}
+                        {% for mailSettingsObject in sp.notifyemails %}
+                        <tr>
+                            <td>
+                                <span>
+                                    <a type="button" data-toggle="modal" data-target="#mailSettingsModal"
+                                       onclick="document.getElementById('mail_settings_frame').src='{{mailSettingsObject.get_absolute_url}}';">
+                                        ✎  </a>
+                                </span>
+                                <span>  {{ mailSettingsObject }}</span>
+                            </td>
+                            <td>
+                                {% for mailDetail in mailSettingsObject.get_details %}
+                                    <span>
+                                        <a type="button" data-toggle="modal" data-target="#mailSettingsModal"
+                                           onclick="document.getElementById('mail_settings_frame').src='{{mailDetail.get_absolute_url}}';">
+                                            ✎  </a>{{ mailDetail }}<br />
+                                    </span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="2" align="center"><span>No e-mail settings or details given</span></td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+<!--                <a class="btn btn-sm btn-outline-info" href="#" type="button" data-toggle="modal"-->
+<!--                   data-target="#mailSettingsModal" style="font-size:9pt;">EDIT</a>-->
+                <a class="btn btn-sm btn-outline-info" type="button" data-toggle="modal"
+                   onclick="document.getElementById('mail_settings_frame').src='/system_configurations/mailing_settings';"
+                   data-target="#mailSettingsModal" style="font-size:9pt;">CREATE NEW MAIL SETTING</a>
+                <a class="btn btn-sm btn-outline-info" type="button" data-toggle="modal"
+                   onclick="document.getElementById('mail_settings_frame').src='/system_configurations/mailing_details';"
+                   data-target="#mailSettingsModal" style="font-size:9pt;">ADD NEW MAIL DETAIL</a>
+            </div>
+        </div><!-- / MAIL SETTINGS CARD -->
+
+        <br/>
+
+        <div class="card shadow" id="daemonRebootCard"><!-- SYSTEM REBOOT CARD -->
+            <div class="card-header">
+                <h5><span>&#9888;</span> SYSTEM REBOOT </h5>
+            </div>
+            <div class="card-body">
+                You may need to reboot ATIBA for the changes to take effect..
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-sm btn-danger shadow" data-toggle="modal" data-target="#rebootConfirm"
+                        style="font-size:9pt;"><b>REBOOT</b></button>
+            </div>
+        </div><!-- / SYSTEM REBOOT CARD -->
+
+        <br/>
+
+        <div class="card shadow" id="resetAICard"><!-- RESET AI CARD -->
+            <div class="card-header">
+                <h5><span>&#9888;</span> RESET AI </h5>
+            </div>
+            <div class="card-body">
+                It will reset AI and all learned data will be lost..
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-sm btn-danger shadow" data-toggle="modal" data-target="#resetAIConfirm"
+                        style="font-size:9pt;"><b>RESET AI</b></button>
+            </div>
+        </div><!-- / RESET AI CARD -->
+
+        <br/>
+
+        <div class="modal fade" id="disableAlertsModal" tabindex="-1" role="dialog" aria-labelledby="disableAlertsModalLabel" aria-hidden="true"><!-- Disable Enable Alert Modal Dialog-->
+            <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="disableAlertsModalLabel">Disable or Enable Alerts</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form method="POST" enctype="multipart/form-data" name="disableAlertForm"><!--Disable Enable Alert Form-->
+                        {% csrf_token %}
+                            <table class="table table-hover table-sm">
+                                <caption>List of Found {{ldd_log_list|length}} Records</caption>
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Structure</th>
+                                        <th>Log Code</th>
+                                        <th>Fields</th>
+                                        <th>
+                                            Check to Disable<br/>
+                                            <small>
+                                                <a href="#" onclick="check_all_for_alert('disableAlertCheckboxes')">
+                                                    select / release all
+                                                </a>
+                                            </small>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for log in ldd_log_list%}
+                                    <tr>
+                                        <td>{{log.outclasstype}}</td>
+                                        <td title="{{log.logstructs}}">{{log.logstructs|truncatechars:20}}</td>
+                                        <td title="{{log.logsarr}}">{{log.logcode|truncatechars:20}}</td>
+                                        <td title="{{log.logfields}}">{{log.logfields|truncatechars:20}}</td>
+                                        <td align="center">
+                                            <input style="width:18px;height:18px;" type="checkbox"
+                                                   title="{{log.userdisabled}}" name="disableAlertCheckboxes"
+                                                   {% if log.userdisabled %} checked {% endif %}
+                                                   value="{{log.id}}" />
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr style="text-align:center;">
+                                        <td colspan="5">No result to show, please search</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <div name="button">
+                                <input class="btn btn-outline-info btn-sm" type="submit" value="SAVE" />
+                            </div>
+                        </form><!--/ Disable Enable Alert Form-->
+                    </div>
+                    <div class="modal-footer">
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+        </div><!--/ Disable Enable Alert Modal Dialog-->
+
+        <div class="modal fade" id="systemParamsEdit1" tabindex="-1" role="dialog" aria-labelledby="systemParamsEdit1Label" aria-hidden="true"><!--System Preferences Modal Dialog-->
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="systemParamsEdit1Label">Set System Parameters</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" enctype="multipart/form-data"><!-- System Preferences Form-->
+                            {% csrf_token %}
+                            {% crispy form1 %}
+                        </form><!--/ System Preferences Form-->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+<!--                        <p></p>-->
+                    </div>
+                </div>
+            </div>
+        </div> <!--/ System Preferences Modal Dialog-->
+
+        <div class="modal fade" id="aiSensitivityModal" tabindex="-1" role="dialog" aria-labelledby="systemParamsEdit1Label" aria-hidden="true"><!-- AI Sensitivity Modal Dialog-->
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="aiSensitivityModalLabel">Set AI Sensitivity</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <iframe style="width:100%;height:600px;" frameborder="0" id="aiSensitivityFrame" src="{% url 'AgentRoot:loading_view' %}"></iframe>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+<!--                        <p></p>-->
+                    </div>
+                </div>
+            </div>
+        </div> <!--/ AI Sensitivity Modal Dialog-->
+
+        <div class="modal fade" id="systemParamsEdit2" tabindex="-1" role="dialog" aria-labelledby="systemParamsEdit2Label" aria-hidden="true"><!--System Log Priorities Modal Dialog-->
+            <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="systemParamsEdit2Label">Set System Log Priorities</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="POST" enctype="multipart/form-data" name="priorityForm"><!--System Log Priorities Form-->
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <div class="modal-body">
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Facilities</th>
+                                            <th id="col_1" class="asLink" onclick="check_column_for_priority(this)">Emergency</th>
+                                            <th id="col_2" class="asLink" style="cursor:pointer;" onclick="check_column_for_priority(this)">Alert</th>
+                                            <th id="col_3" class="asLink" style="cursor:pointer;" onclick="check_column_for_priority(this)">Critical</th>
+                                            <th id="col_4" class="asLink" style="cursor:pointer;" onclick="check_column_for_priority(this)">Error</th>
+                                            <th id="col_5" class="asLink" style="cursor:pointer;" onclick="check_column_for_priority(this)">Warning</th>
+                                            <th id="col_6" class="asLink" style="cursor:pointer;" onclick="check_column_for_priority(this)">Notice</th>
+                                            <th id="col_7" class="asLink" style="cursor:pointer;" onclick="check_column_for_priority(this)">Info</th>
+                                            <th id="col_8" class="asLink" style="cursor:pointer;" onclick="check_column_for_priority(this)">Debug</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for label, priority in priorities %}
+                                            <tr title="{{forloop.counter|add:-1}}">
+                                                <td>{{label}}</td>
+                                                {% for bool_value in priority %}
+                                                <td align="center" name="col_{{forloop.counter}}">
+                                                    <input style="width:18px;height:18px;" type="checkbox"
+                                                           title="{{forloop.counter|add:-1}}" name="priorityCheckboxes"
+                                                           {% if bool_value %}checked{% endif %} />
+                                                </td>
+                                                {% endfor %}
+                                                <td align="center"><a href="#" onclick="check_all_for_priority(this)"
+                                                                      title="{{priority.0}}">ALL</a></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div name="button">
+                                    <input class="btn btn-outline-info btn-sm" type="submit" value="SAVE" />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <p>You can change system log priorities as your preferences, but it may need to reboot daemon</p>
+                            </div>
+                        </div>
+                    </form><!--/ System Log Priorities Form-->
+                </div>
+            </div>
+        </div> <!--/ System Log Priorities Modal Dialog-->
+
+        <div class="modal fade" id="mailSettingsModal" tabindex="-1" role="dialog" aria-labelledby="mailSettingsModalLabel" aria-hidden="true"><!-- Mail Settings Modal Dialog-->
+            <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="mailSettingsModalLabel">SETTING FRAME ABOUT MAILING</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                onclick="document.getElementById('mail_settings_frame').src='/monitor/loading';location.reload();">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                        <div class="modal-body">
+
+                            <div class="container-fluid">
+                                <iframe style="width:100%;height:600px;" id="mail_settings_frame" src="{% url 'AgentRoot:loading_view'%}" frameborder="0"></iframe>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"
+                                    onclick="document.getElementById('mail_settings_frame').src='/monitor/loading';location.reload();">
+                                CLOSE
+                            </button>
+                        </div>
+                </div>
+            </div>
+        </div><!--/ Mail Settings Modal Dialog-->
+
+        <div class="modal fade" id="rebootConfirm" tabindex="-1" role="dialog" aria-labelledby="rebootConfirmLabel" aria-hidden="true"><!-- Reboot confirm Modal Dialog-->
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rebootConfirmLabel"><span>&#9888;</span> REBOOT Button Pressed</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Do you want to reboot ATIBA now ?</p>
+                        <p id="rebootCountdown"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">CANCEL</button>
+                        <form method="post" name="system_reboot">
+                            {%csrf_token%}
+                            <button type="submit" class="btn btn-danger btn-sm" name="reboot"
+                                    value="1" onclick="start_count_down(5, 'rebootCountdown')"><b>REBOOT NOW</b></button><!- reboot function not written yet -->
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div><!--/ Reboot confirm Modal Dialog-->
+
+        <div class="modal fade" id="resetAIConfirm" tabindex="-1" role="dialog" aria-labelledby="resetAIConfirmLabel" aria-hidden="true"><!-- Reset AI confirm Modal Dialog-->
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="resetAIConfirmLabel"><span>&#9888;</span> RESET AI </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Do you want to reset AI now ?</p>
+                        <p id="resetCountDown"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">CANCEL</button>
+                        <form method="post" name="reset_correlation_form">
+                            {%csrf_token%}
+                            <button type="submit" class="btn btn-danger btn-sm" name="reset_ai"
+                                    value="correlation" onclick="start_count_down(20, 'resetCountDown')">
+                                <b>RESET CORRELATION AI</b>
+                            </button><!- reset AI function not written yet -->
+
+                            <button type="submit" class="btn btn-danger btn-sm" name="reset_ai"
+                                    value="adaptation" onclick="start_count_down(20, 'resetCountDown')">
+                                <b>RESET ADAPTATION AI</b>
+                            </button><!- reset AI function not written yet -->
+
+                            <button type="submit" class="btn btn-danger btn-sm" name="reset_ai"
+                                    value="scoring" onclick="start_count_down(20, 'resetCountDown')">
+                                <b>RESET SCORING AI</b>
+                            </button><!- reset AI function not written yet -->
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div><!--/ Reset AI confirm Modal Dialog-->
+
+
+    </div>
+
+
+
+</div>
+
+<script type="text/javascript" language="JavaScript">
+
+/* To prevent the form from being submitted again when the page is refreshed. */
+if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+/* To get form validation errors out of modal */
+$(document).ready(function () {
+    var sampleObject = {{ sp.get_json|safe }};
+    //console.log(sampleObject);
+    var inValidFormParts = $(".invalid-feedback");
+    var formErrors = $(".errorlist");
+    //console.log(formErrors);
+    if(0 < inValidFormParts.length && inValidFormParts.length < 11){
+        var formWarning = "SYSTEM PREFERENCES FORM COULDN'T SAVED : <br>";
+        console.log("There are "+inValidFormParts.length+" invalid form parts !!");
+        inValidFormParts.each(function (el){
+            var warningTEXT = $(this).text();
+            var spanID = $(this).attr('id');
+            spanID = spanID.split("_")[2]+"_"+spanID.split("_")[3];
+            //console.log(spanID);
+            var labels = $("label.col-form-label");
+            var labelTEXT;
+            labels.each(function (el){
+                if($(this).attr('for') == spanID){
+                    labelTEXT = $(this).text().trim();
+                }
+            });
+            formWarning += labelTEXT+" : "+warningTEXT+"<br>";
+        });
+        $("#title_systemPreferences").css("color", "rgba(255, 99, 132, 0.85)")
+        addAlert(formWarning);
+    }else if(inValidFormParts.length == 11){
+        $("#id_loglifetime").val(sampleObject.loglifetime);
+        $("#id_errstatloglife").val(sampleObject.errstatloglife);
+        $("#id_alertlife").val(sampleObject.alertlife);
+        $("#id_newbehaviortime").val(sampleObject.newbehaviortime);
+        $("#id_timeseriesinterval").val(sampleObject.timeseriesinterval);
+        $("#id_incidenttimeout").val(sampleObject.incidenttimeout);
+        $("#id_corepointthreshold").val(sampleObject.corepointthreshold);
+        $("#id_corepiecethreshold").val(sampleObject.corepiecethreshold);
+        $("#id_incpiecethreshold").val(sampleObject.incpiecethreshold);
+        $("#id_autoparaminterval").val(sampleObject.autoparaminterval);
+        $("#id_autoparamtime").val(sampleObject.autoparamtime);
+        //console.log(inValidFormParts);
+        console.log("Form is Empty !!");
+    }
+});
+
+/* System Log Priorities form check box configuration */
+if(document.getElementsByName("priorityCheckboxes").length>0){
+    var checkList = document.getElementsByName("priorityCheckboxes");
+    for(var s=0;s<checkList.length;s++){
+        checkList[s].value = "("+checkList[s].parentElement.parentElement.title+","+checkList[s].title+")";
+    }
+}
+
+/* Function for Enable / Disable Alerts form check box check or uncheck all line */
+function check_all_for_alert(boxNames){
+    var boxes = document.getElementsByName(boxNames);
+    //console.log(boxes);
+    var val = boxes[0].checked;
+    //console.log(val);
+    for(var i=0;i<boxes.length;i++){
+        boxes[i].checked = !val;
+    }
+}
+
+/* Function for System Log Priorities form check box check or uncheck whole line */
+function check_all_for_priority(anchor){
+    childs = anchor.parentElement.parentElement.children;
+    var val = childs[1].firstElementChild.checked;
+    for(var i=1;i<(childs.length-1);i++){
+        childs[i].firstElementChild.checked = !val;
+    }
+}
+
+/* Function for System Log Priorities form check box check or uncheck whole column */
+function check_column_for_priority(priorityColumn){
+    var cells = document.getElementsByName(priorityColumn.id);
+    var val = cells[1].firstElementChild.checked;
+    for(var i=0;i<(cells.length);i++){
+        cells[i].firstElementChild.checked = !val;
+    }
+}
+
+/* Countdown when reset function executing */
+function start_count_down(countFrom, elementID){
+    countFrom = parseInt(countFrom);
+    var countDownP = document.getElementById(elementID)
+    countDownP.style = "color:red;text-align:center;font-size:16pt;";
+    countDownP.innerHTML = countFrom;
+    var counter = setInterval(function (){
+        countDownP.innerHTML = countFrom-1;
+        countFrom=countFrom-1;
+        if(countFrom==0){clearInterval(counter);}
+    }, 1000);
+}
+
+
+</script>
+
+{% endblock %}

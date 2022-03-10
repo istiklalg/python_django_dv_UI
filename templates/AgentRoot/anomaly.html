@@ -1,0 +1,1066 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> ATIBAreport - {{type}} </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+
+        <style>
+            * {box-sizing: border-box;}
+
+            .img-zoom-container {
+                position: relative;
+                //overflow:auto;
+            }
+
+            .img-zoom-lens {
+                position: absolute;
+                border: 1px solid #d4d4d4;
+                border-radius: 5px;
+                /*set the size of the lens:*/
+                width: 5%;
+                height: 40px;
+            }
+
+            .img-zoom-result {
+                border: 1px solid #d4d4d4;
+                margin-bottom: 1rem;
+                /*set the size of the result div:*/
+                width: 50%;
+                //height: 300px;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id="loading">
+            <div class="container-fluid" id="atiba_loading">
+                <h2 class="atiba_loading_h">ΛTIBΛ</h2>
+            </div>
+        </div><!-- / LOADING PART -->
+
+        <div class="container-fluid" id="page" style="margin:0;padding:0;">
+            <div class="row" name="pageSeparators" id="pageSeparators" style="margin:10px;min-height:25px;">
+                <div class="col-md-2 asLink" align="center" id="logsSeparator" name="separators"
+                     style="border:0.5px solid grey;border-radius:15px 15px 0 0;background-color:rgba(150, 150, 150, 0.25);"
+                     onclick="separateParts('logsSeparator', 'pageLogs')">
+                    LOGS ABOUT ALERT
+                </div>
+                <div class="col-md-2 asLink" align="center" id="modellingSeparator" name="separators"
+                     style="border:0.5px solid grey;border-radius:15px 15px 0 0;background-color:rgba(150, 150, 150, 0.25);"
+                     onclick="separateParts('modellingSeparator', 'pageModelling')">
+                    MODELLING
+                </div>
+                <div class="col-md-4 asLink" align="center" id="pageBaseSeparator" name="separators"
+                     style="border:0.5px solid grey;border-radius:15px 15px 0 0;border-bottom:none;"
+                     onclick="separateParts('pageBaseSeparator', 'pageBase')">
+                    ALERT DETAILS
+                </div>
+                <div class="col-md-2 asLink" align="center" id="causalSeparator" name="separators"
+                     style="border:0.5px solid grey;border-radius:15px 15px 0 0;background-color:rgba(150, 150, 150, 0.25);"
+                     onclick="separateParts('causalSeparator', 'pageCausal')">
+                    CAUSAL RELATIONSHIPS
+                </div>
+                <div class="col-md-2 asLink" align="center" id="mappingSeparator" name="separators"
+                     style="border:0.5px solid grey;border-radius:15px 15px 0 0;background-color:rgba(150, 150, 150, 0.25);"
+                     onclick="separateParts('mappingSeparator', 'pageMapping')">
+                    PLACE IN CAUSAL MAPPING
+                </div>
+            </div> <!-- / SEPARATORS PART -->
+
+            <div class="container-fluid" id="pageBody">
+                <div class="container-fluid" name="pageParts" id="pageLogs" style="display:none;">
+                    <table class="table table-sm table-hover">
+                        <caption>LOGS IN INTERVAL [{{anomaly.logdatestart}}, {{anomaly.logdateend}}] RELATED WITH THIS ALERT</caption>
+                        <thead class="thead-light">
+                            <tr>
+                                <th>IP</th>
+                                <th>Unique ID</th>
+                                <th>Log Code</th>
+                                <th>Date</th>
+                                <th>Log Event</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in elasticLogsInInterval %}
+                                <tr>
+                                    <td>{{ log.ipaddress }}</td>
+                                    <td>{{ log.uniqueid }}</td>
+                                    <td>{{ log.logcode }}</td>
+                                    <td>{{ log.credate }}</td>
+                                    <td>{{ log.logevent }}</td>
+                                </tr>
+                                <tr style="color:rgba(150, 150, 150, 0.65);">
+                                    <td colspan="1">Full Log : </td>
+                                    <td colspan="4">{{ log.rawlog }}</td>
+                                </tr>
+                                {% if log.parameters %}
+                                <tr style="color:rgba(150, 150, 150, 0.65);">
+                                    <td colspan="1">Parameters & Values : </td>
+                                    <td colspan="4">{% for k, v in log.parameters.items %}{{ k }} : {{ v }}, {% endfor %}</td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <hr>
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if elasticLogsInInterval.has_previous %}
+                                <a href="?l_page=1">&laquo; jump to first </a>/
+                                <a href="?l_page={{ elasticLogsInInterval.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"> previous </a>/
+                            {% endif %}
+
+                            <span class="current">
+                                <i>{{ elasticLogsInInterval.number }}. of {{ elasticLogsInInterval.paginator.num_pages }} pages </i>
+                            </span>
+
+                            {% if elasticLogsInInterval.has_next %}
+                                /<a href="?l_page={{ elasticLogsInInterval.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"> next </a>
+                                /<a href="?l_page={{ elasticLogsInInterval.paginator.num_pages }}"> jump to last &raquo;</a>
+                            {% endif %}
+                        </span>
+                        <br>
+                    </div>{# /pagination #}
+                    <br><br>
+                </div>  <!-- LOGS ABOUT ALERT PART (LOGS GETTING FROM ELASTIC) -->
+                <div class="container-fluid" name="pageParts" id="pageModelling" style="display:none;">
+<!--                    <p>This is modelling part of the page</p>-->
+                    <div class="container-fluid row">
+                        <span style="font-weight:bold;color:lightgrey;">BEHAVIORAL MODEL : </span><span style=""> {{anomaly.get_sparsity_data.0|upper}}</span>
+                    </div>
+                    {% if anomaly.get_sparsity_data.2 %}
+                        <div class="container-fluid row justify-content-center">
+                            <div class="col-md-12" name="timeSeriesCharts"
+                                 id="timeSeriesModelling" align="center">
+                                <canvas class="timeSeriesCanvas" id="timeSeriesModellingCanvas" height="100" title="Modelling Data"></canvas>
+                                <span>Data Used For Modelling</span>
+                                <data id="{{anomaly.get_sparsity_data.1}}" value="{{anomaly.get_sparsity_data.2}}" style="display:none;">line</data>
+                            </div>
+                        </div>
+                        <hr>
+                    {% endif %}
+                    <div class="container-fluid row">
+                        {% if list_of_interval %}
+                        <div class="col-md-6">
+                            <div align="center">Last 10 Model Types</div>
+                            <br>
+                            <p>
+                            {% for x in list_of_interval %}
+                                <span>{% if forloop.counter == 1 %}|{% endif %}
+                                    <span {% if x.modeltype == 1 %} style="color:green;" {% elif x.modeltype == 2 %} style="color:blue;" {% else %} style="color:lightgrey;" {% endif %}>
+                                        {{x.model_type_name|default_if_none:"Empty Model Type"}}
+                                    </span>
+                                    |
+                                </span>
+                            {% endfor %}
+                            </p>
+                            <br>
+<!--                            <div align="center">Anomaly Score for Behavioral Anomalies</div>-->
+
+                        </div>
+                        {% endif %}
+                        {% if alarms %}
+                            <div class="col-md-6" style="border-left:0.5px solid lightgrey">
+                                <div align="center">Other {{alarms|length}} Alarm(s) In Same Interval & Model Type</div>
+                                <br>
+                                {% for x in alarms %}
+                                    <p><a href="{{x.get_absolute_url}}">{{x.id}} - {{x.get_type_definition}} - {{x.credate}} ({{x.define_anomaly}})</a></p>
+                                {% endfor %}
+                                <hr>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <hr>
+                </div>  <!-- MODELLING PART (SPARSE OR CONTINUOUS MODELLING DETAILS) -->
+                <div class="container-fluid" name="pageParts" id="pageBase" style="display:block;">
+                    {% if dataWarning %}<h5 style="text-align:center;color:rgba(255, 99, 132, 0.85);">{{ dataWarning }}</h5>{% endif %}
+                    {% if intervalWarning %}<p style="text-align:center;color:rgba(255, 99, 132, 0.85);">{{ intervalWarning }}</p>{% endif %}
+                    {% if anomaly.get_device %}
+                        <p><b>Log Source : </b> {{anomaly.get_device.uniqueid}} / {{anomaly.get_device.brand}} / {{anomaly.get_device.brandModel}} / {{anomaly.get_device.brandModel.devicetype}}</p>
+                    {% else %}
+                        {{anomaly.get_device}}
+                    {% endif %}
+
+                    <p><b>Anomaly Score : </b> <i>{{ anomaly.anomalyscore|default_if_none:"No score calculated for this alert" }}</i></p>
+
+                    {% if anomaly.define_anomaly %}
+                        <p><b>Anomaly : </b> {{anomaly.define_anomaly}}</p>
+                    {% endif %}
+                    {% if anomaly.anomalytype == 1301 or anomaly.anomalytype == 1303 or anomaly.anomalytype == 1304 %}
+                        <p>
+                            <b>Abnormal Parameter : </b><i style="color:rgba(255, 99, 132, 0.85);">{{anomaly.get_anomaly_parameter}}</i>
+                            <span> in {{anomaly.anomalycount}} logs between </span><i><u> {{anomaly.logdatestart|date:'Y-m-d H:i:s'}}</u> & <u>{{anomaly.logdateend|date:'Y-m-d H:i:s'}}</u></i>
+                        </p>
+                        <p>
+                            <b>Parameter Values: </b> <i style="color:rgba(255, 99, 132, 0.85);"> {{anomaly.get_anomaly_parameter_and_values.1}}</i>
+                        </p>
+                    {% elif anomaly.anomalytype == 1401 %}
+                        <p>
+                            <b>Abnormal Parameter : </b>
+                            <span>Value of Gauge Parameter</span>
+                            <i style="color:rgba(255, 99, 132, 0.85);">{{anomaly.get_anomaly_parameter}}</i>
+                            <span> is {{anomaly.anomalycount}} in this period of time </span>
+                            <i><u> {{anomaly.logdatestart|date:'Y-m-d H:i:s'}}</u> & <u>{{anomaly.logdateend|date:'Y-m-d H:i:s'}}</u></i>
+                        </p>
+                        <p>
+                            <b>Parameter Values: </b> <i style="color:rgba(255, 99, 132, 0.85);"> {{anomaly.get_anomaly_parameter_and_values.1}}</i>
+                        </p>
+                    {% elif anomaly.anomalytype == 1201 or anomaly.anomalytype == 1203 or anomaly.anomalytype == 1204 %}
+                        <p>
+                            <span>{{anomaly.anomalycount}} logs between </span><i><u> {{anomaly.logdatestart|date:'Y-m-d H:i:s'}}</u> & <u>{{anomaly.logdateend|date:'Y-m-d H:i:s'}}</u></i>
+                        </p>
+                    {% elif anomaly.anomalytype == 1101 %}
+                        <p>
+                            <span>{{anomaly.anomalycount}} logs between </span><i><u> {{anomaly.logdatestart|date:'Y-m-d H:i:s'}}</u> & <u>{{anomaly.logdateend|date:'Y-m-d H:i:s'}}</u></i>
+                        </p>
+                    {% elif anomaly.anomalytype == 2 %}
+                        <p>
+                            <span>{{anomaly.anomalycount}} logs between </span><i><u> {{anomaly.logdatestart|date:'Y-m-d H:i:s'}}</u> & <u>{{anomaly.logdateend|date:'Y-m-d H:i:s'}}</u></i><br/>
+                            <b>Log Code : </b><i> {% if anomaly.logcode %}{{anomaly.logcode}}{% endif %}</i><br/>
+                            {% if anomaly.logevent %}<span>Log Event : </span><i> {{anomaly.logevent}}</i><br/>{% endif %}
+                            <br>
+                            <table class="table table-sm table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>IP</th>
+                                        <th>Unique ID</th>
+                                        <th>Log Code</th>
+                                        <th>Date</th>
+                                        <th>Log Event</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in elasticLogs %}
+                                        <tr>
+                                            <td>{{ log.ipaddress }}</td>
+                                            <td>{{ log.uniqueid }}</td>
+                                            <td>{{ log.logcode }}</td>
+                                            <td>{{ log.credate }}</td>
+                                            <td>{{ log.logevent }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </p>
+                    {% elif anomaly.anomalytype == 1 %}
+                        <p>
+                            <b>Log Code : </b><i> {% if anomaly.logcode %}{{anomaly.logcode}}{% endif %}</i><br/>
+                            {% if anomaly.logevent %}<span>Log Event : </span><i> {{anomaly.logevent}}</i><br/>{% endif %}
+                            <br>
+                            <table class="table table-sm table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>IP</th>
+                                        <th>Unique ID</th>
+                                        <th>Log Code</th>
+                                        <th>Date</th>
+                                        <th>Log Event</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in elasticLogs %}
+                                        <tr>
+                                            <td>{{ log.ipaddress }}</td>
+                                            <td>{{ log.uniqueid }}</td>
+                                            <td>{{ log.logcode }}</td>
+                                            <td>{{ log.credate }}</td>
+                                            <td>{{ log.logevent }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </p>
+                    {% elif anomaly.anomalytype == 3 %}
+                        <p>
+                            <span>{{anomaly.anomalycount}} logs between </span><i><u> {{anomaly.logdatestart|date:'Y-m-d H:i:s'}}</u> & <u>{{anomaly.logdateend|date:'Y-m-d H:i:s'}}</u></i><br/>
+                        </p>
+                    {% endif %}
+                <!-- Graph parts of page -->
+                    {% if anomaly.anomalytype == 1201 or anomaly.anomalytype == 1301 or anomaly.anomalytype == 3 or anomaly.anomalytype == 1401 %}
+
+                        <div class="col-11 col-lg-11 col-md-11 col-sm-11" align="center" name="graph_div" id="anomaly_graph">
+                            <canvas id="graph_canvas"></canvas>
+                            <hr/>
+                            <data id="data" value="{{label_list}}" style="display:none;"
+                                  title="Enabled / Disabled Alerts">horizontalBar</data>
+                        </div>
+
+                    {% elif anomaly.anomalytype == 1203 or anomaly.anomalytype == 1204 or anomaly.anomalytype == 1303 or anomaly.anomalytype == 1304 %}
+                        <div class="row">
+                        <div class="col-11 col-lg-7 col-md-7 col-sm-11" align="center" name="graph_div" id="counts_anomaly_graph">
+                            <canvas id="counts_graph_canvas"></canvas>
+                            <hr/>
+                            <data id="counts_label_data" value="{{label_list}}" style="display:none;"
+                                  title="Enabled / Disabled Alerts">horizontalBar</data>
+                        </div>
+                        <div class="col-11 col-lg-4 col-md-4 col-sm-11" align="center" name="graph_div" id="gaussian_anomaly_graph">
+                            <canvas id="gaussian_graph_canvas"></canvas>
+                            <hr/>
+                            <data id="gaussian_data" value="{{label_list}}" style="display:none;"
+                                  title="Enabled / Disabled Alerts">horizontalBar</data>
+                            <div class="row justify-content-center">{{kde_exception}}</div>
+                        </div>
+                        </div>
+                    {% endif %}
+                <!--/ Graph parts of page -->
+                    <hr>
+                    <div>
+                        <h5 align="center">Information about anomalous log</h5>
+                        {% if anomaly_logs %}
+                            {% for x in anomaly_logs %}
+                                <div class="container-fluid row justify-content-center">
+                                    <div class="col-lg-7 col-md-6">
+                                        <ul>
+                                            {% for k, v in x.general_info.items %}
+                                                <li>
+                                                    <b>{{k|upper}} : </b><i> {{v}}</i>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="col-lg-4 col-md-6" name="timeSeriesCharts"
+                                         id="timeSeriesAnomalyLogs{{forloop.counter}}" align="center"
+                                         onclick="drawSelectedOne(this.id)">
+                                        <canvas class="timeSeriesCanvas" id="timeSeriesAnomalyLogsCanvas{{forloop.counter}}" title="Time Series"></canvas>
+                                        <span>Time Series of Anomalous Log</span>
+                                        <data id="{{sample_labels}}" value="{{x.logtimeseries}}" style="display:none;">line</data>
+                                    </div>
+                                </div>
+<!--                                <small style="color:rgba(75, 192, 192, 0.50);">-->
+<!--                                    {{x.get_json|safe}}-->
+
+<!--                                </small>-->
+                                <hr style="width:70%;color:green;">
+                            {% endfor %}
+                        {% else %}
+                             <div align="center">No match in anomalous logs for this Alert</div>
+                        {% endif %}
+                    </div>
+                    <hr>
+                </div>  <!-- ALERT DETAILS PART (DETAIL INFORMATION AND ANOMALY LOGS)-->
+                <div class="container-fluid" name="pageParts" id="pageCausal" style="display:none">
+                    {% if intervalWarning %}<p style="color:rgba(255, 99, 132, 0.85);">{{ intervalWarning }}</p>{% endif %}
+                    {% if lastFiveMinWarning and anomaly_logs_details %}<p style="color:rgba(255, 99, 132, 0.85);">{{ lastFiveMinWarning }}</p>{% endif %}
+                    <div>
+                        {%csrf_token%}
+                        {% if anomaly_logs_details %}
+                            {% if anomaly_logs_details.0 %} {# it means it's alog in this anomalylogsdetails, this part contains information about relationship #}
+                            <div id="ifAlogDiv">
+                                <div><span style="font-weight:bold;color:rgba(150, 150, 150, 0.50);">CAUSES OF ALERT (IT'S ALOG)</span>
+<!--                                    <br>-->
+<!--                                    <button class="btn btn-sm btn-outline-info" style="font-size:9pt;"-->
+<!--                                            onclick="drawAllOtherCharts()"> SHOW ALL CHARTS </button>-->
+                                </div>
+                                {% for x in anomaly_logs_details.0 %}
+<!--                                    <span><b>{% for anom in x.anomalyLog.get_its_anomaly %}{{ anom.get_json|safe }}{% endfor %}</b></span><br>-->
+                                    <div class="row">
+                                        <div class="col-md-3" align="center" style="color:rgba(54, 162, 235, 0.85);">
+                                            <div>ALERT</div>
+                                            <hr>
+<!--                                            <div style="word-wrap:break-word;">{{ x.anomalyLog }}</div>-->
+                                            <div style="word-wrap:break-word;text-align:left;">
+                                                <ul>
+                                                    {% for k, v in x.anomalyLog.general_info.items %}
+                                                        <li>
+                                                            <b>{{k|upper}} : </b><i> {{v}}</i>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1" style="position:relative;font-size:16pt;">
+                                            <div style="margin:0;position:absolute;top:50%;left:50%;-ms-transform:-50% -50%;transform:-50% -50%;">&#x21e8;</div>
+<!--                                            <div style="margin:0;position:absolute;top:50%;left:50%;-ms-transform:-50% -50%;transform:-50% -50%;">&#x21e6;</div>-->
+                                        </div>
+                                        <div class="col-md-4" align="center" style="color:rgba(150, 150, 150, 0.85);">
+                                            <div>Causal relation details<br>({{x.get_relation_string}})</div>
+                                            <hr>
+                                            <div>
+                                                <table>
+                                                    <tbody>
+                                                    {% for k, v in x.get_relations_dict.items %}
+                                                        <tr>
+                                                            <td>{{k}}</td>
+                                                            <td> : </td>
+                                                            <td>{% if v == True %}&#x2714;{% elif v == False %}&#x2716;{% else %}{{v}}{% endif %}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1" style="position:relative;font-size:16pt;">
+                                            <div style="margin:0;position:absolute;top:50%;left:50%;-ms-transform:-50% -50%;transform:-50% -50%;">&#x21e8;</div>
+<!--                                            <div style="margin:0;position:absolute;top:50%;left:50%;-ms-transform:-50% -50%;transform:-50% -50%;">&#x21e6;</div>-->
+                                        </div>
+                                        <div class="col-md-3" align="center">
+                                            <div>{{ x.causeeffect|upper }}</div>
+                                            <hr>
+<!--                                            <div style="word-wrap:break-word;">{{ x.subAnomalyLog }}</div>-->
+                                            <div style="word-wrap:break-word;text-align:left;">
+                                                <ul>
+                                                    {% for k, v in x.subAnomalyLog.general_info.items %}
+                                                        <li>
+                                                            <b>{{k|upper}} : </b><i> {{v}}</i>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="container-fluid row justify-content-center">
+                                        <div class="col-lg-5 col-md-6" align="center">
+                                            <hr style="margin:0;" />
+                                            <div class="row justify-content-center form-inline">
+                                                <select class="form-control" name="ald_feedback_selection_{{x.id}}"
+                                                        id="ald_select_{{x.id}}" style="font-size:9pt;">
+                                                    <option value="" {%if x.userfeedback is None%}selected{%endif%}>No Given Feedback</option>
+                                                    <option disabled>----</option>
+                                                    <option value="True" {%if x.userfeedback is True%}selected{%endif%}>Correct</option>
+                                                    <option value="False" {%if x.userfeedback is False%}selected{%endif%}>Wrong</option>
+                                                </select>
+                                                <button class="btn btn-sm btn-outline-info form-control" name="ald_select_{{x.id}}"
+                                                        {%if x.userfeedback is not None %}disabled{%endif%} id="ald_button_{{x.id}}"
+                                                        onclick="let value = document.getElementById(this.name).value;if(value) sendFeedBackToPtyhon(this.name, value);"
+                                                        style="font-size:9pt;">Send Feedback</button>
+                                            </div>
+                                            <hr style="margin:0;" />
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <p id="error_text_{{x.id}}" style="color:red;"></p>
+                                        </div>
+                                    </div>
+                                    <div class="container-fluid row justify-content-center">
+                                        <div class="col-lg-5 col-md-6" name="timeSeriesCharts"
+                                             id="timeSeriesIfAlog{{forloop.counter}}" align="center"
+                                             onclick="drawSelectedOne(this.id)">
+                                            <canvas class="timeSeriesCanvas" id="timeSeriesIfAlogCanvas{{forloop.counter}}" title="Time Series"></canvas>
+                                            <span>Time Series of Alert & {{ x.causeeffect }} & {{ x.causeeffect }} relatively to Alert</span>
+                                            <hr>
+                                            <data id="{{sample_labels}}" value="{{x.anomalyLog.logtimeseries}}*{{x.subAnomalyLog.logtimeseries}}*{{x.subtimeseries}}" style="display:none;">line</data>
+                                        </div>
+<!--                                        <div class="col-lg-5 col-md-6" name="timeSeriesCharts"-->
+<!--                                             id="causeSeriesIfAlog{{forloop.counter}}" align="center"-->
+<!--                                             onclick="drawSelectedOne(this.id)">-->
+<!--                                            <canvas class="timeSeriesCanvas" id="causeSeriesCanvas{{forloop.counter}}" title="Cause Time Series"></canvas>-->
+<!--                                            <hr>-->
+<!--                                            <data id="{{sample_labels}}" value="{{x.subtimeseries}}" style="display:none;">line</data>-->
+<!--                                        </div>-->
+                                    </div>
+                                    <div>
+<!--                                        <small style="color:rgba(75, 192, 192, 0.50);">{{x.get_json|safe}}</small>-->
+                                    </div>
+                                <hr style="border:2px solid rgba(150, 150, 150, 0.40);border-radius:2px;">
+                                {% endfor %}
+                            </div> <!-- / IF ALOG DIV-->
+                            <br>
+                            {% endif %}
+                            <br>
+                            {% if anomaly_logs_details.1 %} {# it means it's subalog in this anomalylogsdetails, this part contains information about relationship and link for alog of this #}
+                            <div id="ifSubalogDiv">
+                                <div style="font-weight:bold;color:rgba(150, 150, 150, 0.50);">IT'S CAUSE FOR ANOTHER ALERT PROBABLY (IT'S SUBALOG) </div>
+                                <br>
+                                {% for x in anomaly_logs_details.1 %}
+                                    {% if x.causeeffect == "Cause" and x.anomalyLog.get_its_anomaly %}
+                                    <div>
+                                        Go to
+                                        <b class="asLink" onclick="location.href='/monitor/anomalies/{{x.anomalyLog.get_its_anomaly.0.id}}';">
+                                            {{x.anomalyLog.get_its_anomaly.0.id}}
+                                        </b>
+                                        page to see details
+                                    </div>
+                                    {% else %}
+                                    <div>
+                                        {% if not x.anomalyLog.get_its_anomaly %}<span>There is no generated alarm the situation that it caused</span><br>{% endif %}
+                                        {% if x.causeeffect != "Cause" %}<span>There is no causal relation</span>{% endif %}
+                                    </div>
+                                    {% endif %}
+                                    <hr>
+<!--                                    <span><b>{% for anom in x.anomalyLog.get_its_anomaly %}{{ anom.get_json|safe }}{% endfor %}</b></span><br>-->
+<!--                                    <span><b>{{ x.anomalyLog.get_its_anomaly }}</b></span><br>-->
+                                    <div style="color:rgba(150, 150, 150, 0.50);">
+                                        <div class="container-fluid row">
+                                            <div class="col-md-4">
+                                                <span>(ALOG) IT'S CAUSE FOR : <i>{{ x.anomalyLog.logevent }}</i></span><br>
+                                                <span>CAUSALITY : <i>{{ x.causeeffect }}</i></span><br>
+                                                <span>RELATIONS BETWEEN THEM : <i>{{ x.get_relation_string }}</i></span><br>
+                                                <div>
+                                                    <div>
+                                                        <table>
+                                                            <tbody>
+                                                            {% for k, v in x.get_relations_dict.items %}
+                                                                <tr>
+                                                                    <td>{{k}}</td>
+                                                                    <td> : </td>
+                                                                    <td>{% if v == True %}&#x2714;{% elif v == False %}&#x2716;{% else %}{{v}}{% endif %}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8" align="center">
+                                                FOR GRAPH
+                                            </div>
+                                        </div>
+<!--                                        <small style="color:rgba(75, 192, 192, 0.50);">{{x.get_json|safe}}</small>-->
+                                    </div>
+                                    <hr style="border:2px solid rgba(150, 150, 150, 0.40);border-radius:2px;">
+                                {% endfor %}
+                            </div> <!-- / IF SUBALOG DIV -->
+                            <br>
+                            {% endif %}
+                        {% else %}
+                             <p align="center">There is no causal relationships for this alert</p>
+                        {% endif %}
+                    </div>
+                </div>  <!-- CAUSAL RELATIONS PART (ANOMALY LOGS DETAILS) -->
+                <div class="container-fluid" name="pageParts" id="pageMapping" style="display:none">
+                    <div>
+                        {% if rc_graphs %}
+                            {% if rc_graph_paths %}
+                                <div>
+                                    <h5 align="center">MAPPING(S)</h5>
+                                    {% for anom, rc, paths in rc_graph_paths %}
+<!--                                        <p>{{anom}} - {{rc}} - {{paths}}</p>-->
+<!--                                        <p style="color:rgba(75, 192, 192, 0.85);">RC GRAPH - {{rc.rc_map|safe}}</p>-->
+
+                                        <div class="row justify-content-center test">
+                                            <div class="col-sm-4" align="center" style="display:flex;flex-direction:column;justify-content:space-evenly;flex-wrap:wrap;overflow:auto;">
+                                                {% for node in paths %}
+                                                    {% if forloop.counter != 1 %}
+    <!--                                                    <p class="arrow" style="order:{{forloop.counter}};font-size:16pt;">&#x21e8;</p>-->
+                                                        <p class="arrow" style="order:{{forloop.counter}};font-size:16pt;">&#x21e9;</p>
+                                                    {% endif %}
+                                                    <p class="item" {% if node in anomaly_logs %} style="order:{{forloop.counter}};color:rgba(54, 162, 235, 0.85);word-wrap:break-word;" {% else %} style="order:{{forloop.counter}};word-wrap:break-word;" {% endif %}>
+                                                        ID : {{ node.id }} / Log Source : {{ node.get_device.uniqueid }}
+                                                        <br>
+                                                        Log Event : {{ node.logevent }}
+                                                        <span style="font-weight:bold;">
+                                                            {% if node.id in rc.rootlist %}(incident){% elif node.id in rc.leaflist %}(root-cause){% else %}(in a position between incident and root-cause){% endif %}
+                                                        </span>
+                                                    </p>
+                                                {% endfor %}
+                                            </div>
+                                            {% if rc.graphimage %}
+                                            <div class="col-sm-8">
+                                                <div class="row justify-content-center img-zoom-container" style="padding:0;margin:0;">
+                                                    <img class="col-sm-6" id="mapGraph-{{forloop.counter}}" src="{{rc.graphimage.url}}"
+                                                         alt="Whole Root Cause Map" title="Root Cause Map" />
+                                                    <div class="col-sm-6 img-zoom-result" id="zoom_result-{{forloop.counter}}"></div>
+                                                </div>
+                                                <div class="row justify-content-center">
+                                                    <div class="col-sm-6" align="center">
+                                                        <a class="asLink" href="{{rc.get_absolute_url}}" title="See its details" target="_blank">
+                                                            GO TO DETAIL PAGE OF THIS INCIDENT
+                                                        </a>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <button class="btn btn-sm btn-outline-info" style="width:100%;font-size:9pt;"
+                                                                onclick="imageZoom('mapGraph-{{forloop.counter}}', 'zoom_result-{{forloop.counter}}');">ADJUST ZOOM</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <div class="col-sm-8">
+                                                <div class="row justify-content-center" style="padding:10px;margin:0;">
+                                                    Incident & Root-Cause Mapping Graph couldn't prepared
+                                                </div>
+                                                <div class="row justify-content-center" style="padding:10px;margin:0;">
+                                                    <a class="asLink" href="{{rc.get_absolute_url}}" title="See its details" target="_blank">
+                                                        GO TO DETAIL PAGE OF THIS INCIDENT
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            <br>
+                                        </div>
+<!--                                        <span>RC GRAPHS FOR THIS : {{ rc }}</span>-->
+<!--                                        <br>-->
+<!--                                        <small style="color:rgba(75, 192, 192, 0.85);">{{rc.get_json|safe}}</small>-->
+<!--                                        <br>-->
+
+                                        <hr style="border:2px solid rgba(150, 150, 150, 0.40);border-radius:2px;">
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p align="center">There is mappings including this, but couldn't found in any path</p>
+                                <span>RC GRAPHS INCLUDING THIS :</span>
+                                {% for rcMap in rc_graphs %}
+                                    <br>
+                                    <span>Created at : </span><a href="{{rcMap.get_absolute_url}}" target="_blank">{{rcMap.graphupdatetime}} click to go details</a>
+<!--                                    <small style="color:rgba(75, 192, 192, 0.85);">{{rcMap.get_json|safe}}</small>-->
+                                {% endfor %}
+                                <br>
+                                <hr style="border:2px solid rgba(150, 150, 150, 0.40);border-radius:2px;">
+                            {% endif %}
+                        {% elif anomaly_logs_details %}
+                            <p align="center">This alert is not included in any mapping.</p>
+                        {% else %}
+                            <p align="center">This alert is not included in any mapping, because it has no causal relationship.</p>
+                        {% endif %}
+                    </div>
+<!--                    <div>-->
+<!--                        {% if rc_graphs %}-->
+<!--                            <span>MAPPING(S) :</span><hr>-->
+<!--                            {% for x in rc_graphs %}-->
+<!--                                <div class="container-fluid" align="center" style="display:flex;flex-direction:row;justify-content:space-evenly;flex-wrap:wrap;overflow:auto;">-->
+<!--                                    {% for node in x.get_node_loglist %}-->
+<!--                                        {% if forloop.counter != 1 %}-->
+<!--                                            <p class="arrow" style="order:{{forloop.counter}};font-size:16pt;">&#x21e8;</p>-->
+<!--                                        {% endif %}-->
+<!--                                        <p class="item" {% if node in anomaly_logs %} style="order:{{forloop.counter}};color:rgba(54, 162, 235, 0.85);word-wrap:break-word;" {% else %} style="order:{{forloop.counter}};word-wrap:break-word;" {% endif %}>-->
+<!--                                            Log Source : {{ node.get_device.uniqueid }}-->
+<!--                                            <br>-->
+<!--                                            Log Event : {{ node.logevent }}-->
+<!--                                            {% if node.id in x.rootlist %}-->
+<!--                                                <span style="font-weight:bold;"> (incident) </span>-->
+<!--&lt;!&ndash;                                                <p class="arrow">&#8595;</p>&ndash;&gt;-->
+<!--                                            {% elif node.id in x.leaflist %}-->
+<!--                                                <span style="font-weight:bold;"> (root-cause) </span>-->
+<!--                                            {% else %}-->
+<!--                                                <span style="font-weight:bold;"> (in a position between incident and root-cause) </span>-->
+<!--                                            {% endif %}-->
+<!--                                        </p>-->
+<!--                                    {% endfor %}-->
+<!--                                </div>-->
+<!--                                <span>RC GRAPHS FOR THIS : {{ x }}</span>-->
+<!--                                <br>-->
+<!--                                <small style="color:rgba(75, 192, 192, 0.85);">{{x.get_json|safe}}</small>-->
+<!--                                <br>-->
+<!--                                <hr style="border:2px solid rgba(150, 150, 150, 0.40);border-radius:2px;">-->
+<!--                            {% endfor %}-->
+<!--                            <br>-->
+<!--                        {% else %}-->
+<!--                             <p align="center">This alert is not included in any mapping, because it has no causal relationship.</p>-->
+<!--                        {% endif %}-->
+<!--                    </div>-->
+                </div>  <!-- PLACE IN CAUSAL MAPPING PART (RC GRAPHS AND PATHS) -->
+
+                <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+                    <small>{% include 'messages.html' %}</small>
+                </div>
+            </div> <!-- / BASE PAGE PART -->
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/Chart.js' %}"></script>
+<!--        <script type="text/javascript" language="JavaScript" src="{% static 'js/bokeh-2.3.2.min.js' %}"></script>-->
+<!--        {{ scrpt|safe }}-->
+        <script type="text/javascript" language="JavaScript">
+        // colors -> [green, red, orange, blue, yellow, grey, purple]
+        var graphColors = ['rgba(75, 192, 192, 0.85)','rgba(255, 99, 132, 0.85)','rgba(255, 159, 64, 0.85)','rgba(54, 162, 235, 0.85)','rgba(255, 206, 86, 0.85)','rgba(150, 150, 150, 0.85)','rgba(106, 92, 112, 0.85)']
+        var labelNames = ['Alert ', 'Cause ', 'Sub']
+
+        $(document).ready(function () {
+            $("#loading").hide();
+            $("#page").show();
+            //$("a[class='bk bk-logo bk-logo-small']").remove(); /* i need it for bokeh graphs */
+            $(".alert").fadeTo(8000, 0);
+            setTimeout(function () {$(".alert").alert("close")}, 10000);
+
+            // if using pages for logs !!
+            var logs_page = '{{request.GET.l_page}}'!=''?'{{request.GET.l_page}}':null;
+            if(logs_page){separateParts('logsSeparator', 'pageLogs');}
+
+            if({{anomaly.anomalytype}}==1201||{{anomaly.anomalytype}}==1301||{{anomaly.anomalytype}}==3){
+                var _div = document.getElementById("anomaly_graph");
+                var _canvas = document.getElementById("graph_canvas");
+                var _data = document.getElementById("data");
+                var _label_list = (_data.value).replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+                var ctx = _canvas.getContext("2d");
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: _label_list,
+                        //labels: {{label_list}},
+                        datasets: [
+                            {
+                                label: "Upper Bound",
+                                data: {{graph_data}}[0],
+                                backgroundColor: ['rgba(150, 150, 150, 0.50)'],
+                                borderColor: ['rgba(150, 150, 150, 0.50)'],
+                                borderWidth: 0.5,
+                                pointRadius: 1,
+                                fill: '1',
+                            },
+                            {
+                                label: "Lower Bound",
+                                data: {{graph_data}}[2],
+                                backgroundColor: ['rgba(150, 150, 150, 0.50)'],
+                                borderColor: ['rgba(150, 150, 150, 0.50)'],
+                                borderWidth: 0.5,
+                                pointRadius: 1,
+                                fill: false,
+                            },
+                            {
+                                label: "Log Count",
+                                order: 1,
+                                data: {{graph_data}}[1],
+                                backgroundColor: 'rgba(75, 192, 192, 0.85)',
+                                borderColor: 'rgba(75, 192, 192, 0.85)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                fill: false,
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{scaleLabel: {display: true, labelString: 'Date & Time'}}],
+                            yAxes: [{scaleLabel: {display: true, labelString: 'Count of Logs'}, ticks: {beginAtZero: true,}}]
+                        }
+                    }
+                });
+            }else if({{anomaly.anomalytype}}==1401){
+                var _div = document.getElementById("anomaly_graph");
+                var _canvas = document.getElementById("graph_canvas");
+                var _data = document.getElementById("data");
+                var _label_list = (_data.value).replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+                var ctx = _canvas.getContext("2d");
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: _label_list,
+                        datasets: [
+                            {
+                                label: "Upper Bound",
+                                data: {{graph_data}}[0],
+                                backgroundColor: ['rgba(150, 150, 150, 0.50)'],
+                                borderColor: ['rgba(150, 150, 150, 0.50)'],
+                                borderWidth: 0.5,
+                                pointRadius: 1,
+                                fill: '1',
+                            },
+                            {
+                                label: "Lower Bound",
+                                data: {{graph_data}}[2],
+                                backgroundColor: ['rgba(150, 150, 150, 0.50)'],
+                                borderColor: ['rgba(150, 150, 150, 0.50)'],
+                                borderWidth: 0.5,
+                                pointRadius: 1,
+                                fill: false,
+                            },
+                            {
+                                label: "Value",
+                                order: 1,
+                                data: {{graph_data}}[1],
+                                backgroundColor: 'rgba(75, 192, 192, 0.85)',
+                                borderColor: 'rgba(75, 192, 192, 0.85)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                fill: false,
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{scaleLabel: {display: true, labelString: 'Date & Time'}}],
+                            yAxes: [{scaleLabel: {display: true, labelString: 'Parameter Values'}, ticks: {beginAtZero: true,}}]
+                        }
+                    }
+                });
+            }else if({{anomaly.anomalytype}}==1203||{{anomaly.anomalytype}}==1204||{{anomaly.anomalytype}}==1303||{{anomaly.anomalytype}}==1304){
+                var gaussian_canvas = document.getElementById("gaussian_graph_canvas");
+                var gaussian_ctx = gaussian_canvas.getContext("2d");
+
+                var counts_graph_canvas = document.getElementById("counts_graph_canvas");
+                var counts_graph_ctx = counts_graph_canvas.getContext("2d");
+
+                var _data = document.getElementById("counts_label_data");
+                var _label_list = (_data.value).replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+
+                var gaussianChart = new Chart(gaussian_ctx, {
+                    type: 'line',
+                    data: {
+                        labels: {{graph_data}}[1],
+                        datasets: [
+                            {
+                                label: "Count Distribution",
+                                data: {{graph_data}}[2],
+                                backgroundColor: 'rgba(75, 192, 192, 0.85)',
+                                borderColor: 'rgba(75, 192, 192, 0.85)',
+                                fill: false,
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{scaleLabel: {display: true, labelString: 'Count of Logs'}}],
+                            yAxes: [{scaleLabel: {display: true, labelString: 'Distribution Forecast'}}]
+                        }
+                    }
+                });
+
+                var countsChart = new Chart(counts_graph_ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: _label_list,
+                        datasets: [
+                            {
+                                label: "Log Counts",
+                                data: {{graph_data}}[0],
+                                backgroundColor: 'rgba(255, 99, 132, 0.85)',
+                                borderColor: 'rgba(255, 99, 132, 0.85)',
+                                //fill: '1',
+                                fill: false,
+                                barThickness: 5,
+                                pointHitRadius: 12,
+                                pointRadius: 10,
+                                pointBackgroundColor: 'rgba(75, 192, 192, 0.85)',
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{scaleLabel: {display: true, labelString: 'Date & Time'}}],
+                            yAxes: [{scaleLabel: {display: true, labelString: 'Count of Logs'}}]
+                        }
+                    }
+                });
+            }
+            drawAllOtherCharts();
+        });
+
+        function separateParts(pressed, showThat){
+            $('div[name="pageParts"]').hide();
+            $('div[name="separators"]').css("border-bottom", "0.5px solid grey").css("background-color", "rgba(150, 150, 150, 0.25)");
+            $("#"+showThat).show();
+            $("#"+pressed).css("border-bottom", "none").css("background-color", "");
+        }
+
+        function drawSelectedOne(IdOfDivElement){
+            let el = document.getElementById(IdOfDivElement);
+            let dataBank = el.lastElementChild;
+            let chartLabels = (dataBank.id).replace(/ /g, "").replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+            let dataSet = [];
+            if((dataBank.value).includes("*")){
+                let chartValueList = (dataBank.value).split("*");
+                for(i=0;i<chartValueList.length;i++){
+                    let chartValues = (chartValueList[i]).replace(/ /g, "").replace("[", "").replace("]", "").split(",");
+                    let dataJSON = {
+                        label: labelNames[i]+"time series",
+                        data: chartValues,
+                        backgroundColor: graphColors[i],
+                        borderColor: graphColors[i],
+                        borderWidth: 0.5,
+                        pointRadius: 1,
+                        fill: false,
+                    };
+                    dataSet.push(dataJSON);
+                }
+            }else{
+                let chartValues = (dataBank.value).replace(/ /g, "").replace("[", "").replace("]", "").split(",");
+                let dataJSON = {
+                    label: "time series line",
+                    data: chartValues,
+                    backgroundColor: 'rgba(75, 192, 192, 0.85)',
+                    borderColor: 'rgba(75, 192, 192, 0.85)',
+                    borderWidth: 0.5,
+                    pointRadius: 1,
+                    fill: false,
+                };
+                dataSet.push(dataJSON);
+            }
+            let dATA = {
+                labels: chartLabels,
+                datasets: dataSet
+            };
+            //console.log(dataBank);
+            //console.log(dataBank.innerHTML);
+            //console.log(dataBank.id);
+            //console.log(dataBank.value);
+            drawChartGiven(el.firstElementChild, dataBank.innerHTML, dATA, "", "");
+        }
+
+        function drawAllOtherCharts(){
+            var chartDivs = document.getElementsByName("timeSeriesCharts");
+            //console.log(chartDivs);
+            chartDivs.forEach(function (el){
+                let dataBank = el.lastElementChild;
+                let chartLabels = (dataBank.id).replace(/ /g, "").replace(/'/g,"").replace("[", "").replace("]", "").split(",");
+                let dataSet = [];
+
+                if((dataBank.value).includes("*")){
+                    let chartValueList = (dataBank.value).split("*");
+                    for(i=0;i<chartValueList.length;i++){
+                        let chartValues = (chartValueList[i]).replace(/ /g, "").replace("[", "").replace("]", "").split(",");
+                        let dataJSON = {
+                            label: labelNames[i]+"time series",
+                            data: chartValues,
+                            backgroundColor: graphColors[i],
+                            borderColor: graphColors[i],
+                            borderWidth: (1.5/(i+1)),
+                            pointRadius: 1.5,
+                            fill: false,
+                        };
+                        dataSet.push(dataJSON);
+                    }
+                }else{
+                    let chartValues = (dataBank.value).replace(/ /g, "").replace("[", "").replace("]", "").split(",");
+                    let dataJSON = {
+                        label: "time series line",
+                        data: chartValues,
+                        backgroundColor: 'rgba(75, 192, 192, 0.85)',
+                        borderColor: 'rgba(75, 192, 192, 0.85)',
+                        borderWidth: 1.5,
+                        pointRadius: 1.5,
+                        fill: false,
+                    };
+                    dataSet.push(dataJSON);
+                }
+                let dATA = {
+                    labels: chartLabels,
+                    datasets: dataSet
+                };
+                drawChartGiven(el.firstElementChild, dataBank.innerHTML, dATA, "", "");
+            });
+        }
+
+        function drawChartGiven(canvasElement, chartType, daTA, xAxisString, yAxisString){
+            var ctx;
+            try{
+                ctx = canvasElement.getContext("2d");
+            }catch(TypeError){
+                console.log("Chart is drawn already");
+            }
+            if(ctx){
+                var myChart = new Chart(ctx, {
+                    type: chartType,
+                    data: daTA,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{scaleLabel: {display: true, labelString: xAxisString}}],
+                            yAxes: [{scaleLabel: {display: true, labelString: yAxisString}, ticks: {beginAtZero: true, stepSize: 1}}]
+                        }
+                    }
+                });
+            }else{
+                console.log("...");
+            }
+        }
+
+        // to zoom rcgraph image ;
+        function imageZoom(imgID, resultID) {
+              var img, lens, result, cx, cy;
+              img = document.getElementById(imgID);
+              result = document.getElementById(resultID);
+              /* Creating a lens for zoom area: */
+              lens = document.createElement("DIV");
+              lens.setAttribute("class", "img-zoom-lens");
+              /* Insert lens: */
+              img.parentElement.insertBefore(lens, img);
+              /* Calculate the ratio between result DIV and lens: */
+              cx = result.offsetWidth / lens.offsetWidth;
+              cy = result.offsetHeight / lens.offsetHeight;
+              /* Set background properties for the result DIV */
+              result.style.backgroundImage = "url('" + img.src + "')";
+              result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
+              /* Execute a function when someone moves the cursor over the image, or the lens: */
+              lens.addEventListener("mousemove", moveLens);
+              img.addEventListener("mousemove", moveLens);
+              /* And also for touch screens: */
+              lens.addEventListener("touchmove", moveLens);
+              img.addEventListener("touchmove", moveLens);
+              function moveLens(e) {
+                    var pos, x, y;
+                    /* Prevent any other actions that may occur when moving over the image */
+                    e.preventDefault();
+                    /* Get the cursor's x and y positions: */
+                    pos = getCursorPos(e);
+                    /* Calculate the position of the lens: */
+                    x = pos.x - (lens.offsetWidth / 2);
+                    y = pos.y - (lens.offsetHeight / 2);
+                    /* Prevent the lens from being positioned outside the image: */
+                    if (x > img.width - lens.offsetWidth) {x = img.width - lens.offsetWidth;}
+                    if (x < 0) {x = 0;}
+                    if (y > img.height - lens.offsetHeight) {y = img.height - lens.offsetHeight;}
+                    if (y < 0) {y = 0;}
+                    /* Set the position of the lens: */
+                    lens.style.left = x + "px";
+                    lens.style.top = y + "px";
+                    /* Display what the lens "sees": */
+                    result.style.backgroundPosition = "-" + (x * cx) + "px -" + (y * cy) + "px";
+              }
+              function getCursorPos(e) {
+                    var a, x = 0, y = 0;
+                    e = e || window.event;
+                    /* Get the x and y positions of the image: */
+                    a = img.getBoundingClientRect();
+                    /* Calculate the cursor's x and y coordinates, relative to the image: */
+                    x = e.pageX - a.left;
+                    y = e.pageY - a.top;
+                    /* Consider any page scrolling: */
+                    x = x - window.pageXOffset;
+                    y = y - window.pageYOffset;
+                    return {x : x, y : y};
+              }
+        }
+
+        function update(imgTagId) {
+            var source = document.getElementById(imgTagId).src,
+                timestamp = (new Date()).getTime(),
+                newUrl = source + '?_=' + timestamp;
+            console.log(source+" "+timestamp+" "+newUrl);
+            document.getElementById(imgTagId).src = newUrl;
+        }
+
+        function sendFeedBackToPtyhon(selectionID, selectionValue) {
+            let aldID = selectionID.split("_")[2];
+            var selectElement = $("#selectionID");
+            var buttonElement = $("#ald_button_"+aldID);
+            var pElement = $("#error_text_"+aldID);
+            var csrf = $("input[name=csrfmiddlewaretoken]").val();
+            var currentURL = window.location.pathname;
+            console.log("You are giving "+selectionValue+" to "+aldID);
+            $.ajax({
+                url: currentURL,
+                type: "post",
+                data: {
+                    csrfmiddlewaretoken: csrf,
+                    action: "sendSingleFeedBack",
+                    aldID: aldID,
+                    feedbackValue: selectionValue
+                },
+                beforeSend: function (){
+                    buttonElement.text("Wait..");
+                    pElement.text("");
+                },
+                success: function(response){
+                    if(response.command!=0){
+                        buttonElement.text("Send Feedback");
+                        pElement.text("Failed to save feedback. ERROR : "+response.result);
+                    }else{
+                        // operation successfully completed;
+                        pElement.text("");
+                        buttonElement.text("Send Feedback");
+                        buttonElement.attr("disabled", true);
+                        selectElement.value = selectionValue;
+                        console.log(response.result);
+                    }
+                }
+            });
+        }
+
+        </script>
+    </body>
+
+</html>
+

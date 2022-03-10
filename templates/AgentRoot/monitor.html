@@ -1,0 +1,232 @@
+
+
+
+
+
+
+{% extends 'base.html' %}
+
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    Monitoring {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "general" %}
+
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+<!--    <div class="row justify-content-center">GENERAL</div>-->
+    <h5>MONITORING OPTIONS</h5>
+    <hr/>
+    <div class="row justify-content-around">
+
+        <div class="col-md-2">
+<!--            <div class="row justify-content-center asLink" id="1" name="infAlert" style="cursor:pointer;" onclick="open_close(this)">ALERTS</div>-->
+            <div class="row justify-content-center asLink" id="1" name="infAlert" style="cursor:pointer;color:#000;" onclick="location.reload();">ALERTS</div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="row justify-content-center"><a class="asLink" href="{% url 'AgentRoot:incidents_monitor' %}">INCIDENTS</a></div>
+        </div>
+
+        <div class="col-md-2">
+<!--            <div class="row justify-content-center"><a class="asLink" href="{% url 'AgentRoot:rc_flowing' %}" target="_blank">LATEST DIAGNOSES</a></div>-->
+            <div class="row justify-content-center"><a class="asLink" href="{% url 'inventories:rc_graph_list' %}" target="_blank">LATEST DIAGNOSES</a></div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="row justify-content-center"><a class="asLink" href="{% url 'AgentRoot:log_monitoring' %}">LOG MONITORING</a></div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="row justify-content-center"><a class="asLink" href="{% url 'inventories:devices' %}">LOG SOURCE MONITORING</a></div>
+        </div>
+
+    </div>
+    <hr/>
+    <br/>
+    <div id="infAlert" style="display:block;overflow:auto;padding-bottom:20px;">
+        <small>
+
+            <table class="table table-sm table-hover">
+                <thead class="thead-light">
+                <form method="GET" class="form-inline">
+                    <tr>
+                        <th>ANOMALY TYPE</th>
+                        <th></th>
+                        <th>DEVICE TYPE</th>
+                        <th>LOCATION</th>
+                        <th>IP / UDS</th>
+                        <th>SOURCE</th>
+                        <th>START PERIOD</th>
+                        <th>END PERIOD</th>
+                        <th>COUNT<br/>IN PERIOD</th>
+                        <th>ANOMALY BY<br />LOG CODE / PARAMETER</th>
+                        <th>STATUS</th>
+                        <th style="padding:0;margin:0;max-width:50px;overflow:hidden;"><a class="asLink" href="{% url 'AgentRoot:general_monitor' %}" style="text-decoration:None;padding:0;margin:0;">Clear All Searches</a></th>
+                    </tr>
+                    <tr>
+                        <th><small><input type="text" name="anomaly_q" placeholder="&#8981;" value="{{request.GET.anomaly_q}}" style="max-width:110px;" /></small></th>
+                        <th></th>
+                        <th><small><input type="text" name="device_q" placeholder="&#8981;" value="{{request.GET.device_q}}" style="max-width:100px;" /></small></th>
+                        <th><small><input type="text" name="location_q" placeholder="&#8981;" value="{{request.GET.location_q}}" style="max-width:100px;" /></small></th>
+                        <th><small><input type="text" name="ip_q" placeholder="&#8981;" value="{{request.GET.ip_q}}" style="max-width:100px;" /></small></th>
+                        <th><small><input type="text" name="uniqueid_q" placeholder="&#8981;" value="{{request.GET.uniqueid_q}}" style="max-width:80px;" /></small></th>
+                        <th><small><input type="text" name="start_q" placeholder="YYYY-MM-DD" value="{{request.GET.start_q}}" style="max-width:100px;" /></small></th>
+                        <th><small><input type="text" name="end_q" placeholder="YYYY-MM-DD" value="{{request.GET.end_q}}" style="max-width:100px;" /></small></th>
+                        <th><small><input type="number" name="count_q" placeholder="Min Count" value="{{request.GET.count_q}}" style="max-width:80px;" /></small></th>
+                        <th><small><input type="text" name="code_q" placeholder="With Log Code" value="{{request.GET.code_q}}" style="max-width:100px;" /></small></th>
+                        <th><small><input type="text" name="status_q" placeholder="&#8981;" value="{{request.GET.status_q}}" style="max-width:50px;" /></small></th>
+                        <th>
+                            <input type="number" name="limit_q" placeholder="Limit count" value="{{request.GET.limit_q}}" />
+                            <button style="height:18px;width:18px;padding:0;margin:0;overflow:hidden;" class="btn btn-outline-success btn-sm" type="submit"><small>&#8981;</small></button>
+                        </th>
+                    </tr>
+<!--                    <small style="position:absolute;float:right;">-->
+<!--                        <a class="asLink" href="{% url 'AgentRoot:general_monitor' %}" style="text-decoration:None;">Clear Search</a>-->
+<!--                        <input type="number" name="limit_q" placeholder="Limit of records count" value="{{request.GET.limit_q}}" />-->
+<!--                        <button style="display:block;float:right;height:21px;width:21px;padding:0;overflow:hidden;" class="btn btn-outline-success btn-sm" type="submit"><small>&#8981;</small></button>-->
+<!--                    </small>-->
+                </form>
+                </thead>
+                <tbody>
+                {% for anomaly in anomaliesList %}
+                    <tr class="type-{{anomaly.anomalytype}}">
+                        <td>
+                            {{anomaly.get_type_definition}}
+                        </td>
+                        <td>
+                            <button class="btn btn-outline-info btn-sm" name="{{anomaly.get_type_definition}}"
+                                    id="{{anomaly.id}}" title="SEE DETAILS" data-toggle="modal"
+                                    data-target="#modal_anomaly_detail"
+                                    style="float:right;height:18px;width:18px;padding:0;overflow:hidden;"
+                                    onclick="document.getElementById('modalLabel').innerHTML = {{anomaly.id}}+' - '+this.name;document.getElementById('anomaly_detail_frame').src='{{anomaly.get_absolute_url}}';">
+                                <small>&#9776;</small>
+                            </button>
+                        </td>
+                        <td data-toggle="tooltip" data-placement="right" data-html="true" title="<h6>DEVICE</h6><p>{{anomaly.get_device}}<br>{{anomaly.get_device.brand}} / {{anomaly.get_device.brandModel}}</p>">
+                            {{anomaly.get_device.brandModel.devicetype}}
+                        </td>
+                        <td>{{anomaly.get_device.profileGroup.location.locationname}}</td>
+                        <td>{{anomaly.get_device.deviceip}}</td>
+                        <td>{{anomaly.lsuniqueid}}</td>
+                        <td>{{anomaly.logdatestart|date:'Y-m-d H:i:s'}}</td>
+                        <td>{{anomaly.logdateend|date:'Y-m-d H:i:s'}}</td>
+                        <td>{% if anomaly.anomalycount %} {{anomaly.anomalycount}} {% endif %}</td>
+                        {% if anomaly.anomalytype == 1301 or anomaly.anomalytype == 1302 or anomaly.anomalytype == 1304 or anomaly.anomalytype == 1401 %}
+                            <td data-toggle="tooltip" data-placement="left" data-html="true"
+                                title="<small><b>{{anomaly.get_anomaly_parameter_and_values.0}} :</b><br /> {{anomaly.get_anomaly_parameter_and_values.1}}</small>">
+                                {% if anomaly.logcode %}{{anomaly.logcode}} {% endif %}
+                            </td>
+                        {% else %}
+                            <td data-toggle="tooltip" data-placement="left" data-html="true"
+                                title="<small>Not a parameter alert</small>">
+                                {% if anomaly.logcode %}{{anomaly.logcode}} {% endif %}
+                            </td>
+                        {% endif %}
+                        <td data-toggle="tooltip" data-placement="left" data-html="true" title="<p>Close it as resolved or open it as unresolved</p>">
+<!--                            {% if anomaly.status == '001' %} Closed {% else %} Open {% endif %}-->
+                            <form method="POST" name="change_anomaly_status" enctype="multipart/form-data">
+                            {% csrf_token %}
+                                {% if anomaly.status == '001' %}
+                                    <span style="color:red;">Closed</span>
+                                    <button name="change_status" value="{{anomaly.id}}" type="submit" style="float:right;height:18px;width:18px;padding:0;overflow:hidden;" class="btn btn-outline-success btn-sm">
+                                        <small>on</small>
+                                    </button>
+                                {% else %}
+                                    <span style="color:green;">Open</span>
+                                    <button name="change_status" value="{{anomaly.id}}" type="submit" style="float:right;height:18px;width:18px;padding:0;overflow:hidden;" class="btn btn-outline-danger btn-sm">
+                                        <small>off</small>
+                                    </button>
+                                {% endif %}
+                            </form>
+                        </td>
+                        <td>{{anomaly.define_anomaly}}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="container-fluid">{{ caption }} </div>
+            <div class="pagination">{# pagination #}
+                <span class="step-links">
+                    {% if anomaliesList.has_previous %}
+                        <a href="?page=1{% if request.GET %}&limit_q={{request.GET.limit_q}}&anomaly_q={{request.GET.anomaly_q}}&device_q={{request.GET.device_q}}&location_q={{request.GET.location_q}}&ip_q={{request.GET.ip_q}}&uniqueid_q={{request.GET.uniqueid_q}}&start_q={{request.GET.start_q}}&end_q={{request.GET.end_q}}&count_q={{request.GET.count_q}}&code_q={{request.GET.code_q}}&status_q={{request.GET.status_q}}{% endif %}">&laquo; jump to first </a>/
+                        <a href="?page={{ anomaliesList.previous_page_number }}{% if request.GET %}&limit_q={{request.GET.limit_q}}&anomaly_q={{request.GET.anomaly_q}}&device_q={{request.GET.device_q}}&location_q={{request.GET.location_q}}&ip_q={{request.GET.ip_q}}&uniqueid_q={{request.GET.uniqueid_q}}&start_q={{request.GET.start_q}}&end_q={{request.GET.end_q}}&count_q={{request.GET.count_q}}&code_q={{request.GET.code_q}}&status_q={{request.GET.status_q}}{% endif %}"> previous </a>/
+                    {% endif %}
+
+                    <span class="current">
+                        <i>{{ anomaliesList.number }}. of {{ anomaliesList.paginator.num_pages }} pages </i>
+                    </span>
+
+                    {% if anomaliesList.has_next %}
+                        /<a href="?page={{ anomaliesList.next_page_number }}{% if request.GET %}&limit_q={{request.GET.limit_q}}&anomaly_q={{request.GET.anomaly_q}}&device_q={{request.GET.device_q}}&location_q={{request.GET.location_q}}&ip_q={{request.GET.ip_q}}&uniqueid_q={{request.GET.uniqueid_q}}&start_q={{request.GET.start_q}}&end_q={{request.GET.end_q}}&count_q={{request.GET.count_q}}&code_q={{request.GET.code_q}}&status_q={{request.GET.status_q}}{% endif %}"> next </a>
+                        /<a href="?page={{ anomaliesList.paginator.num_pages }}{% if request.GET %}&limit_q={{request.GET.limit_q}}&anomaly_q={{request.GET.anomaly_q}}&device_q={{request.GET.device_q}}&location_q={{request.GET.location_q}}&ip_q={{request.GET.ip_q}}&uniqueid_q={{request.GET.uniqueid_q}}&start_q={{request.GET.start_q}}&end_q={{request.GET.end_q}}&count_q={{request.GET.count_q}}&code_q={{request.GET.code_q}}&status_q={{request.GET.status_q}}{% endif %}"> jump to last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>{# /pagination #}
+        </small>
+    </div>
+    <hr/>
+    <div class="modal fade" id="modal_anomaly_detail" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel"> </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                            onclick="document.getElementById('anomaly_detail_frame').src='/monitor/loading';">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <iframe style="width:100%;height:600px;" id="anomaly_detail_frame" src="{% url 'AgentRoot:loading_view'%}" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"
+                            onclick="document.getElementById('anomaly_detail_frame').src='/monitor/loading';">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+
+</div>
+
+{% elif route == "detail" %}
+
+<div class="innerBodies container-fluid" style="padding-top:10px;">
+    DETAIL
+</div>
+
+{% endif %}
+
+
+
+<script type="text/javascript" lang="javascript">
+
+    /* To prevent the form from being submitted again when the page is refreshed. */
+    if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+    function showIt(elmnt){
+        console.log(elmnt.tagName == 'DIV');
+        console.log(elmnt.getAttribute("name"));
+    }
+
+    function create_frame_url(button) {
+        var frame = document.getElementById('anomaly_detail_frame');
+        var anomaly_id = button.id;
+        document.getElementById('modalLabel').innerHTML = anomaly_id+" - "+button.name;
+        frame.src = window.location.origin+"/monitor/anomalies/"+anomaly_id;
+    }
+</script>
+
+{% endblock %}

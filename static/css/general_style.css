@@ -1,0 +1,391 @@
+
+/*
+colors scala =>
+green : rgba(75, 192, 192, 0.85)
+red : rgba(255, 99, 132, 0.85)
+orange : rgba(255, 159, 64, 0.85)
+blue : rgba(54, 162, 235, 0.85)
+yellow : rgba(255, 206, 86, 0.85)
+grey : rgba(150, 150, 150, 0.85)
+purple : rgba(106, 92, 112, 0.85)
+beige : rgba(245, 245, 220, 0.6)
+--
+burgundy: rgba(125, 20, 64, 0.85);
+info blue : color:rgba(64, 128, 158, 0.85);
+debug green :rgba(128, 165, 128, 0.85);
+*/
+
+.test {
+    border:1px solid rgba(54, 162, 235, 0.85); /* blue colored border */
+    border-radius:5px;
+    padding:10px;
+}
+
+/* Vertically and horizontally center this content */
+.centralContent{
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: -50% -50%;
+    transform: -50% -50%;
+}
+
+/* For inner frame width */
+.modal-xl{
+     max-width: 90% !important;
+}
+
+/* For creating an half-frame to window */
+.topBlock {
+    position:fixed;
+    top:0;
+    right:0;
+    background-color: #3d3d5c;
+    background-image:url(/static/img/ai_background1.jpg);
+    opacity: 0.85;
+    width: 100%;
+    height:20%;
+    max-height:50px;
+    color:white;
+    text-align:center;
+    font-size: 1vw;
+    z-index: 1;
+}
+
+.leftBlock {
+    margin-top:50px;
+    position:fixed;
+    background-color: #3d3d5c;
+    background-image:url(/static/img/ai_background1.jpg);
+    opacity: 0.85;
+    height:100%;
+    width:2.5%;
+    z-index: 1;
+}
+
+/* For designing components in schema frame */
+.inSchema {
+    position:fixed;
+    color:white;
+    z-index:2;
+}
+.navLinks {
+    font-size:12pt;
+    /*font-size:2vw;*/
+    margin-left:50px;
+    margin-top:10px;
+}
+.navItem {
+    text-decoration: None;
+    padding-right:10px;
+    color:rgba(255,255,255,0.5);
+}
+.navItem:hover{
+    font-size:14pt;
+    text-decoration: None;
+    padding-right:10px;
+    color:rgba(255,255,255,1);
+}
+.inLink{
+    font-size:14pt;
+    text-decoration: None;
+    padding-right:10px;
+    color:rgba(255,255,255,1);
+}
+.leftNavItem{
+    transform:rotate(-90deg);
+    -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
+}
+
+/* For giving fontsize to form elemnts like input, button etc. */
+body, button, input, select {
+    font-size:9pt;
+}
+
+/* For locating inner html files of base template */
+.innerBodies {
+    padding-left:3.5%;
+    font-size:9pt;
+}
+
+.contentViewport {
+    padding-top:60px;
+    padding-bottom:60px;
+    font-size:9pt;
+}
+
+/* For positioning table captions */
+caption {
+    caption-side:top;
+    text-align:center;
+}
+
+/* For creating floating action buttons as widget where we need.
+   Just add floating-left or floating-right to class of element to float it */
+.floating-left {
+    position:fixed;
+    bottom:50px;
+    left:3.5%;
+    opacity:0.75;
+}
+
+.floating-right {
+    position:fixed;
+    bottom:50px;
+    right:50px;
+    opacity:0.75;
+}
+
+/* For creating circular floating button for back action in location history */
+#floating_back_button {
+    border-radius:50%;
+}
+
+/* for circular typed buttons */
+.circle {
+    border-radius:50%;
+}
+
+/* Positioning footer content */
+#footer-content {
+    position:fixed;
+    bottom:0;
+    right:10px;
+    color:grey;
+    opacity:0.65;
+}
+
+/* for flowing information frame in homepage */
+.rcframe {
+    border:0.5px solid #fff /*rgba(54, 162, 235, 0.85)*/; /* frame border colored blue */
+    border-radius:5px;
+    height:500px;
+    width:98%;
+    resize: vertical;
+    overflow:auto;
+}
+.rcitem {
+    margin:5px auto;
+    padding: 2px;
+    border:0.2px solid lightgrey;
+    border-radius:8px;
+    width:97%;
+    align: center;
+    /*background-color: lightgrey #F5F5DC;*/
+}
+
+/* Incident & Root-cause Mapping design */
+span.arrow{
+    color:rgba(255, 99, 132, 0.85);  /* color : red */
+}
+
+p.item{
+    border:0.5px solid grey;
+    border-radius:5px;
+    background-color:rgba(245, 245, 220, 0.6); /* background colored beige */
+}
+
+/* For using blinking effects where we need. Just add blinking to class of element using rgba(54, 162, 235, 0.85) blue as #36A2EB instead of #00F full blue */
+.blinking{
+    animation:blinkingText 1.2s infinite;
+    animation-iteration-count: 10;
+}
+@keyframes blinkingText{
+    0%{     color: #36A2EB; }
+    49%{    color: #36A2EB; }
+    60%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: #36A2EB; }
+}
+
+/* ATIBA loading screen */
+.atiba_loading_h {
+	display:flex;
+	justify-content: center;
+	align-items: center;
+	height:100%;
+	margin: auto;
+	position: absolute;
+	top:50%;
+	left:50%;
+	transform:translate(-50%, -50%);
+/* 	width: 350px; */
+/* 	font-size:26px; */
+	font-family: Dosis, sans-serif, Arial;
+	font-weight: bold;
+	animation: load 1.2s infinite 0s ease-in-out;
+	animation-direction: alternate;
+	text-shadow: 0 0 1px black;
+}
+.atiba_loading {
+	height: 96vh;
+	background-color: white;
+	color: black;
+	position:relative;
+}
+@keyframes load {
+    0%{
+        opacity: 0.08;
+        filter: blur(5px);
+        letter-spacing: 3px;
+        }
+    100%{
+/*         opacity: 1; */
+/*         font-size: 12px; */
+/* 				font-weight:600; */
+/* 				filter: blur(0); */
+        }
+}
+
+/* Infrastructure alerts table customization */
+tr.type-1, tr.type-3 {
+    color:rgba(255, 159, 64, 0.85);  /* orange */
+}
+tr.type-1 td:first-child::before,tr.type-3 td:first-child::before {
+    content: "\26A0 ";
+}
+tr.type-2 {
+    color:rgba(255, 99, 132, 0.85);  /* red */
+}
+tr.type-2 td:first-child::before {
+    content: "\2757 \2757 ";
+}
+tr.type-1101 {
+}
+tr.type-1101 td:first-child::before {
+}
+tr.type-1201 {
+}
+tr.type-1201 td:first-child::before {
+}
+tr.type-1301 {
+}
+tr.type-1301 td:first-child::before {
+}
+tr.type-1303 {
+}
+tr.type-1303 td:first-child::before {
+}
+tr.type-1304 {
+}
+tr.type-1304 td:first-child::before {
+}
+
+/* Point representation for active and passive states */
+.activePoint {
+    border: 0.5px solid white;
+    border-radius:50%;
+    height: 18px;
+    width: 18px;
+    background-image: radial-gradient(circle, rgba(75, 210, 192, 1), rgba(75, 210, 192, 0.80), rgba(75, 210, 192, 0.50), rgba(75, 210, 192, 0.30), white);
+}
+.passivePoint {
+    border: 0.5px solid white;
+    border-radius:50%;
+    height: 18px;
+    width: 18px;
+    background-image: radial-gradient(circle, rgba(255, 99, 132, 1), rgba(255, 99, 132, 0.80), rgba(255, 99, 132, 0.50), rgba(255, 99, 132, 0.30), white);
+}
+.unknownPoint {
+    border: 0.5px solid white;
+    border-radius:50%;
+    height: 18px;
+    width: 18px;
+    background-image: radial-gradient(circle, rgba(150, 150, 150, 1), rgba(150, 150, 150, 0.80), rgba(150, 150, 150, 0.50), rgba(150, 150, 150, 0.30), white);
+}
+
+/* divs and anchors re-styling */
+.asLink {
+    color: rgba(54, 162, 235, 0.85);
+}
+.asLink:hover {
+    color: rgba(54, 162, 235, 0.85);
+    text-decoration: underline;
+    font-weight: bold;
+    cursor:pointer;
+}
+
+/* button and anchors adding symbols */
+.plusBefore::before{
+    /* #x271A; plus (+) in unicode (decimal) */
+    content: "\271A  ";
+}
+
+/* Coloring tale rows due to log priority */
+
+.priority-ALERT, .priority-Alert, .priority-alert, .priority-EMERGENCY, .priority-Emergency, .priority-emergency{
+    color:rgba(125, 20, 64, 0.95);  /* burgundy (bordo) color for ALERT & EMERGENCY */
+}
+
+.priority-ERROR, .priority-Error, .priority-error, .priority-CRITICAL, .priority-Critical, .priority-critical{
+    color:rgba(255, 99, 132, 0.95);  /* red for ERROR & CRITICAL */
+}
+
+.priority-WARNING, .priority-Warning, .priority-warning{
+    color:rgba(255, 159, 64, 0.95);  /* orange WARNING */
+}
+
+.priority-INFO, .priority-Info, .priority-info, .priority-NOTICE, .priority-Notice, .priority-notice{
+    color:rgba(64, 128, 158, 0.95);  /* blue for INFO and NOTICE not ordinary blue */
+}
+
+.priority-DEBUG, .priority-Debug, .priority-debug{
+    color:rgba(128, 165, 128, 0.95);  /* green for DEBUG not ordinary green */
+}
+
+/**/
+.newsframe {
+    width:90%;
+    background-color:rgba(209, 236, 241, 0.75);
+    border:1px solid #fff;
+    border-radius:6px;
+    min-height:30px;
+}
+
+.newsframe-info {
+    width:90%;
+    background-color:rgba(209, 236, 241, 0.75);
+    border:1px solid #fff;
+    border-radius:6px;
+    min-height:30px;
+}
+
+.newsframe-warning {
+    width:90%;
+    background-color:rgba(255, 243, 205, 0.75);
+    border:1px solid #fff;
+    border-radius:6px;
+    min-height:30px;
+}
+
+.newsframe-danger {
+    width:90%;
+    background-color:rgba(248, 215, 218, 0.75);
+    border:1px solid #fff;
+    border-radius:6px;
+    min-height:30px;
+}
+
+.newsframeClose {
+    cursor:pointer;
+    font-size:12pt;
+}
+
+.newsframeClose:hover {
+    font-size:13pt;
+}
+
+.newsframeSpan {
+
+}
+
+/* shadow effect for elements */
+
+.shadowBox {
+    -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+

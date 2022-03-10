@@ -1,0 +1,902 @@
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> {{purpose}} {{route}} profile </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body  style="padding-top:15px;">
+        {% if route == 'general' %}
+
+        <div class="row justify-content-center" style="padding:20px;">
+
+            <div class="col-lg-4">
+                <div class="card shadow test" style="text-align:center;">
+                    <a class="asLink" href="?adding=networkdevice">Network Devices</a>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test" style="text-align:center;">
+                    <a class="asLink" href="?adding=nginx&device_add_method=manual">Nginx</a>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test" style="text-align:center;">
+                    <a class="asLink" href="?adding=postgresql&device_add_method=manual">Postgresql</a>
+                </div>
+            </div>
+
+        </div><!--row 1-->
+        <div class="row justify-content-center" style="padding:20px;">
+
+            <div class="col-lg-4">
+                <div class="card shadow test" style="text-align:center;">
+                    <a class="asLink" href="?adding=oracle">Oracle</a>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test" style="text-align:center;">
+                    <a class="asLink" href="?adding=aws">AWS</a>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test" style="text-align:center;">
+                    <a class="asLink" href="?adding=hadoop">Hadoop</a>
+                </div>
+            </div>
+
+        </div><!--row 2-->
+
+        {% elif route == 'monitor' %}
+
+        <div class="container" style="text-align:center;font-size:9pt;">
+            <h5>{{pageTitle}} Monitor Profile</h5>
+<!--            <small>Creating new monitor profile</small>-->
+            <hr>
+            <form method="POST" name="new_monitor_profile" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="name_and_type" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="paramsname" class="col-md-3 col-form-label">Monitor Profile Name </label>
+                        <div class="col-md-3">
+                            <input id="paramsname" style="font-size:9pt;" name="paramsname"
+                                   class="form-control form-control-sm" type="text" maxlength="15"
+                                   onblur="validate_form_element(this)"/>
+                        </div>
+                        <label for="monitorprofileid" class="col-md-3 col-form-label">Monitor Profile Type </label>
+                        <div class="col-md-3">
+                            <select id="monitorprofileid" style="font-size:9pt;" name="monitorprofileid"
+                                    class="form-control form-control-sm" onblur="arrangeFormParts(this)"
+                                    onchange="arrangeFormParts(this)">
+                                <option value="0">Select Type</option>
+                                {% for x in monitorProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row" id="snmp_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="snmpversion" class="col-md-3 col-form-label">SNMP Version</label>
+                        <div class="col-md-3">
+                            <select id="snmpversion" style="font-size:9pt;" name="snmpversion"
+                                    class="form-control form-control-sm" onblur="arrangeFormParts(this)"
+                                    onchange="arrangeFormParts(this)">
+                                <option value="v2c">v2c</option>
+                                <option value="v3">v3</option>
+                            </select>
+                        </div>
+                        <label for="communitystring" class="col-md-3 col-form-label">Community String</label>
+                        <div class="col-md-3">
+                            <input id="communitystring" style="font-size:9pt;" name="communitystring"
+                                   class="form-control form-control-sm" type="password" onblur="validate_form_element(this)"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row" id="snmpV3_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="snmpv3user" class="col-md-3 col-form-label">SNMP V3 User</label>
+                        <div class="col-md-3">
+                            <input id="snmpv3user" style="font-size:9pt;" name="snmpv3user"
+                                   class="form-control form-control-sm" type="text" onblur="validate_form_element(this)"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="snmpv3authprotocol" class="col-md-3 col-form-label">SNMP V3 Auth Protocol</label>
+                        <div class="col-md-3">
+                            <select id="snmpv3authprotocol" style="font-size:9pt;" name="snmpv3authprotocol"
+                                    class="form-control form-control-sm">
+                                <option value="MD5">MD5</option>
+                                <option value="SHA">SHA</option>
+                            </select>
+                        </div>
+                        <label for="snmpv3privacyprotocol" class="col-md-3 col-form-label">SNMP V3 Privacy Protocol</label>
+                        <div class="col-md-3">
+                            <select id="snmpv3privacyprotocol" style="font-size:9pt;" name="snmpv3privacyprotocol"
+                                    class="form-control form-control-sm">
+                                <option value="DES">DES</option>
+                                <option value="AES">AES</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="snmpv3authpass" class="col-md-3 col-form-label">SNMP V3 Auth Password</label>
+                        <div class="col-md-3">
+                            <input id="snmpv3authpass" style="font-size:9pt;" name="snmpv3authpass"
+                                   class="form-control form-control-sm" type="password" onblur="validate_form_element(this)" />
+                        </div>
+                        <label for="snmpv3privacypass" class="col-md-3 col-form-label">SNMP V3 Privacy Password</label>
+                        <div class="col-md-3">
+                            <input id="snmpv3privacypass" style="font-size:9pt;" name="snmpv3privacypass"
+                                   class="form-control form-control-sm" type="password" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row" id="http_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="httpmethod" class="col-md-3 col-form-label">HTTP Request Method</label>
+                        <div class="col-md-3">
+                            <select id="httpmethod" style="font-size:9pt;" name="httpmethod"
+                                    class="form-control form-control-sm">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                            </select>
+                        </div>
+                        <label for="httpsecure" class="col-md-3 col-form-label">Secure HTTP ?</label>
+                        <div class="col-md-3">
+                            <select id="httpsecure" style="font-size:9pt;" name="httpsecure"
+                                    class="form-control form-control-sm">
+                                <option value="1">YES</option>
+                                <option value="0">NO</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="httpport" class="col-md-3 col-form-label">HTTP Port</label>
+                        <div class="col-md-3">
+                            <input id="httpport" style="font-size:9pt;" name="httpport"
+                                   class="form-control form-control-sm" type="number"
+                                   onblur="validate_form_element(this)" />
+                        </div>
+                        <label for="httpurl" class="col-md-3 col-form-label">HTTP URL</label>
+                        <div class="col-md-3">
+                            <input id="httpurl" style="font-size:9pt;" name="httpurl"
+                                   class="form-control form-control-sm" type="text" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="httpuri" class="col-md-3 col-form-label">HTTP URI</label>
+                        <div class="col-md-3">
+                            <input id="httpuri" style="font-size:9pt;" name="httpuri"
+                                   class="form-control form-control-sm" type="text" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row" id="database_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="username" class="col-md-3 col-form-label">User Name</label>
+                        <div class="col-md-3">
+                            <input id="username" style="font-size:9pt;" name="username"
+                                   class="form-control form-control-sm" type="text" onblur="validate_form_element(this)" />
+                        </div>
+                        <label for="dbasename" class="col-md-3 col-form-label">Database Name</label>
+                        <div class="col-md-3">
+                            <input id="dbasename" style="font-size:9pt;" name="dbasename"
+                                   class="form-control form-control-sm" type="text" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="userpass" class="col-md-3 col-form-label">User Password</label>
+                        <div class="col-md-3">
+                            <input id="userpass" style="font-size:9pt;" name="userpass"
+                                   class="form-control form-control-sm" type="password" onblur="validate_form_element(this)" />
+                        </div>
+                        <label for="dbaseport" class="col-md-3 col-form-label">Database Port Running On</label>
+                        <div class="col-md-3">
+                            <input id="dbaseport" style="font-size:9pt;" name="dbaseport"
+                                   class="form-control form-control-sm" type="number" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row" id="request_and_response_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="querytosend" class="col-md-3 col-form-label" id="querytosendLabel">OID</label>
+                        <div class="col-md-3">
+                            <input id="querytosend" style="font-size:9pt;" name="querytosend"
+                                   class="form-control form-control-sm" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="responsetoreceive" class="col-md-3 col-form-label">Response That Means Healthy</label>
+                        <div class="col-md-3">
+                            <input id="responsetoreceive" style="font-size:9pt;" name="responsetoreceive"
+                                   class="form-control form-control-sm" />
+                        </div>
+                        <label for="responsetodown" class="col-md-3 col-form-label">Response That Means Down</label>
+                        <div class="col-md-3">
+                            <input id="responsetodown" style="font-size:9pt;" name="responsetodown"
+                                   class="form-control form-control-sm" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+                <div class="form-group row" name="form_rows" style="display:block;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        {% if purpose == "add" %}
+                            <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="snmp_v3_row"
+                               href="{% url 'add_monitor_profile' %}">RESET FORM</a>
+                        {% elif purpose == "edit" %}
+                            <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="snmp_v3_row"
+                                   onclick="this.href=location.pathname">RESET FORM</a>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 col-sm-6" id="form_save_button_div" style="display:none;text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" id="form_save_button" style="font-size:9pt;"
+                                type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {%if warning and warning != ""%}<li>{{warning}}</li>{%endif%}
+                </ul>
+            </div>
+
+            <hr/>
+        </div>
+
+        {% elif route == 'location' %}
+
+        <div class="container" style="text-align:center;font-size:9pt;">
+            <h5>New Location Profile</h5>
+            <small>Creating new location profile</small>
+            <hr>
+            <form method="POST" name="new_location_profile" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="location_and_group" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="locationgroupid" class="col-md-3 col-form-label">Existing Location Groups </label>
+                        <div class="col-md-3">
+                            <select id="locationgroupid" style="font-size:9pt;" name="locationgroupid"
+                                    class="form-control form-control-sm" onblur="arrangeFormParts(this)"
+                                    onchange="arrangeFormParts(this)">
+                                <option value="0">NEW LOCATION GROUP</option>
+                                {% for x in locationGroupList %}
+                                <option value="{{x.id}}">{{x.locationgroupname}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="locationgroupname" class="col-md-3 col-form-label">Location Group Name </label>
+                        <div class="col-md-3">
+                            <input id="locationgroupname" style="font-size:9pt;" name="locationgroupname"
+                                   class="form-control form-control-sm" type="text" maxlength="15"
+                                   onblur="validate_form_element(this)"/>
+                        </div>
+                        <label for="locationgroupcode" class="col-md-3 col-form-label">Location Group Code </label>
+                        <div class="col-md-3">
+                            <input id="locationgroupcode" style="font-size:9pt;" name="locationgroupcode"
+                                   class="form-control form-control-sm" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="locationname" class="col-md-3 col-form-label">Location Name </label>
+                        <div class="col-md-3">
+                            <input id="locationname" style="font-size:9pt;" name="locationname"
+                                   class="form-control form-control-sm" type="text" maxlength="15" onblur="validate_form_element(this)"/>
+                        </div>
+                        <label for="locationcode" class="col-md-3 col-form-label">Location Code </label>
+                        <div class="col-md-3">
+                            <input id="locationcode" style="font-size:9pt;" name="locationcode"
+                                   class="form-control form-control-sm" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <br>
+                <div class="form-group row" name="form_rows" style="display:block;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" style="font-size:9pt;"
+                           href="{% url 'add_location_profile' %}">RESET FORM</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" id="form_save_button_div" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" id="form_save_button" style="font-size:9pt;"
+                                type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {%if warning and warning != ""%}<li>{{warning}}</li>{%endif%}
+                </ul>
+            </div>
+
+            <hr/>
+        </div>
+
+
+        {% elif route == 'ingestion' %}
+
+        <div class="container" style="text-align:center;font-size:9pt;">
+            <h5>New Ingestion Profile</h5>
+            <small>Creating new ingestion profile</small>
+            <hr>
+            <form method="POST" name="new_ingestion_profile" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="ingestion" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ingestionprofilename" class="col-md-2 col-form-label">Ingestion Profile Name </label>
+                        <div class="col-md-2">
+                            <input id="ingestionprofilename" style="font-size:9pt;" name="ingestionprofilename"
+                                   class="form-control form-control-sm" type="text" maxlength="15"
+                                   onblur="validate_form_element(this)"/>
+                        </div>
+                        <label for="ingestionprofiletype" class="col-md-2 col-form-label">Ingestion Profile Type </label>
+                        <div class="col-md-2">
+                            <select id="ingestionprofiletype" style="font-size:9pt;" name="ingestionprofiletype"
+                                    class="form-control form-control-sm">
+                            {% for x in profileTypeList %}
+                                <option value="{{x.id}}">{{x.profiletype}}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        <label for="ingestionport" class="col-md-2 col-form-label">Ingestion Port </label>
+                        <div class="col-md-2">
+                            <input id="ingestionport" style="font-size:9pt;" name="ingestionport"
+                                   class="form-control form-control-sm" type="number" onblur="validate_form_element(this)"/>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <br>
+                <div class="form-group row" name="form_rows" style="display:block;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" style="font-size:9pt;"
+                           href="{% url 'add_ingestion_profile' %}">RESET FORM</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" id="form_save_button_div" style="display:none;text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" id="add_ingestion_profile_save"
+                                style="font-size:9pt;" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {%if warning and warning != ""%}<li>{{warning}}</li>{%endif%}
+
+                </ul>
+            </div>
+
+            <hr/>
+        </div>
+
+        {% elif route == 'parser' %}
+
+        <!-- it's in add_parser_profile.html file -->
+        <div class="container-fluid" style="text-align:center;font-size:9pt;">
+            <h5>New Parser Profile</h5>
+            <small>Creating new parser profile</small>
+            <hr>
+            <div class="row">
+                <label for="ipselection" class="col-md-3 col-form-label">Select IP Address </label>
+                <div class="col-md-3">
+                    <select style="font-size:9pt;" id="ipselection" name="ipselection" class="form-control form-control-sm" onblur="arrangeFormParts(this)" onchange="arrangeFormParts(this)">
+                        <option value="0">Please Select</option>
+                        <option disabled>-------</option>
+                        {% for x in ipList %}
+                        <option value="{{x}}">{{x}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <label for="rawlogselection" class="col-md-3 col-form-label">Select Raw Log </label>
+                <div class="col-md-9">
+                    <select style="font-size:9pt;" id="rawlogselection" name="rawlogselection" class="form-control form-control-sm" onblur="arrangeFormParts(this)" onchange="arrangeFormParts(this)">
+                        <option value="0">Please Select</option>
+                        <option disabled>-------</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-12">
+                    <input style="font-size:9pt;" class="form-control form-control-sm" type="text" id="rowlogdata" onkeyup="getSelectedText(this)" onmouseup="getSelectedText(this)"/>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-2">Start Point :</div>
+                <div class="col-md-2" id="startindex" style="color:red;"></div>
+                <div class="col-md-2">Count of Chars :</div>
+                <div class="col-md-2" id="countofchars" style="color:red;"></div>
+                <div class="col-md-2">Parser Test Result :</div>
+                <div class="col-md-2" id="parsertestresult"></div>
+            </div>
+            <br>
+            <div class="row">
+                <label for="versionparserselection" class="col-md-2 col-form-label">Select From Existing Version Parsers </label>
+                <div class="col-md-3">
+                    <select style="font-size:9pt;" id="versionparserselection" name="versionparserselection" class="form-control form-control-sm" onblur="arrangeFormParts(this)" onchange="arrangeFormParts(this)">
+                        <option value="0">Please Select</option>
+                        <option disabled>-------</option>
+                        {% for x in versionParserList %}
+                        <option value="{{x}}">{{x}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">OR</div>
+                <label for="customparserselection" class="col-md-2 col-form-label">Select From Existing Custom Parsers </label>
+                <div class="col-md-3">
+                    <select style="font-size:9pt;" id="customparserselection" name="customparserselection" class="form-control form-control-sm" onblur="arrangeFormParts(this)" onchange="arrangeFormParts(this)">
+                        <option value="0">Please Select</option>
+                        <option disabled>-------</option>
+                        {% for x in customParserList %}
+                        <option value="{{x}}">{{x}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                    <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" href="">TEST</a>
+                </div>
+            </div>
+            <form method="POST" name="new_parser_profile" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+
+                <div class="form-group row" name="form_rows" style="display:block;"></div>
+                <div class="form-group row" name="form_rows" style="display:block;"></div>
+                <div class="form-group row" name="form_rows" style="display:block;"></div>
+                <div class="form-group row" name="form_rows" style="display:block;"></div>
+
+                <div class="form-group row" name="form_rows" style="display:block;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" href="{% url 'add_parser_profile' %}">RESET FORM</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" id="form_save_button_div" style="display:block;text-align:right;float:left;">
+                        <button style="font-size:9pt;" class="btn btn-outline-info btn-sm" id="add_parser_profile_save" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {%if warning and warning != ""%}<li>{{warning}}</li>{%endif%}
+
+                </ul>
+            </div>
+
+            <hr/>
+        </div>
+
+        {% elif route == 'detail' %}
+
+
+        {% else %}
+
+         <div class="container" style="text-align:center;">
+            <h5>SOMETHING WRONG HAPPENED</h5>
+            <hr>
+         </div>
+
+        {% endif %}
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            if(window.history.replaceState){
+                console.log(window.history.replaceState);
+            }
+            var route = "{{route}}";
+            var note = $('#form_notifications');  // for validation warnings
+            var form_parts = document.getElementsByName('form_rows');
+            var inputs = document.getElementsByTagName('input');
+            var selects = document.getElementsByTagName('select');
+            var saveButtonDiv = document.getElementById('form_save_button_div');
+
+            if(route=="monitor"){
+                var purpose = "{{purpose}}";
+                var mpdNameList = [{% for x in mpdNameList %}"{{ x|safe }}",{% endfor %}];
+                var monitorProfileList = [{% for x in monitorProfileList %}{{ x|safe }},{% endfor %}];
+                var selectedType = "";
+
+                if(purpose=="edit"){
+                    var selectedMPD = {%if selectedMPD%}{{selectedMPD.get_json|safe}}{%else%}""{%endif%};
+                    document.getElementById("paramsname").value = selectedMPD.paramsname;
+                    var selectedMP = {%if selectedMP%}{{selectedMP.get_json|safe}}{%else%}""{%endif%};
+                    //console.log("edit for "+selectedMP.monitorprofiletype+" profile");
+                    document.getElementById("monitorprofileid").value = selectedMP.id;
+                    document.getElementById("snmpversion").value = selectedMPD.snmpversion;
+                    document.getElementById("communitystring").value = selectedMPD.communitystring;
+                    document.getElementById("snmpv3user").value = selectedMPD.snmpv3user;
+                    document.getElementById("snmpv3authprotocol").value = selectedMPD.snmpv3authprotocol;
+                    document.getElementById("snmpv3privacyprotocol").value = selectedMPD.snmpv3privacyprotocol;
+                    document.getElementById("snmpv3authpass").value = selectedMPD.snmpv3authpass;
+                    document.getElementById("snmpv3privacypass").value = selectedMPD.snmpv3privacypass;
+                    document.getElementById("httpmethod").value = selectedMPD.httpmethod;
+                    document.getElementById("httpsecure").value = (selectedMPD.httpsecure!=""&&selectedMPD.httpsecure=='true')?1:0;;
+                    //document.getElementById("httpport").value = selectedMPD.httpport;
+                    //document.getElementById("dbaseport").value = selectedMPD.httpport;
+                    document.getElementById("httpurl").value = selectedMPD.httpurl;
+                    document.getElementById("httpuri").value = selectedMPD.httpuri;
+                    document.getElementById("username").value = selectedMPD.username;
+                    document.getElementById("dbasename").value = selectedMPD.dbasename;
+                    document.getElementById("userpass").value = selectedMPD.userpass;
+
+                    document.getElementById("querytosend").value = selectedMPD.querytosend;
+                    document.getElementById("responsetoreceive").value = selectedMPD.responsetoreceive;
+                    document.getElementById("responsetodown").value = selectedMPD.responsetodown;
+
+                    if(selectedMP.monitorprofiletype=="SNMP"){
+                        document.getElementById("snmp_row").style.display = "block";
+                        document.getElementById("request_and_response_row").style.display = "block";
+                        document.getElementById("http_row").style.display = "none";
+                        document.getElementById("database_row").style.display = "none";
+                        document.getElementById("snmpV3_row").style.display = "none";
+                        $("#querytosendLabel").text("O I D");
+                        document.getElementById("querytosend").value = "1.3.6.1.2.1.2.2.1.6.1";
+                        document.getElementById("responsetodown").value = "noSuchObject";
+                    }else if(selectedMP.monitorprofiletype=="HTTP"||selectedType=="HTTPS"){
+                        document.getElementById("httpport").value = selectedMPD.httpport;
+                        document.getElementById("snmp_row").style.display = "none";
+                        document.getElementById("database_row").style.display = "none";
+                        document.getElementById("snmpV3_row").style.display = "none";
+                        document.getElementById("http_row").style.display = "block";
+                        document.getElementById("request_and_response_row").style.display = "block";
+                        $("#querytosendLabel").text("Request To Send");
+                        document.getElementById("querytosend").value = "";
+                        document.getElementById("responsetodown").value = "";
+                    }else if(selectedMP.monitorprofiletype=="SQL"||selectedMP.monitorprofiletype=="POSTGRESQL"){
+                        document.getElementById("dbaseport").value = selectedMPD.httpport;
+                        document.getElementById("snmp_row").style.display = "none";
+                        document.getElementById("http_row").style.display = "none";
+                        document.getElementById("snmpV3_row").style.display = "none";
+                        document.getElementById("database_row").style.display = "block";
+                        document.getElementById("request_and_response_row").style.display = "block";
+                        $("#querytosendLabel").text("Query To Send");
+                        document.getElementById("querytosend").value = "";
+                        document.getElementById("responsetodown").value = "";
+                    }else if(selectedMP.monitorprofiletype=="ICMP"){
+                        document.getElementById("snmp_row").style.display = "none";
+                        document.getElementById("http_row").style.display = "none";
+                        document.getElementById("snmpV3_row").style.display = "none";
+                        document.getElementById("database_row").style.display = "none";
+                        document.getElementById("request_and_response_row").style.display = "none";
+                        //$("#querytosendLabel").text("Query To Send");
+                        //document.getElementById("querytosend").value = "";
+                        //document.getElementById("responsetodown").value = "";
+                    }
+
+                }
+
+                function arrangeFormParts(select){
+                    if(select.id=="monitorprofileid"){
+                        if(select.value=="0"){
+                            location.reload();
+                        }else{
+                            for(i in monitorProfileList){
+                                if(monitorProfileList[i].value==parseInt(select.value)){
+                                    selectedType = monitorProfileList[i].name;
+                                    break;
+                                }
+                            }
+                        }
+                        if(selectedType=="SNMP"){
+                            document.getElementById("snmp_row").style.display = "block";
+                            document.getElementById("request_and_response_row").style.display = "block";
+                            document.getElementById("http_row").style.display = "none";
+                            document.getElementById("database_row").style.display = "none";
+                            document.getElementById("snmpV3_row").style.display = "none";
+                            $("#querytosendLabel").text("O I D");
+                            document.getElementById("querytosend").value = "1.3.6.1.2.1.2.2.1.6.1";
+                            document.getElementById("responsetodown").value = "noSuchObject";
+                        }else if(selectedType=="HTTP"||selectedType=="HTTPS"){
+                            document.getElementById("snmp_row").style.display = "none";
+                            document.getElementById("database_row").style.display = "none";
+                            document.getElementById("snmpV3_row").style.display = "none";
+                            document.getElementById("http_row").style.display = "block";
+                            document.getElementById("request_and_response_row").style.display = "block";
+                            $("#querytosendLabel").text("Request To Send");
+                            document.getElementById("querytosend").value = "";
+                            document.getElementById("responsetodown").value = "";
+                        }else if(selectedType=="SQL"||selectedType=="POSTGRESQL"){
+                            document.getElementById("snmp_row").style.display = "none";
+                            document.getElementById("http_row").style.display = "none";
+                            document.getElementById("snmpV3_row").style.display = "none";
+                            document.getElementById("database_row").style.display = "block";
+                            document.getElementById("request_and_response_row").style.display = "block";
+                            $("#querytosendLabel").text("Query To Send");
+                            document.getElementById("querytosend").value = "";
+                            document.getElementById("responsetodown").value = "";
+                        }else if(selectedType=="ICMP"){
+                            document.getElementById("snmp_row").style.display = "none";
+                            document.getElementById("http_row").style.display = "none";
+                            document.getElementById("snmpV3_row").style.display = "none";
+                            document.getElementById("database_row").style.display = "none";
+                            document.getElementById("request_and_response_row").style.display = "none";
+                            //$("#querytosendLabel").text("Query To Send");
+                            //document.getElementById("querytosend").value = "";
+                            //document.getElementById("responsetodown").value = "";
+                        }
+                    }
+                    if(select.id=="snmpversion"){
+                        if(select.value=="v2c"){
+                            document.getElementById("snmpV3_row").style.display = "none";
+                        }else if(select.value=="v3"){
+                            document.getElementById("snmpV3_row").style.display = "block";
+                        }
+                    }
+                }
+
+                function validate_form_element(form_element){
+                    if(form_element.id=="paramsname"){
+                        if(form_element.value==""){
+                            form_element.focus();
+                            note.append("<li><u>Profile Name</u> field blank !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }else if(mpdNameList.includes(form_element.value)){
+                            form_element.focus();
+                            note.append("<li><u>Profile Name</u> already exists !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="monitorprofileid"){}  // select
+                    if(form_element.id=="snmpversion"){}  // select
+                    if(form_element.id=="communitystring"){
+                        console.log(selectedType);
+                        if(selectedType=="SNMP"&&form_element.value==""){
+                            form_element.focus();
+                            note.append("<li>You can not pass <u>Community String</u> field blank when Monitor Profile Type SNMP !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="snmpv3user"){
+                        if(document.getElementById("snmpversion").value=="v3"&&form_element.value==""){
+                            form_element.focus();
+                            note.append("<li>You can not pass <u>V3 Areas</u> blank when SNMP Version selected v3 !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="snmpv3authprotocol"){}  //select
+                    if(form_element.id=="snmpv3privacyprotocol"){}  //select
+                    if(form_element.id=="snmpv3authpass"){
+                        if(document.getElementById("snmpversion").value=="v3"&&form_element.value==""){
+                            form_element.focus();
+                            note.append("<li>You can not pass <u>V3 Areas</u> blank when SNMP Version selected v3 !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="snmpv3privacypass"){
+                        if(document.getElementById("snmpversion").value=="v3"&&form_element.value==""){
+                            form_element.focus();
+                            note.append("<li>You can not pass <u>V3 Areas</u> blank when SNMP Version selected v3 !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="httpmethod"){}  // select
+                    if(form_element.id=="httpsecure"){}  // select
+                    if(form_element.id=="httpport"){}  // input
+                    if(form_element.id=="httpurl"){}  // input
+                    if(form_element.id=="httpuri"){}  // input
+                    if(form_element.id=="username"){}  // input
+                    if(form_element.id=="dbasename"){}  // input
+                    if(form_element.id=="userpass"){}  // input
+                    if(form_element.id=="dbaseport"){}  // input
+                    if(form_element.id=="querytosend"){}  // input
+                    if(form_element.id=="responsetoreceive"){}  // input
+                    if(form_element.id=="responsetodown"){}  // input
+
+                    note.text("");
+                    saveButtonDiv.style.display = "block";
+                    return true;
+                }
+
+                function validation_control(){
+                    var valid = true;
+                    for(i in inputs){
+                        valid = (valid&&validate_form_element(inputs[i]));
+                    }
+                    console.log("Form is valid ? : "+valid);
+                }
+
+
+            }else if(route=="location"){
+                var locationGroupList = [{% for x in locationGroupList %}{{ x.get_json|safe }},{% endfor %}];;
+                //console.log(locationGroupList);
+                function arrangeFormParts(select){
+                    if(select.id=="locationgroupid"){
+                        if(select.value=="0"){
+                            document.getElementById("locationgroupname").value = "";
+                            document.getElementById("locationgroupcode").value = "";
+                        }else{
+                            for(i in locationGroupList){
+                                if(locationGroupList[i].id==parseInt(select.value)){
+                                    document.getElementById("locationgroupname").value = locationGroupList[i].locationgroupname;
+                                    document.getElementById("locationgroupcode").value = locationGroupList[i].locationgroupcode;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                function validate_form_element(form_element){
+                    if(form_element.id=="locationgroupid"){} // select
+                    if(form_element.id=="locationgroupname"){
+                        if(form_element.value==""){
+                            form_element.focus();
+                            note.append("<li><u>Location Group Name</u> field blank !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="locationgroupcode"){
+                        if(form_element.value==""){
+                            form_element.focus();
+                            note.append("<li><u>Location Group Code</u> field blank !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="locationname"){
+                        if(form_element.value==""){
+                            form_element.focus();
+                            note.append("<li><u>Location Name</u> field blank !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="locationcode"){
+                        if(form_element.value==""){
+                            form_element.focus();
+                            note.append("<li><u>Location Code</u> field blank !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    note.text("");
+                    saveButtonDiv.style.display = "block";
+                    return true;
+                }
+
+
+            }else if(route=="ingestion"){
+                var ingestionNameList = [{% for x in ingestionNameList %}"{{x|safe}}", {% endfor %}];
+
+                function validate_form_element(form_element){
+                    if(form_element.id=="ingestionprofilename"){
+                        if(form_element.value==""){
+                            form_element.focus();
+                            note.append("<li><u>Ingestion Profile Name</u> field blank !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }else if(ingestionNameList.includes(form_element.value)){
+                            form_element.focus();
+                            note.append("<li><u>Ingestion Profile Name</u> that you gave is already exist !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    }  // input
+                    if(form_element.id=="ingestionprofiletype"){} // select
+                    if(form_element.id=="ingestionport"){
+                        if(form_element.value==""){
+                            form_element.focus();
+                            note.append("<li><u>Ingestion Port</u> field blank !!</li>");
+                            saveButtonDiv.style.display = "none";
+                            return false;
+                        }
+                    } // input
+                    note.text("");
+                    saveButtonDiv.style.display = "block";
+                    return true;
+                }
+
+
+            }else if(route=="parser"){
+                var rowLogList = [{% for x in rawLogList %}{{ x.get_json|safe}}, {%endfor%}];
+
+                function arrangeFormParts(select){
+                    if(select.id=="ipselection"){
+                        //console.log(select.value);
+                        var rawLogSelect = document.getElementById("rawlogselection");
+                        var existingOptions = rawLogSelect.options;
+                        while(existingOptions.length>2){
+                            rawLogSelect.remove(existingOptions.length-1);
+                        }
+                        for(var i=0;i<rowLogList.length;i++){
+                            if(rowLogList[i].inetaddress == select.value){
+                                var option = document.createElement("option");
+                                option.text = rowLogList[i].logevent;
+                                option.value = rowLogList[i].logevent;
+                                rawLogSelect.add(option);
+                            }
+                        }
+                    }
+                    if(select.id=="rawlogselection"){
+                        //console.log(select.value);
+                        var rowLogData = document.getElementById("rowlogdata");
+                        //rowLogData.innerHTML = "";
+                        //rowLogData.innerHTML = select.value;
+                        rowLogData.value = "";
+                        rowLogData.value = select.value;
+                    }
+                }
+
+                function getSelectedText(element){
+                    var startResult = document.getElementById("startindex");
+                    var charCountResult = document.getElementById("countofchars");
+                    var totalString = element.value;
+                    var partOfString = window.getSelection().toString()
+                    //console.log(element.value);
+                    //console.log(window.getSelection().toString());
+                    //console.log(window.getSelection());
+                    //console.log(totalString.indexOf(partOfString));
+                    //console.log(partOfString.length);
+                    startResult.innerHTML = totalString.indexOf(partOfString) + 1;
+                    charCountResult.innerHTML = partOfString.length;
+                }
+
+            }else if(route=="general"){
+
+            }else if(route=="detail"){
+
+            }
+
+
+        </script>
+    </body>
+
+</html>

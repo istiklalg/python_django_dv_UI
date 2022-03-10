@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> ATIBAreport - AI Sensitivity Settings </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+        <style>
+
+        </style>
+    </head>
+    <body>
+
+        <div id="loading"><!-- LOADING PART -->
+            <div class="container-fluid" id="atiba_loading">
+                <h2 class="atiba_loading_h">ΛTIBΛ</h2>
+            </div>
+        </div><!-- / LOADING PART -->
+
+        <div class="container-fluid" id="page" style="margin:0;padding:0;"><!-- PAGE PART -->
+            <h5 align="center">SENSITIVITY SETTINGS</h5>
+<!--            {% for x in algorithms %}<p>{{x}}</p>{% endfor %}-->
+            <hr>
+            <div class="container-fluid" name="formContainer">
+                <form method="POST" action="{%url 'ai_sensitivity'%}" name="ai_sensitivity_form" onkeydown="return event.key != 'Enter';">
+                    {% csrf_token %}
+                    {% for x in algorithms %}
+                        <div class="form-group row justify-content-center">
+                            <label for="input{{x.id}}" id="label{{x.id}}" class="col-md-4"><b>{{x.algorithmname}}</b> Sensitivity</label>
+                            <div class="col-md-3" align="center">
+                                <a type="button" class="btn btn-sm btn-outline-danger"
+                                   onclick="document.getElementById('input{{x.id}}').value=-1;document.getElementById('label{{x.id}}').style.color='rgba(255, 99, 132, 0.85)';">
+                                    Less Sensitive (-)
+                                </a>
+                            </div>
+                            <div class="col-md-2" align="center" style="display:none">
+                                <input class="form-control form-control-sm" type="number" id="input{{x.id}}" name="{{x.id}}" min="-1" max="1" value="{{x.val}}" />
+                            </div>
+                            <div class="col-md-3" align="center">
+                                <a type="button" class="btn btn-sm btn-outline-success"
+                                   onclick="document.getElementById('input{{x.id}}').value=1;document.getElementById('label{{x.id}}').style.color='rgba(75, 192, 192, 0.85)';">
+                                    More Sensitive (+)
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <hr>
+                    <div class="form-group row justify-content-center">
+                        <div class="col-md-4"align="center">
+                            <a class="btn btn-outline-danger btn-sm" type="button" style="width:100%;" onclick="location.assign(location.href);">RESET CHANGES</a>
+                        </div>
+<!--                        <div class="col-md-1"></div>-->
+                        <div class="col-md-6" align="center">
+                            <button class="btn btn-outline-info btn-sm" type="submit" style="width:100%;">APPLY CHANGES</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+                <small>{% include 'messages.html' %}</small>
+            </div>
+
+        </div> <!-- / PAGE PART -->
+
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            // colors -> [green, red, orange, blue, yellow, grey, purple]
+            var graphColors = ['rgba(75, 192, 192, 0.85)','rgba(255, 99, 132, 0.85)','rgba(255, 159, 64, 0.85)','rgba(54, 162, 235, 0.85)','rgba(255, 206, 86, 0.85)','rgba(150, 150, 150, 0.85)','rgba(106, 92, 112, 0.85)']
+            var labelNames = ['Alert ', 'Cause ', 'Sub']
+
+            $(document).ready(function () {
+                $("#loading").hide();
+                $("#page").show();
+                $(".alert").fadeTo(8000, 0);
+                setTimeout(function () {$(".alert").alert("close")}, 10000);
+            });
+
+        </script>
+    </body>
+</html>

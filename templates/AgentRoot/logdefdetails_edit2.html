@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> {{route}} </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body  style="padding-top:15px;">
+
+        {% if route == 'general' %}
+
+
+        {% elif route == 'Configure Parameters' %}
+
+        <div class="container-fluid" style="text-align:center;font-size:9pt;">
+            <h5>id : {{logDefDetail.id}} / {{logDefDetail.logcode}}</h5>
+            <br>
+
+            <div class="row container" style="margin:auto;">
+                <div class="col-md-12">
+                    <div class="row"><h5>Log Definition Structure</h5></div>
+                    <hr>
+                    <div class="row">
+                        <p id="logstructs">{{logDefDetail.logstructs}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row container test" style="margin:auto;">
+                <div class="col-md-11">
+                    <div class="row"><h5>New Log Definition Structure</h5></div>
+                    <hr>
+                    <div class="row">
+                        <p id="reconstructedlogstructs">{{ reconstructedLogStructs }}</p>
+                    </div>
+                </div>
+                <div class="col-md-1" style="border-left:0.5px solid lightgrey;">
+                    <label for="accept_result">Accept Result</label>
+                    <input type="checkbox" id="accept_result" name="accept_result" onclick="check_new_logstructs(this)" />
+                </div>
+            </div>
+
+            <br>
+
+            <div class="container" style="background-color:lightgrey;border:0.5px solid white;border-radius:10px;margin:auto;">
+                <div class="row">
+                    <div class="col-sm-1">
+                        <a class="carousel-control-prev" role="button" tabindex="0" style="cursor: pointer;"
+                           onclick="get_new_page('samplesPageContainer', 'prev')" title="Previous page">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="sr-only"> </span>
+                        </a>
+                    </div>
+
+                    <div class="col-sm-10">
+                        <h5>Log Event Samples</h5>
+                        <hr>
+                        <div id="samplesPageContainer">
+                            {% for log in logEventSamples %}
+                                <p>{{ log }}</p>
+                            {% endfor %}
+                        </div>
+                        <hr/>
+                        <div style="text-align:center;color:blue;" id="pageInfo">{{currentPage|default:"1"}}. of {{totalPages}} pages</div>
+                    </div>
+
+
+                    <div class="col-sm-1">
+                        <a class="carousel-control-next" role="button" tabindex="0" style="cursor: pointer;"
+                           onclick="get_new_page('samplesPageContainer', 'next')" title="Next page">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span><span class="sr-only"> </span>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <br>
+
+            <div class="container" style="margin:auto;" id="form_div">
+                <br>
+                <form method="post">
+                    {%csrf_token%}
+                    <div class="container-fluid" id="form_body_container">
+                        {% for x in logDefsList %}
+
+                        <div class="container-fluid px-3 py-1"
+                             id="droppable_{{forloop.counter}}"
+                             ondrop="drop(event)" ondragover="allowDrop(event)"
+                             ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"
+                             style="min-height:10px;">
+
+                        </div>
+                        <div class="container-fluid" id="dragable_{{forloop.counter}}">
+                            <div class="container my-3" draggable="true" ondragstart="drag(event)"
+                                 style="display:flex;flex-direction:row;justify-content:space-around;"
+                                 id="form_row_{{forloop.counter}}" name="form_rows">
+
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-info btn-sm" title="Add part like this"
+                                            onclick="add_new_row(this)">+</button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" title="Remove this part"
+                                            onclick="delete_row(this)">X</button>
+                                </div>
+
+                                <label for="input_{{forloop.counter}}" class="col-md-3">{% if x.s %}Constant{% elif x.d %}Variable{% endif %}</label>
+                                {% if x.s %}
+                                <div class="col-md-9">
+                                    <input id="input_{{forloop.counter}}" name="s" class="form-control form-control-sm" value="{{x.s}}" onfocus="disable_save_button()" ondrop="return false" />
+                                </div>
+                                {% elif x.d %}
+                                <div class="col-md-9">
+                                    <select name="d" class="form-control form-control-sm" id="input_{{forloop.counter}}" onfocus="disable_save_button()">
+                                        {% for paramType, paramList in variableList %}
+                                            <optgroup label="{{paramType}}">
+                                                {% for kodnote, kod in paramList %}
+                                                    <option value="{{kod}}" {%if x.d == kod%} selected {%endif%}>{{kodnote}}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="container-fluid px-3 py-1"
+                             id="droppable_0"
+                             ondrop="drop(event)" ondragover="allowDrop(event)"
+                             ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"
+                             style="min-height:10px;">
+
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="container" style="display:flex;flex-direction:row;justify-content:space-between;">
+                        <input type="text" name="new_logdefs" id="new_logstructs" class="form-control form-control-sm" />
+                    </div>
+                    <br>
+                    <div class="container-fluid" style="display:flex;flex-direction:row;justify-content:space-between;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" id="form_reset_button" href="{{logDefDetail.get_edit_url}}">&#10005; RESET CHANGES</a>
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" id="check_form_button" onclick="check_form()">&#10003; SET FORM VALUES</a>
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;" id="form_save_button" type="submit" disabled>&#10146; SAVE</button>
+                    </div>
+                </form>
+            </div>
+            <br>
+
+        </div>
+
+        {% else %}
+
+         <div class="container" style="text-align:center;">
+
+         </div>
+
+        {% endif %}
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+        var route = "{{route}}";
+        if(route=="Configure Parameters"){
+
+            var currentPage = 1;
+            var totalPages = parseInt({{totalPages}});
+            console.log(`${currentPage}. of ${totalPages} pages`);
+            var currentURL = window.location.pathname;
+            console.log(currentURL);
+            var idCounter = 999;
+            var droppableSample = document.getElementById("droppable_0");
+
+            function drag(ev) {
+                // method for ondragstart event on dragable element
+                ev.dataTransfer.setData("text", ev.target.id);
+            }
+
+            function dragEnter(ev){
+                ev.preventDefault();
+                ev.target.style.backgroundColor = "rgba(245, 245, 220, 0.6)";
+                ev.target.style.minHeight = "50px";
+            }
+
+            function dragLeave(ev){
+                ev.preventDefault();
+                ev.target.style.backgroundColor = "#fff";
+                ev.target.style.minHeight = "10px";
+            }
+
+            function allowDrop(ev) {
+                // method for draggable element over the droppable element
+                // ondragover event for droppable element
+                ev.preventDefault();
+                ev.target.style.backgroundColor = "rgba(245, 245, 220, 0.6)";
+                ev.target.style.minHeight = "50px";
+            }
+
+
+            function drop(ev) {
+                // ondrop event on droppable element, when you leave the
+                // dragable element to destination
+                ev.preventDefault();
+                var data = ev.dataTransfer.getData("text");
+                if (ev.target.id.startsWith("droppable") && ev.target.tagName === "DIV") {
+                    let newContainer = document.createElement("div");
+                    newContainer.className = "container-fluid";
+                    newContainer.appendChild(document.getElementById(data))
+                    ev.target.insertAdjacentElement("afterend", newContainer);
+                    let draggedId = data.replace("form_row", "dragable");
+                    let droppable = droppableSample.cloneNode(true);
+                    droppable.id = `droppable_${idCounter}`;
+                    idCounter --;
+                    newContainer.insertAdjacentElement("afterend", droppable);
+                }
+                ev.target.style.backgroundColor = "#fff";
+                ev.target.style.minHeight = "10px";
+            }
+
+            function add_new_row(add_button){
+                let el = add_button.parentElement.parentElement.parentElement;
+                let cln = el.cloneNode(true);
+                cln.id = `form_row_${idCounter}`
+                cln.firstElementChild.id = `clon_${cln.id}`
+                let clnInput = cln.querySelectorAll("INPUT, SELECT");
+                clnInput.forEach((el) => { el.id = `input_${idCounter}`});
+                let clnLabel = cln.querySelector("LABEL");
+                clnLabel.htmlFor = `input_${idCounter}`;
+                document.getElementById('form_body_container').insertBefore(cln, el.nextSibling);
+                let droppable = droppableSample.cloneNode(true);
+                droppable.id = `droppable_${idCounter}`;
+                idCounter --;
+                document.getElementById('form_body_container').insertBefore(droppable, el.nextSibling);
+            }
+
+            function delete_row(delete_button){
+                let el = delete_button.parentElement.parentElement;
+                el.remove();
+            }
+
+            function get_new_page(containerId, direction){
+                var samplesDiv = document.getElementById(containerId);
+                if((direction==="prev" && currentPage > 1) || (direction==="next" && currentPage < totalPages)){
+                    var csrf = $("input[name=csrfmiddlewaretoken]").val();
+                    $.ajax({
+                        url: currentURL,
+                        type: "post",
+                        data: { csrfmiddlewaretoken: csrf,
+                                action: "page",
+                                direction: direction,
+                                currentPage: currentPage,
+                               },
+                        success: function(response){
+                            if(response.command!=0){
+                                currentPage = response.currentPage;
+                                var logEventSample = response.logEventSample;
+                                samplesDiv.innerHTML = "";
+                                for(var i=0;i<logEventSample.length;i++){
+                                    var p = document.createElement("p");
+                                    p.innerHTML = logEventSample[i];
+                                    samplesDiv.appendChild(p);
+                                }
+                                $("#pageInfo").text(`${currentPage}. of ${totalPages} pages`);
+                            }else{
+                                console.log(response.message);
+                                //$("#pageInfo").text(`No page ${direction} of ${currentPage}`);
+                                $("#pageInfo").text(response.message);
+                            }
+                        }
+                    });
+                }else{
+                    console.log(`No page ${direction} of ${currentPage}`);
+                    $("#pageInfo").text(`No page ${direction} of ${currentPage}`);
+                }
+            }
+
+            var logsArr = [{% for x in logDefDetail.logsarr %}"{{x}}", {% endfor %}];
+            var logFields = [{% for x in logDefDetail.logfields %}"{{x}}", {% endfor %}];
+            var logDefs = [{% for x in logDefDetail.get_logdefs %}{{x|safe}}, {% endfor %}];
+
+            var acceptResult = document.getElementById("accept_result");
+
+            var formCheckButton = document.getElementById("check_form_button");
+            var formSaveButton = $("#form_save_button");
+/*
+            var moveUpButton = document.getElementById("move_up_selected");
+            var moveDownButton = document.getElementById("move_down_selected");
+            var addNewButton = document.getElementById("add_new");
+            var deleteButton = document.getElementById("delete_selected");
+*/
+            var formBodyContainer = document.getElementById("form_body_container");
+            var newLogStructs = document.getElementById("new_logstructs");
+            var formRows = document.getElementsByName("form_rows");
+            var formRowCount = formRows.length;
+            var selectedFormRow;
+            //console.log(formRows);
+            //console.log(formBodyContainer);
+            console.log(formRowCount);
+            //console.log(logDefs);
+            //console.log(logDefs[0].s);
+
+            var logstructsP = document.getElementById("logstructs")
+            var logstructs = "{{logDefDetail.logstructs}}";
+            logstructsP.innerHTML = logstructs.replace(/&lt;&lt;/g, ' <span style="color:red;">&lt;&lt;').replace(/&gt;&gt;/g, "&gt;&gt;</span> ");
+
+            var reconstructedP = document.getElementById("reconstructedlogstructs");
+            var reconstructedString = "{{reconstructedLogStructs}}";
+            reconstructedP.innerHTML = reconstructedString.replace(/&lt;&lt;/g, ' <span style="color:red;">&lt;&lt;').replace(/&gt;&gt;/g, "&gt;&gt;</span> ");
+
+            function get_form_values(){
+                var form_map = $('form').serializeArray();
+                var resultStringList = [];
+                for(var i=0;i<form_map.length;i++){
+                    if(form_map[i].name != "new_logstructs" && form_map[i].name != "new_logdefs" && form_map[i].name != "csrfmiddlewaretoken"){
+                        //resultStringList.push("{'"+form_map[i].name+"':'"+form_map[i].value+"'}");
+                        resultStringList.push('{"'+form_map[i].name+'":"'+form_map[i].value+'"}');
+                    }
+                }
+                return resultStringList;
+            }
+/*
+            function select_form_row(selectedRow){
+                selectedFormRow = selectedRow;
+                console.log(selectedRow.id);
+                moveUpButton.value = selectedRow.id;
+                moveDownButton.value = selectedRow.id;
+                addNewButton.value = selectedRow.id;
+                deleteButton.value = selectedRow.id;
+                formRows.forEach(function (row){row.style.backgroundColor = "white";});
+                selectedRow.style.backgroundColor="rgba(245, 245, 220, 0.6)";
+            }
+*/
+            function check_form(){
+                var form_map = $('form').serializeArray();
+                var resultStringList = [];
+                newLogStructs.value = "";
+                for(var i=0;i<form_map.length;i++){
+                    if(form_map[i].name != "new_logstructs" && form_map[i].name != "new_logdefs" && form_map[i].name != "csrfmiddlewaretoken"){
+                        //resultStringList.push("{'"+form_map[i].name+"':'"+form_map[i].value+"'}");
+                        let stringReplacedChars = (form_map[i].value).replace(/\"/g, "\\\"");
+                        form_map[i].value = stringReplacedChars;
+                        resultStringList.push('{"'+form_map[i].name+'":"'+form_map[i].value+'"}');
+                    }
+                }
+                newLogStructs.value = resultStringList;
+                //console.log(resultStringList);
+
+                var reconstructJS = "";
+                var resultJSONList = []
+                for(var i=0;i<resultStringList.length;i++){
+                    //console.log(resultStringList[i]);
+                    var el = JSON.parse(resultStringList[i]);
+                    resultJSONList.push(el);
+                    //for(x in element){
+                    //    if(x=="s"){
+                    //        reconstructJS += element[x]+" ";
+                    //    }else if(x=="d"){
+                    //        reconstructJS += "&lt;&lt;"+element[x]+"&gt;&gt; ";
+                    //    }
+                    //}
+                }
+
+                for(var i=2;i<resultJSONList.length;i++){
+                    for(x in resultJSONList[i]){
+                        if(x=="s"){
+                            try{
+                                resultJSONList[i-2][x] = resultJSONList[i-2][x].replace(resultJSONList[i][x], "");
+                                //console.log("try "+resultJSONList[i-2][x]);
+                            }catch(err){
+                                try{
+                                resultJSONList[i-1][x] = resultJSONList[i-1][x].replace(resultJSONList[i][x], "");
+                                //console.log("catch "+resultJSONList[i]);
+                                }catch(err){
+                                    alert("You are trying to add more than one dynamic values without any white space or constant value between them");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for(var i=0;i<resultJSONList.length;i++){
+                    for(x in resultJSONList[i]){
+                        if(x=="s"){
+                            reconstructJS += resultJSONList[i][x]+" ";
+                        }else if(x=="d"){
+                            reconstructJS += "&lt;&lt;"+resultJSONList[i][x]+"&gt;&gt; ";
+                        }
+                    }
+                }
+
+                //console.log(reconstructJS);
+                //console.log(typeof reconstructJS);
+                reconstructedP.innerHTML = reconstructJS.replace(/&lt;&lt;/g, ' <span style="color:red;">&lt;&lt;').replace(/&gt;&gt;/g, "&gt;&gt;</span> ");
+
+
+                if(acceptResult.checked==true){
+                    formSaveButton.attr("disabled", false);
+                }else{
+                    acceptResult.focus();
+                }
+            }
+
+            function check_new_logstructs(checkBox){
+                if(checkBox.checked==true){
+                    if(newLogStructs.value!=""){
+                        formSaveButton.attr("disabled", false);
+                    }else{
+                        formCheckButton.focus();
+                    }
+                }else{
+                    formSaveButton.attr("disabled", true);
+                }
+            }
+
+            function disable_save_button(){
+                formSaveButton.attr("disabled", true);
+            }
+
+        }
+
+        </script>
+    </body>
+
+</html>

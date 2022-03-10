@@ -1,0 +1,757 @@
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> Edit - {{route}} </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body  style="padding-top:15px;">
+
+        {% if route == 'general' %} <!-- -->
+
+        <div class="container" style="text-align:center;">
+
+
+        </div>
+
+        {% elif route == 'logsource' %}
+
+        <div class="container" style="text-align:center;">
+            <h5>{{source}}</h5>
+            <small>{{source.logsourceselection}} {{source.mean_scan_status|lower}} area</small>
+            <hr>
+            <form method="POST" name="edit_source" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="uniques_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ipaddress" class="col-md-3 col-form-label">IP Address </label>
+                        <div class="col-md-3">
+                            <input id="ipaddress" name="ipaddress" class="form-control form-control-sm" type="text" value="{{source.ipaddress}}" onblur="validate_form_element(this)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="uniqueidtype" class="col-md-3 col-form-label">Identifier Type</label>
+                        <div class="col-md-3">
+                            <input id="uniqueidtype" name="uniqueidtype" class="form-control form-control-sm" value="{{source.uniqueidtype}}" disabled/>
+                        </div>
+                        <label for="uniqueid" class="col-md-3 col-form-label">Unique Identifier</label>
+                        <div class="col-md-3">
+                            <input id="uniqueid" name="uniqueid" class="form-control form-control-sm" {%if source.uniqueid%}value="{{source.uniqueid}}"{%endif%} {%if not source.isFirstEdit%} disabled {%endif%}/>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row" id="profiles_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="monitorprofile" class="col-md-3 col-form-label">Monitoring Profile Details</label>
+                        <div class="col-md-9">
+                            <select id="monitorprofile" name="monitorprofile" class="form-control form-control-sm" onchange="setSelectedValues(this)">
+                                {% if source.logsourceselection == "microsoftserver" or source.logsourceselection == "linuxserver" %}
+                                    <option value="0">No Parser Profile Selected</option>
+                                    <option disabled>-----------</option>
+                                {% endif %}
+                                {% for x in monitorProfileList %}
+                                    <option value="{{x.id}}" {%if x.id == source.monitorprofile%}selected{%endif%}>{{x}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parserprofile" class="col-md-3 col-form-label">Parser Profile </label>
+                        <div class="col-md-9">
+                            <select id="parserprofile" name="parserprofile" class="form-control form-control-sm">
+                                <option value="0">No Parser Profile Selected</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}" {%if x.value == source.parserprofile%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="locationprofile" class="col-md-3 col-form-label">Location Profile </label>
+                        <div class="col-md-9">
+                            <select id="locationprofile" name="locationprofile" class="form-control form-control-sm">
+                                <option value="0">No Location Profile Selected</option>
+                                <option disabled>-----------</option>
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}" {%if x.value == source.locationprofile%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestionprofile" class="col-md-3 col-form-label">Log Ingestion Profile </label>
+                        <div class="col-md-9">
+                            <select id="ingestionprofile" name="ingestionprofile" class="form-control form-control-sm">
+                                <option value="0">No Log Ingestion Profile</option>
+                                <option disabled>-----------</option>
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}" {%if x.value == source.ingestionprofile%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                {% if source.logsourceselection == "networkdevice" %}
+                <div class="form-group row" id="networkdevice_row" name="form_rows" style="display:block;text-align:left;">
+                    <ul>
+                        <li>Choose the correct brand, model and version.
+                            If you cannot find it among the options,
+                            please contact us to install the driver for this version.
+                        </li>
+                    </ul>
+                    <div class="row">
+                        <label for="markid" class="col-md-3 col-form-label">Brand Name *</label>
+                        <div class="col-md-3">
+                            <select id="markid" name="markid" class="form-control form-control-sm" onchange="arrangeModelListForMarkId(this)">
+                                <option value="0">Select Brand</option>
+                                <option disabled>-----------</option>
+                                {% for x in markList %}
+                                    <option value="{{x.value}}" {%if x.value == source.markid%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="modelid" class="col-md-3 col-form-label">Model Name *</label>
+                        <div class="col-md-3">
+                            <select id="modelid" name="modelid" class="form-control form-control-sm" onchange="arrangeVersionListForModel(this)">
+                                <option value="0">Select Model</option>
+                                {% for x in modelList %}
+                                    {%if x.value == source.modelid%}
+                                    <option value="{{x.value}}" selected>{{x.name}}</option>
+                                    {%endif%}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="deviceverid" class="col-md-3 col-form-label">Version *</label>
+                        <div class="col-md-3">
+                            <select id="deviceverid" name="deviceverid" class="form-control form-control-sm">
+                                <option value="0">Select Version</option>
+                                {% for x in versionList %}
+                                    {%if x.value == source.deviceverid%}
+                                    <option value="{{x.value}}" selected>{{x.name}}</option>
+                                    {%endif%}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {% elif source.logsourceselection == "microsoftserver" or source.logsourceselection == "linuxserver" %}
+
+                <div class="form-group row" id="server_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="markid" class="col-md-3 col-form-label">Brand Name</label>
+                        <div class="col-md-3">
+                            <select id="markid" name="markid" class="form-control form-control-sm" onchange="arrangeModelListForMarkId(this)">
+<!--                                <option value="0">Custom Brand</option>-->
+<!--                                <option disabled>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+                                {% for x in markList %}
+                                    <option value="{{x.value}}" {%if x.value == source.markid%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="modelid" class="col-md-3 col-form-label">Distrubution</label>
+                        <div class="col-md-3">
+                            <select id="modelid" name="modelid" class="form-control form-control-sm" onchange="arrangeVersionListForModel(this)">
+                                <option value="0">Custom Model</option>
+                                {% for x in modelList %}
+                                    {%if x.value == source.modelid%}
+                                    <option value="{{x.value}}" selected>{{x.name}}</option>
+                                    {%else%}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                    {%endif%}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="deviceverid" class="col-md-3 col-form-label">Version</label>
+                        <div class="col-md-3">
+                            <select id="deviceverid" name="deviceverid" class="form-control form-control-sm">
+                                <option value="0">Custom Version</option>
+                                {% for x in versionList %}
+                                    {%if x.value == source.deviceverid%}
+                                    <option value="{{x.value}}" selected>{{x.name}}</option>
+                                    {%endif%}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {% endif %}
+                <br>
+                <div class="form-group row" id="tag_row" name="form_rows" style="display:block;text-align:left;">
+<!--                    <div class="row">-->
+<!--                        <div class="col-md-3 col-lg-4">-->
+<!--                            Tag information and address <br>in log for this tag-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="before_tag">Chars Right Before Tag</label></div>-->
+<!--                            <div class="row">-->
+<!--                                <input id="before_tag" name="before_tag" class="form-control form-control-sm" type="text" minlength="3" maxlength="5" value="{{before_tag}}"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="syslogtag">TAG</label></div><div class="row">-->
+<!--                                <input id="syslogtag" name="syslogtag" class="form-control form-control-sm" type="text" minlength="3" maxlength="10" {%if source.syslogtag%}value="{{source.syslogtag}}"{%endif%}/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="after_tag">Chars Right After Tag</label></div>-->
+<!--                            <div class="row">-->
+<!--                                <input id="after_tag" name="after_tag" class="form-control form-control-sm" type="text" minlength="3" maxlength="5" value="{{after_tag}}"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <div class="row">
+                        <label for="tag" class="col-md-3 col-form-label">Tag information</label>
+                        <div class="col-md-9">
+                            <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Tag in log" maxlength="25" onblur="validate_form_element(this)" onkeyup="validate_form_element(this)"
+                                   {%if source.syslogtag%}value="{{source.syslogtag}}"{%endif%}/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="taglocation" class="col-md-3 col-form-label">Tag location regex</label>
+                        <div class="col-md-9">
+                            <input id="taglocation" name="taglocation" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Regex for tag in log"
+                                   {%if source.taglocation%}value="{{source.taglocation}}"{%endif%}/>
+                        </div>
+                    </div>
+                </div>
+
+
+                <br>
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:block;">
+                    <div class="row test" id="activate_source" style="text-align:left;">
+                        <label for="scanstatus" class="custom-control custom-checkbox">
+                            Activate this log source and take it out of the {%if source.scanstatus == 9%}history{%else%}staging area{%endif%}
+                        </label>
+                        <div class="col-md-3">
+                            <input id="scanstatus" type="checkbox" name="scanstatus" class="custom-control custom-checkbox" value="0" />
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="form_notifications" style="color:red;text-align:left;">
+                        {% if warning != "" %}
+                            <li>{{warning}}</li>
+                        {% endif %}
+                    </div>
+                    <hr>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" onclick="location.assign(location.href);">RESET FORM</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+        {% elif route == 'component' %} <!--edit component-->
+
+        <div class="container" style="text-align:center;font-size:9pt;">
+            <h5>{{component.componentname}}</h5>
+            <div class="container-fluid">
+                <form method="post" onkeydown="return event.key != 'Enter';" name="editComponent">
+                    {% csrf_token %}
+                    <div class="form-row align-items-center">
+                        <label for="component_name" class="col-md-6 col-form-label">Component Name</label>
+                        <div class="col-md-6">
+                            <input type="text" id="component_name" name="component_name" style="font-size:9pt;" maxlength="35" value="{{component.componentname}}" required onblur="check_if_exist(this)"/>
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="container-fluid" style="height:20px;color:red;" id="component">
+                        <p id="editComponentWarning"></p>
+                        {% if warning %}<ul><li>{{ warning }}</li></ul>{% endif %}
+                    </div>
+
+                    <br>
+                    <div class="form-row align-items-center">
+                        <table class="table table-sm table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Unique Identifier</th>
+                                    <th>Log Source Name</th>
+                                    <th align="center"><div class="asLink" onclick="check_and_release_all('id_list')">ALL</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for source in logSources %}
+                                <tr>
+                                    <td>{% if source.uniqueid %}{{source.uniqueid}}{% endif %}</td>
+                                    <td><label for="source{{source.id}}">{{source.sourcename}}</label></td>
+                                    <td><input type="checkbox" id="source{{source.id}}" name="id_list" value="{{source.id}}" {%if source in component.get_log_sources%}checked{%endif%}></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-outline-info btn-sm" type="submit" style="font-size:9pt;">UPDATE</button>
+                </form>
+            </div>
+        </div>
+
+        {% elif route == 'application' %} <!--edit application-->
+
+        <div class="container" style="text-align:center;font-size:9pt;">
+            <h5>{{application.appname}}</h5>
+            <div class="container-fluid">
+                <form method="post" onkeydown="return event.key != 'Enter';" name="application">
+                    {% csrf_token %}
+                    <div class="form-row align-items-center">
+                        <label for="application_name" class="col-md-6 col-form-label">Application Name</label>
+                        <div class="col-md-6">
+                            <input type="text" id="application_name" name="application_name" style="font-size:9pt;" maxlength="35" value="{{application.appname}}"
+                                   required onblur="check_if_exist(this)" />
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="container-fluid" style="height:20px;color:red;" id="application">
+                        <p id="editApplicationWarning"></p>
+                        {% if warning %}<ul><li>{{ warning }}</li></ul>{% endif %}
+                    </div>
+
+                    <br>
+                    <div class="form-row align-items-center">
+                        <table class="table table-sm table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Component Name</th>
+                                    <th>Count of <br>Log Sources</th>
+                                    <th align="center"><div class="asLink" onclick="check_and_release_all('component_ids')">ALL</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for component in componentList %}
+                                <tr>
+                                    <td>{{component.componentname}}</td>
+                                    <td><label for="component{{component.id}}">{{component.get_log_sources|length}}</label></td>
+                                    <td><input type="checkbox" id="component{{component.id}}" name="component_ids" value="{{component.id}}" {%if component in application.get_components%}checked{%endif%} /></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-outline-info btn-sm" type="submit">SAVE</button>
+                </form>
+            </div>
+
+        </div>
+
+        {% elif route == 'monitorprofile' %} <!-- -->
+
+        <div class="container" style="text-align:center;">
+
+
+        </div>
+
+        {% elif route == 'detail' %}  <!-- -->
+
+        <div class="container" style="text-align:center;">
+
+        </div>
+
+        {% elif route == 'noedit' %}  <!-- -->
+
+        <div class="container" style="text-align:center;">
+            <h5>YOU CAN EDIT LOG SOURCE WHEN THEY ARE IN STAGING AREA</h5>
+        </div>
+
+        {% else %}
+
+         <div class="container" style="text-align:center;">
+            <h5>SOON ...</h5>
+            <hr>
+         </div>
+
+        {% endif %}
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.maskedinput.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/general_style.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+
+            if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+            var add_method = "{{route}}";
+            //console.log(add_method);
+            var sourceSelection = "{{source.logsourceselection}}";
+            //console.log(sourceSelection);
+            $('#ipaddress').mask('999.999.999.999');
+            if("{{route}}"=="logsource"){
+                $('#ipaddress').val('{{source.ipaddress|safe}}');
+                if("{{source.uniqueidtype}}"=="ipaddress"){
+                    $('#ipaddress').prop("disabled", true);
+                }
+
+            }
+            function check_if_exist(inputElement){
+                // to control given component and application names is used before;
+                console.log("Edit Page !");
+                if(inputElement.name=="component_name"){
+                    var result = document.getElementById("editComponentWarning");
+                    var componentNameList = [{%for x in componentNames%}'{{x|safe}}', {%endfor%}]
+                    if(componentNameList.includes(inputElement.value)){
+                        inputElement.focus();
+                        result.innerHTML = "<ul><li> '"+inputElement.value+"' name is used before please give a unique name</li></ul>";
+                        return false;
+                    }else if(inputElement.value==""){
+                        inputElement.focus();
+                        result.innerHTML = "<ul><li>Please give a unique name for component</li></ul>";
+                        return false;
+                    }
+                }else if(inputElement.name=="application_name"){
+                    var result = document.getElementById("editApplicationWarning");
+                    var applicationNameList = [{%for x in applicationNames%}'{{x|safe}}', {%endfor%}]
+                    if(applicationNameList.includes(inputElement.value)){
+                        inputElement.focus();
+                        result.innerHTML = "<ul><li>'"+inputElement.value+"' name is used before please give a unique name</li></ul>";
+                        return false;
+                    }else if(inputElement.value==""){
+                        inputElement.focus();
+                        result.innerHTML = "<ul><li>Please give a unique name for application</li></ul>";
+                        return false;
+                    }
+                }
+                result.innerHTML = "";
+                return true
+            }
+            var note = $('#form_notifications');  // for validation warnings
+            var form_parts = document.getElementsByName('form_rows');  // list of div elements in form containing parts of form using it next&prev
+            var inputs = document.getElementsByTagName('input');  // input elements in form
+            var selects = document.getElementsByTagName('select');  // select elements in form
+            var markList = [{% for x in markList %}{{ x|safe }},{% endfor %}];
+            var modelList = [{% for x in modelList %}{{ x|safe }},{% endfor %}];
+            var versionList = [{% for x in versionList %}{{ x|safe }},{% endfor %}];
+            var ipAndTaglist = [{%for x in ipAndTaglist%}JSON.stringify({{x|safe}}),{%endfor%}];
+            var ipsOfNetworkDevices = [{% for x in ipsOfNetworkDevices %}"{{ x|safe }}",{% endfor %}];
+            //var add_method = {{request.GET.device_add_method}};
+            var add_method = "{{route}}";
+            //console.log(add_method=="scan");
+            //console.log(add_method=="manual");
+
+            // function that when a brand (mark) is chosen arrange a modelList for model selection;
+            function arrangeModelListForMarkId(selected){
+                var modelSelect = document.getElementById("modelid");
+                var existingOptions = modelSelect.options;
+                while(existingOptions.length>2){
+                    modelSelect.remove(existingOptions.length-1);
+                }
+
+                for(var i=0;i<modelList.length;i++){
+                    if(modelList[i].markid==selected.value){
+                        var option = document.createElement("option");
+                        option.text = modelList[i].name;
+                        option.value = modelList[i].value;
+                        modelSelect.add(option);
+                    }
+                }
+            }
+
+            // function that when a model is chosen arrange a versionList for version selection;
+            function arrangeVersionListForModel(selected){
+                var versionSelect = document.getElementById("deviceverid");
+                var existingOptions = versionSelect.options;
+                var selectedDeviceType = "";
+                modelList.forEach(
+                    function (el){
+                        if(el.value==selected.value){
+                            selectedDeviceType=el.devicetype;
+                        }
+                    }
+                );
+                while(existingOptions.length>2){
+                    versionSelect.remove(existingOptions.length-1);
+                }
+                for(var i=0;i<versionList.length;i++){
+                    if(versionList[i].devicetype==selectedDeviceType){
+                        var option = document.createElement("option");
+                        option.text = versionList[i].name;
+                        option.value = versionList[i].value;
+                        versionSelect.add(option);
+                    }
+                }
+            }
+
+            function setSelectedValues(selected){
+                // selected is html select element which calls this function;
+                console.log(selected.value);
+                console.log(selected.name);
+
+                if(selected.name=="snmp_profile"){
+                    if(selected.value=="0"){
+                        // if selected element is about snmp profiles selected as new to create new snmp profile;
+                        $('#snmp_profile_name').val("");
+                        $('#community_string').val("");
+                        $('#v3_user_name').val("");
+                        $('#v3_auth_password').val("");
+                        $('#v3_privacy_password').val("");
+                    }else{
+                        // if selected element is one of the existing snmp profiles;
+                        var snmpProfileList = [{% for x in snmpProfileList %}{{ x.get_json|safe }},{% endfor %}];
+                        var selectedProfile;
+                        for(var i=0;i<snmpProfileList.length;i++){
+                            if(snmpProfileList[i].id==selected.value){
+                                selectedProfile=snmpProfileList[i];
+                                break;
+                            }
+                        }
+                        if(selectedProfile){
+                            if(selectedProfile.snmpversion=="v2c"||selectedProfile.snmpversion=="V2c"||selectedProfile.snmpversion=="V2C"||selectedProfile.snmpversion=="v2C"){
+                                $('#snmp_profile_name').val(selectedProfile.paramsname);
+                                $('#snmp_version').val("v2c");
+                                $('#community_string').val(selectedProfile.communitystring);
+                            }else if(selectedProfile.snmpversion=="v3"||selectedProfile.snmpversion=="V3"){
+                                $('#snmp_profile_name').val(selectedProfile.paramsname);
+                                $('#snmp_version').val("v3");
+                                $('#community_string').val(selectedProfile.communitystring);
+                                $('#v3_user_name').val(selectedProfile.snmpv3user);
+                                $('#v3_auth_protocol').val(selectedProfile.snmpv3authprotocol);
+                                $('#v3_auth_password').val(selectedProfile.snmpv3authpass);
+                                $('#v3_privacy_protocol').val(selectedProfile.snmpv3privacyprotocol);
+                                $('#v3_privacy_password').val(selectedProfile.snmpv3privacypass);
+                            }
+                        }
+                    }
+                }
+                if(selected.name=="monitor_profile"){
+                    if(selected.value=="0"){
+                        $('#monitor_profile_name').val("");
+                        $('#monitor_profile_type').val("");
+                    }else{
+                        var monitorProfileList = [{% for x in monitorProfileList %}{{x.get_json|safe}},{% endfor %}];
+                        var selectedMonitor;
+                        for(var i=0;i<monitorProfileList.length;i++){
+                            if(monitorProfileList[i].id==selected.value){
+                                selectedMonitor = monitorProfileList[i];
+                                break;
+                            }
+                        }
+                        if(selectedMonitor){
+                            $('#monitor_profile_name').val(selectedMonitor.monitorprofilename);
+                            $('#monitor_profile_type').val(selectedMonitor.monitorprofiletype);
+                        }
+                    }
+
+                }
+            }
+
+            function testSpecialCharacters(str){
+                var regex = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g;
+                return regex.test(str);
+            }
+
+            function only_show(form_part){
+                for(var i=0;i<form_parts.length;i++){
+                    form_parts[i].style.display = "none";
+                }
+                form_part.style.display = "block";
+            }
+
+            function validate_form_element(form_element){
+                if(form_element.id=="ipaddress"){
+                    console.log(form_element.value);
+                    if(form_element.value==""||form_element.value=="___.___.___.___"){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>IP Address</u> field blank !!</li>");
+                        return false;
+                    }else if(sourceSelection=="networkdevice"){
+                        var ipPartList = form_element.value.split(".");
+                        var ipString = parseInt(ipPartList[0])+"."+parseInt(ipPartList[1])+"."+parseInt(ipPartList[2])+"."+parseInt(ipPartList[3]);
+                        console.log(ipString);
+                        if(ipsOfNetworkDevices.includes(ipString)){
+                            form_element.focus();
+                            note.append("<li>There is another network device on this <u>IP Address</u> !!</li>");
+                            return false;
+                        }
+                    }else{
+                        var ok = true;
+                        var list = form_element.value.split(".");
+                        list.forEach(function(str){ok = (ok&&(parseInt(str)<256));});
+                        if(!ok){
+                            form_element.focus();
+                            note.append("<li>Make sure you have entered the correct <u>IP Address</u> !!</li>");
+                            return false;
+                        }
+                    }
+                }  // text
+                if(form_element.id=="ip_mask"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li><u>Mask</u> field blank !!</li>");
+                        return false;
+                    }else if(form_element.value>32||form_element.value<=0){
+                        form_element.focus();
+                        note.append("<li>Wrong value in <u>Mask</u> field, must be between 1 and 32 !!</li>");
+                        return false;
+                    }
+                }  // integer max = 32
+                if(form_element.id=="unique_identifier"){ }  // selection
+                if(form_element.id=="uniqueid"){
+                    if(testSpecialCharacters(form_element.value)){
+                        form_element.focus();
+                        note.append("<li>Please don't use special characters or white space in <u>Unique Identifier</u> !!</li>");
+                        return false;
+                    }
+                }  // input text for uniqueid
+                if(form_element.id=="markid"){ }  // selection
+                if(form_element.id=="modelid"){ }  // selection
+                if(form_element.id=="deviceverid"){ }  // selection
+                if(form_element.id=="oid"){
+                    if(form_element.value==""&&(document.getElementById("unique_identifier").value=="macaddress"||document.getElementById("unique_identifier").value=="hostname")){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>OID</u> field blank when unique identifier Mac Address or Host Name !!</li>");
+                        return false;
+                    }
+                }  // text
+                if(form_element.id=="custom_name"){
+                    if(form_element.value==""&&document.getElementById("unique_identifier").value=="customname"){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Custom Name</u> field blank when unique identifier Custom Name !!</li>");
+                        return false;
+                    }else if(testSpecialCharacters(form_element.value)){
+                        form_element.focus();
+                        note.append("<li>Please don't use special characters or white space in <u>Custom Name</u> !!</li>");
+                        return false;
+                    }
+                }  // text max 35 chars
+                if(form_element.id=="log_source_name"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Log Source Name</u> field blank !!</li>");
+                        return false;
+                    }else if(testSpecialCharacters(form_element.value)){
+                        form_element.focus();
+                        note.append("<li>Please don't use special characters or white space in <u>Log Source Name</u> !!</li>");
+                        return false;
+                    }
+                }  // text max 35 chars
+                if(form_element.id=="monitor_profile"){ }  // selection
+                if(form_element.id=="snmp_profile"){ }  // selection
+                if(form_element.id=="monitor_profile_name"){
+                    if(document.getElementById("monitor_profile").value=="0"&&form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Monitor Profile Name</u> field blank for new profile !!</li>");
+                        return false;
+                    }
+                } // name input
+                if(form_element.id=="monitor_profile_type"){ } // selection
+                if(form_element.id=="snmp_profile_name"){
+                    if(document.getElementById("snmp_profile").value=="0"&&form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>SNMP Profile Name</u> field blank when creating new SNMP profile !!</li>");
+                        return false;
+                    }
+                }
+                if(form_element.id=="parser_profile"){ }  //selection
+                if(form_element.id=="location_profile"){ }  //selection
+                if(form_element.id=="ingestion_profile"){ }  //selection
+                if(form_element.id=="snmp_version"){ }  //selection
+                if(form_element.id=="community_string"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Community String</u> field blank !!</li>");
+                        return false;
+                    }
+                }  // password for V2c
+                if(form_element.id=="v3_user_name"){ }  // for v3 text
+                if(form_element.id=="v3_auth_protocol"){}  // for v3 selection
+                if(form_element.id=="v3_auth_password"){
+                    if(document.getElementById("snmp_version").value=="v3"&&form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Auth Password</u> field blank when SNMP Version chosen V3 !!</li>");
+                        return false;
+                    }
+                }  // for v3 password
+                if(form_element.id=="v3_privacy_protocol"){}  // for v3 selection
+                if(form_element.id=="v3_privacy_password"){
+                    if(document.getElementById("snmp_version").value=="v3"&&form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Privacy Password</u> field blank when SNMP Version chosen V3 !!</li>");
+                        return false;
+                    }
+                }  // for v3 password
+                if(form_element.id=="tag"){
+                    var ipPartList = $("#ipaddress").val().split(".");
+                    var ipString = parseInt(ipPartList[0])+"."+parseInt(ipPartList[1])+"."+parseInt(ipPartList[2])+"."+parseInt(ipPartList[3])
+                    var ipAndTag = {ipaddress:ipString, syslogtag:$("#tag").val()};
+                    if(ipAndTaglist.includes(JSON.stringify(ipAndTag))){
+                        form_element.focus();
+                        note.append("<li>There is another log source with same <u>ip & tag</u> !!</li>");
+                        return false;
+                    }
+                } // input for syslog tag
+
+                note.text("");
+                return true
+
+            }
+
+            function next_row(button){
+                if(button.name=="submit_row"){
+                    var form_map = $('form').serializeArray();
+                    $('#form_results').text("");
+                    for(var i=1;i<form_map.length;i++){
+                        if(form_map[i].value!=""){
+                            if(form_map[i].name=="community_string"||form_map[i].name=="v3_auth_password"||form_map[i].name=="v3_privacy_password"){
+                                $('#form_results').append("<li><b>"+form_map[i].name+" :</b> *** </li>");
+                            }else{
+                                $('#form_results').append("<li><b>"+form_map[i].name+" :</b> "+form_map[i].value+"</li>");
+                            }
+                        }else{
+                            $('#form_results').append("<li><b>"+form_map[i].name+" :</b> EMPTY </li>");
+                        }
+                    }
+                }
+                var current_el = button.parentElement.parentElement;
+                var next_element = document.getElementById(button.name);
+                var input_parts = current_el.getElementsByTagName('input')
+                var valid = true;
+                if(input_parts.length>0){
+                    for(var i=0;i<input_parts.length;i++){
+                        valid = (valid&&validate_form_element(input_parts[i]));
+                    }
+                }
+                if(valid){
+                    only_show(next_element);
+                }
+
+            }
+
+            function previous_row(button){
+                var current_el = button.parentElement.parentElement;
+                var previous_element = document.getElementById(button.name);
+                only_show(previous_element);
+            }
+
+
+
+        </script>
+    </body>
+
+</html>

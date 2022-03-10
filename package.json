@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "@popperjs/core": "^2.9.1"
+  }
+},
+
+SELECT id,socketaddress, inetaddress,logdata,port, olusturmatarih,
+logdate,severity, classificationgroup, recstatus,recerror,tryjson, mappedlogsource
+ from loglar where id=747418
+
+'{"socketaddress","inetaddress","logdata": ?,"port": ?,"olusturmatarih": ?,"logdate": ?,"severity": ?,"classificationgroup": ?,"recstatus": ?,"recerror": ?,"tryjson": ?,"mappedlogsource": ?}'
+
+
+JSONObject json = new JSONObject()
+json.put("socketaddress", )
+json.put("inetaddress", )
+json.put("logdata", )
+json.put("port", )
+json.put("olusturmatarih", )
+json.put("logdate", )
+json.put("severity", )
+json.put("classificationgroup", )
+json.put("recstatus", )
+json.put("recerror", )
+json.put("tryjson", )
+json.put("mappedlogsource"}'
+

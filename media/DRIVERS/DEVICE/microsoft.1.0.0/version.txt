@@ -1,0 +1,1 @@
+{"tarType":"device","definitioncode":1904001,"definitionname":"MICROSOFT","filename":"microsoft.1.0.0","defversion":"1.0","defsubversion":0,"files":[{"filename":"version.txt"},{"filename":"microsoft.sql"}]}

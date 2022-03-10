@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>ATIBA Helps - Date & Time formatting</title>
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+<body>
+
+    <div class="container">
+
+    <h4>Template Patterns for Date/TimeFormatting</h4>
+
+    <table border="1" class="table table-sm table-stripped">
+      <thead>
+        <tr>
+          <th>Pattern</th>
+
+          <th>Description</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td><tt class="LITERAL">HH</tt></td>
+
+          <td>hour of day (01-12)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">HH12</tt></td>
+
+          <td>hour of day (01-12)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">HH24</tt></td>
+
+          <td>hour of day (00-23)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">MI</tt></td>
+
+          <td>minute (00-59)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">SS</tt></td>
+
+          <td>second (00-59)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">MS</tt></td>
+
+          <td>millisecond (000-999)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">US</tt></td>
+
+          <td>microsecond (000000-999999)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">SSSS</tt></td>
+
+          <td>seconds past midnight (0-86399)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">AM</tt>, <tt class="LITERAL">am</tt>, <tt class="LITERAL">PM</tt> or
+          <tt class="LITERAL">pm</tt></td>
+
+          <td>meridiem indicator (without periods)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">A.M.</tt>, <tt class="LITERAL">a.m.</tt>, <tt class="LITERAL">P.M.</tt> or
+          <tt class="LITERAL">p.m.</tt></td>
+
+          <td>meridiem indicator (with periods)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">Y,YYY</tt></td>
+
+          <td>year (4 or more digits) with comma</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">YYYY</tt></td>
+
+          <td>year (4 or more digits)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">YYY</tt></td>
+
+          <td>last 3 digits of year</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">YY</tt></td>
+
+          <td>last 2 digits of year</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">Y</tt></td>
+
+          <td>last digit of year</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">IYYY</tt></td>
+
+          <td>ISO 8601 week-numbering year (4 or more digits)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">IYY</tt></td>
+
+          <td>last 3 digits of ISO 8601 week-numbering year</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">IY</tt></td>
+
+          <td>last 2 digits of ISO 8601 week-numbering year</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">I</tt></td>
+
+          <td>last digit of ISO 8601 week-numbering year</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">BC</tt>, <tt class="LITERAL">bc</tt>, <tt class="LITERAL">AD</tt> or
+          <tt class="LITERAL">ad</tt></td>
+
+          <td>era indicator (without periods)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">B.C.</tt>, <tt class="LITERAL">b.c.</tt>, <tt class="LITERAL">A.D.</tt> or
+          <tt class="LITERAL">a.d.</tt></td>
+
+          <td>era indicator (with periods)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">MONTH</tt></td>
+
+          <td>full upper case month name (blank-padded to 9
+          chars)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">Month</tt></td>
+
+          <td>full capitalized month name (blank-padded to 9
+          chars)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">month</tt></td>
+
+          <td>full lower case month name (blank-padded to 9
+          chars)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">MON</tt></td>
+
+          <td>abbreviated upper case month name (3 chars in
+          English, localized lengths vary)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">Mon</tt></td>
+
+          <td>abbreviated capitalized month name (3 chars in
+          English, localized lengths vary)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">mon</tt></td>
+
+          <td>abbreviated lower case month name (3 chars in
+          English, localized lengths vary)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">MM</tt></td>
+
+          <td>month number (01-12)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">DAY</tt></td>
+
+          <td>full upper case day name (blank-padded to 9
+          chars)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">Day</tt></td>
+
+          <td>full capitalized day name (blank-padded to 9
+          chars)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">day</tt></td>
+
+          <td>full lower case day name (blank-padded to 9
+          chars)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">DY</tt></td>
+
+          <td>abbreviated upper case day name (3 chars in English,
+          localized lengths vary)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">Dy</tt></td>
+
+          <td>abbreviated capitalized day name (3 chars in English,
+          localized lengths vary)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">dy</tt></td>
+
+          <td>abbreviated lower case day name (3 chars in English,
+          localized lengths vary)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">DDD</tt></td>
+
+          <td>day of year (001-366)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">IDDD</tt></td>
+
+          <td>day of ISO 8601 week-numbering year (001-371; day 1
+          of the year is Monday of the first ISO week)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">DD</tt></td>
+
+          <td>day of month (01-31)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">D</tt></td>
+
+          <td>day of the week, Sunday (<tt class="LITERAL">1</tt>)
+          to Saturday (<tt class="LITERAL">7</tt>)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">ID</tt></td>
+
+          <td>ISO 8601 day of the week, Monday (<tt class="LITERAL">1</tt>) to Sunday (<tt class="LITERAL">7</tt>)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">W</tt></td>
+
+          <td>week of month (1-5) (the first week starts on the
+          first day of the month)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">WW</tt></td>
+
+          <td>week number of year (1-53) (the first week starts on
+          the first day of the year)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">IW</tt></td>
+
+          <td>week number of ISO 8601 week-numbering year (01-53;
+          the first Thursday of the year is in week 1)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">CC</tt></td>
+
+          <td>century (2 digits) (the twenty-first century starts
+          on 2001-01-01)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">J</tt></td>
+
+          <td>Julian Day (days since November 24, 4714 BC at
+          midnight)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">Q</tt></td>
+
+          <td>quarter (ignored by <code class="FUNCTION">to_date</code> and <code class="FUNCTION">to_timestamp</code>)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">RM</tt></td>
+
+          <td>month in upper case Roman numerals (I-XII;
+          I=January)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">rm</tt></td>
+
+          <td>month in lower case Roman numerals (i-xii;
+          i=January)</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">TZ</tt></td>
+
+          <td>upper case time-zone name</td>
+        </tr>
+
+        <tr>
+          <td><tt class="LITERAL">tz</tt></td>
+
+          <td>lower case time-zone name</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+  <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+  <script type="text/javascript" language="JavaScript" src="{% static 'js/general_style.js' %}"></script>
+</body>
+</html>

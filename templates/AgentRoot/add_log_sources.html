@@ -1,0 +1,2731 @@
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> Add Log Sources - {{route}} </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body  style="padding-top:15px;">
+        {% if route == 'general' %} <!--logsource type selection-->
+
+        <div class="row justify-content-center" style="padding:20px;display:flex;flex-direction:row;">  <!--logsource type selection-->
+
+            <div class="col-lg-4">
+                <div class="card shadow test my-3" style="text-align:center;">
+                    <div class="card-img-top"><img style="height:100px;" src="{% static 'img/SNMP-Image.png'%}" alt="SNMP SOURCE"></div>
+                    <div class="card-body"><a class="asLink" href="{% url 'add_networkdevice' %}">NETWORK (SNMP) DEVICES</a></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test my-3" style="text-align:center;">
+                    <div class="card-img-top"><img style="height:100px;" src="{% static 'img/Nginx-Logo-long.png'%}" alt="NGINX"></div>
+                    <div class="card-body"><a class="asLink" href="{% url 'add_nginx' %}">NGINX</a></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test my-3" style="text-align:center;">
+                    <div class="card-img-top"><img style="height:100px;" src="{% static 'img/Postgresql-Logo-big.png'%}" alt="POSTGRESQL"></div>
+                    <div class="card-body"><a class="asLink" href="{% url 'add_postgresql' %}">POSTGRESQL</a></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test my-3" style="text-align:center;">
+                    <div class="card-img-top"><img style="height:100px;" src="{% static 'img/Microsoft-Logo-Big.png'%}" alt="MICROSOFT"></div>
+                    <div class="card-body"><a class="asLink" href="{% url 'add_microsoftserver' %}">MICROSOFT SERVER</a></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test my-3" style="text-align:center;">
+                    <div class="card-img-top"><img style="height:100px;" src="{% static 'img/Linux-Logo-Big.png'%}" alt="LINUX"></div>
+                    <div class="card-body"><a class="asLink" href="{% url 'add_linuxserver' %}">LINUX SERVER</a></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow test my-3" style="text-align:center;">
+                    <div class="card-img-top"><img style="height:100px;" src="{% static 'img/elasticsearch_logo_long.png'%}" alt="ELASTICSEARCH"></div>
+                    <div class="card-body"><a class="asLink" href="{% url 'add_elastic' %}">ELASTICSEARCH</a></div>
+                </div>
+            </div>
+        </div> <!-- / logsource type selection-->
+        <div class="row justify-content-center" style="padding:20px;display:flex;flex-direction:row;">
+
+<!--            <div class="col-lg-4">-->
+<!--                <div class="card shadow test" style="text-align:center;">-->
+<!--                    <a class="asLink" href="?adding=oracle">Oracle</a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-lg-4">-->
+<!--                <div class="card shadow test" style="text-align:center;">-->
+<!--                    <a class="asLink" href="?adding=aws">AWS</a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-lg-4">-->
+<!--                <div class="card shadow test" style="text-align:center;">-->
+<!--                    <a class="asLink" href="?adding=hadoop">Hadoop</a>-->
+<!--                </div>-->
+<!--            </div>-->
+
+        </div><!--row 2-->
+
+        {% elif route == 'networkdevice' %} <!--auto or manual selection-->
+
+        <div class="row justify-content-center" style="padding:20px;">
+            <div class="col-lg-6">
+                <div class="card shadow test" style="text-align:center;">
+                    <a class="asLink" href="?device_add_method=scan">Auto Scan</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow test" style="text-align:center;">
+                    <a class="asLink" href="?device_add_method=manual">Manually Add</a>
+                </div>
+            </div>
+        </div>
+
+        {% elif route == 'scan' %} <!--form for auto scan-->
+
+        <div class="container" style="text-align:center;font-size:9pt;">
+            <h5>Discover Network Devices (SNMP sources) With Auto Scan</h5>
+            <hr>
+
+            <form method="POST" name="auto_scan_sources" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="ip_and_mask_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ip_address" class="col-md-2 col-form-label">IP Address </label>
+                        <div class="col-md-2">
+                            <input id="ip_address" style="font-size:9pt;" name="ip_address"
+                                   class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="ip_mask" class="col-md-1 col-form-label">Mask </label>
+                        <div class="col-md-2">
+                            <input id="ip_mask" style="font-size:9pt;" name="ip_mask"
+                                   class="form-control form-control-sm" type="number" min="1" max="32"/>
+                        </div>
+                        <label for="unique_identifier" class="col-md-3 col-form-label">Chose Unique Identifier</label>
+                        <div class="col-md-2">
+                            <select id="unique_identifier" style="font-size:9pt;" name="unique_identifier"
+                                    class="form-control form-control-sm">
+                                {% for x in identifierList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-12" style="text-align:right;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="oid_row"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="oid_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="oid" class="col-md-5 col-form-label">OID </label>
+                        <div class="col-md-6">
+                            <input id="oid" name="oid" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" value="1.3.6.1.2.1.2.2.1.6.1" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="ip_and_mask_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="monitor_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="monitor_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile" class="col-md-5 col-form-label">Chose Monitoring Profile Type</label>
+                        <div class="col-md-6">
+                            <select id="monitor_profile" name="monitor_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in monitorProfileList %}
+                                    <option value="{{x.id}}">{{x.monitorprofiletype}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parser_profile" class="col-md-5 col-form-label">Chose Parser Profile </label>
+                        <div class="col-md-6">
+                            <select id="parser_profile" name="parser_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                <option value="0">Use Version Parsers</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="location_profile" class="col-md-5 col-form-label">Chose Location Profile </label>
+                        <div class="col-md-6">
+                            <select id="location_profile" name="location_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestion_profile" class="col-md-5 col-form-label">Chose Log Ingestion Profile </label>
+                        <div class="col-md-6">
+                            <select id="ingestion_profile" name="ingestion_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="oid_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_params_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_params_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="snmp_profile" class="col-md-3 col-form-label">Monitor Profile Details</label>
+                        <div class="col-md-3">
+                            <select name="snmp_profile" id="snmp_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm" onchange="setSelectedValues(this)">
+                                <option value="0">NEW</option>
+                                <option disabled>-----------</option>
+                                {% for x in snmpProfileList %}
+                                    <option value="{{x.id}}">{{x.paramsname}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="snmp_version" class="col-md-3 col-form-label">SNMP Version</label>
+                        <div class="col-md-3">
+                            <select id="snmp_version" name="snmp_version" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in snmpVersionList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="snmp_profile_name" class="col-md-3 col-form-label">Detailed Monitor Profile Name</label>
+                        <div class="col-md-3">
+                            <input name="snmp_profile_name" id="snmp_profile_name" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text" maxlength="35" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="monitor_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v2c_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_v2c_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="community_string" class="col-md-3 col-form-label">Community String </label>
+                        <div class="col-md-9">
+                            <input id="community_string" name="community_string" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="password"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_params_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_v3_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="v3_user_name" class="col-md-3 col-form-label">User Name </label>
+                        <div class="col-md-5">
+                            <input id="v3_user_name" name="v3_user_name" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="v3_auth_protocol" class="col-md-3 col-form-label">Chose Auth Protocol</label>
+                        <div class="col-md-3">
+                            <select id="v3_auth_protocol" name="v3_auth_protocol" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in v3AuthProtocolList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="v3_auth_password" class="col-md-3 col-form-label">Auth Password </label>
+                        <div class="col-md-3">
+                            <input id="v3_auth_password" name="v3_auth_password" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="password"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="v3_privacy_protocol" class="col-md-3 col-form-label">Chose Privacy Protocol</label>
+                        <div class="col-md-3">
+                            <select id="v3_privacy_protocol" name="v3_privacy_protocol" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in v3PrivacyProtocolList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="v3_privacy_password" class="col-md-3 col-form-label">Privacy Password </label>
+                        <div class="col-md-3">
+                            <input id="v3_privacy_password" name="v3_privacy_password" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="password"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v2c_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="submit_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:none;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;"
+                                type="submit">SAVE & START SCAN</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+
+                </ul>
+            </div>
+
+            <hr/>
+
+            <div class="row">
+                <p>
+                    <b><i>Please note that automatic scanning will start when you save the form</i></b>
+                </p>
+            </div>
+            <br/>
+            <div class="row justify-content-center">
+                <a class="asLink" href="{% url 'add_log_sources' %}">Return Home</a>
+            </div>
+
+        </div>
+
+        {% elif route == 'manual' %} <!--form for manually add one by one for networkdevice-->
+
+        <div class="container" style="text-align:center;font-size:9pt;">
+            <h5>Insert Log Source Manually</h5>
+            <small> now adding networkdevice (SNMP source) </small>
+            <hr>
+            <form method="POST" name="manual_sources" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="ip_and_mask_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ip_address" class="col-md-2 col-form-label">IP Address </label>
+                        <div class="col-md-2">
+                            <input id="ip_address" name="ip_address" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="ip_mask" class="col-md-1 col-form-label">Mask </label>
+                        <div class="col-md-1">
+                            <input id="ip_mask" name="ip_mask" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="number" value="32" disabled/>
+                        </div>
+                        <label for="unique_identifier" class="col-md-3 col-form-label">Chose Unique Identifier</label>
+                        <div class="col-md-3">
+                            <select id="unique_identifier" name="unique_identifier" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in identifierList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="custom_name" class="col-md-2 col-form-label">Custom Name </label>
+                        <div class="col-md-4">
+                            <input id="custom_name" name="custom_name" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text"
+                                   maxlength="35" placeholder="Give a unique name for device"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="log_source_name" class="col-md-2 col-form-label">Log Source Name </label>
+                        <div class="col-md-4">
+                            <input id="log_source_name" name="log_source_name" class="form-control form-control-sm"
+                                   type="text" maxlength="35" style="font-size:9pt;"
+                                   placeholder="Give a name for log source"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-12" style="text-align:right;">
+                        <a class="btn btn-outline-info btn-sm" name="oid_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="oid_row" name="form_rows" style="display:none;text-align:left;">
+
+                    {% if request.GET.adding and request.GET.adding != 'networkdevice' %}
+                    <div class="row">
+                        <label for="oid" class="col-md-2 col-form-label">REQUEST </label>
+                        <div class="col-md-10">
+                            <input id="oid" name="oid" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" value="1.3.6" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+<!--                        <div class="col-md-3 col-lg-4">-->
+<!--                            Tag information and address <br>in log for this tag-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="before_tag">Chars Right Before Tag</label></div>-->
+<!--                            <div class="row">-->
+<!--                                <input id="before_tag" name="before_tag" style="font-size:9pt;"-->
+<!--                                       class="form-control form-control-sm" type="text" minlength="3" maxlength="5"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="tag">TAG</label></div><div class="row">-->
+<!--                                <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"-->
+<!--                                       type="text" minlength="3" maxlength="10"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="after_tag">Chars Right After Tag</label></div>-->
+<!--                            <div class="row">-->
+<!--                                <input id="after_tag" name="after_tag" class="form-control form-control-sm" style="font-size:9pt;"-->
+<!--                                       type="text" minlength="3" maxlength="5"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        <label for="tag" class="col-md-2 col-form-label">Tag information</label>
+                        <div class="col-md-10">
+                            <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Tag in log" maxlength="25"/>
+                        </div>
+                        <label for="taglocation" class="col-md-2 col-form-label">Tag address in log</label>
+                        <div class="col-md-10">
+                            <input id="taglocation" name="taglocation" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Regex for tag in log" />
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row">
+                        <label for="markid" class="col-md-2 col-form-label">Brand Name</label>
+                        <div class="col-md-2">
+                            <select id="markid" name="markid" class="form-control form-control-sm" style="font-size:9pt;"
+                                    onchange="arrangeModelListForMarkId(this)">
+                                <option value="0">Chose Brand</option>
+                                <option disabled>-----------</option>
+                                {% for x in markList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="modelid" class="col-md-2 col-form-label">Model Name</label>
+                        <div class="col-md-2">
+                            <select id="modelid" name="modelid" class="form-control form-control-sm" style="font-size:9pt;"
+                                    onchange="arrangeVersionListForModel(this)">
+                                <option value="0">Chose Model</option>
+                                <option disabled>-----------</option>
+                            </select>
+                        </div>
+                        <label for="deviceverid" class="col-md-2 col-form-label">Version</label>
+                        <div class="col-md-2">
+                            <select id="deviceverid" name="deviceverid" style="font-size:9pt;" class="form-control form-control-sm">
+                                <option value="0">Chose Version</option>
+                                <option disabled>-----------</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="oid" class="col-md-2 col-form-label">OID </label>
+                        <div class="col-md-10">
+                            <input id="oid" name="oid" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" value="1.3.6.1.2.1.2.2.1.6.1" />
+                        </div>
+                    </div>
+                    {% endif %}
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="ip_and_mask_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="monitor_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="monitor_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile" class="col-md-5 col-form-label">Chose Monitoring Profile Type</label>
+                        <div class="col-md-6">
+                            <select id="monitor_profile" name="monitor_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm" onchange="arrangeProfileDetailList(this)">
+                                {% for x in monitorProfileList %}
+                                    <option value="{{x.id}}">{{x.monitorprofiletype}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parser_profile" class="col-md-5 col-form-label">Chose Parser Profile </label>
+                        <div class="col-md-6">
+                            <select id="parser_profile" name="parser_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="location_profile" class="col-md-5 col-form-label">Chose Location Profile </label>
+                        <div class="col-md-6">
+                            <select id="location_profile" name="location_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestion_profile" class="col-md-5 col-form-label">Chose Log Ingestion Profile </label>
+                        <div class="col-md-6">
+                            <select id="ingestion_profile" name="ingestion_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="oid_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_params_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_params_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="snmp_profile" class="col-md-3 col-form-label">Monitor Profile Details</label>
+                        <div class="col-md-3">
+                            <select name="snmp_profile" id="snmp_profile" style="font-size:9pt;"
+                                    class="form-control form-control-sm" onchange="setSelectedValues(this)">
+                                <option value="0">NEW</option>
+                                <option disabled>-----------</option>
+                                {% for x in snmpProfileList %}
+                                    {%if x.monitorProfile.monitorprofiletype == "SNMP"%}
+                                    <option value="{{x.id}}">{{x.paramsname}}</option>
+                                    {%endif%}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="snmp_version" class="col-md-3 col-form-label">Chose SNMP Version</label>
+                        <div class="col-md-3">
+                            <select id="snmp_version" name="snmp_version" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in snmpVersionList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="snmp_profile_name" class="col-md-3 col-form-label">Detailed Monitor Profile Name</label>
+                        <div class="col-md-3">
+                            <input name="snmp_profile_name" id="snmp_profile_name" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text" maxlength="35" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="monitor_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v2c_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_v2c_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="community_string" class="col-md-5 col-form-label">Community String </label>
+                        <div class="col-md-7">
+                            <input id="community_string" name="community_string" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="password"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_receive" class="col-md-5 col-form-label">Response That Means Healthy </label>
+                        <div class="col-md-7">
+                            <input id="response_receive" name="response_receive" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_down" class="col-md-5 col-form-label">Response That Means Log Source Down </label>
+                        <div class="col-md-7">
+                            <input id="response_down" name="response_down" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_params_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_v3_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="v3_user_name" class="col-md-3 col-form-label">User Name </label>
+                        <div class="col-md-5">
+                            <input id="v3_user_name" name="v3_user_name" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="v3_auth_protocol" class="col-md-3 col-form-label">Chose Auth Protocol</label>
+                        <div class="col-md-3">
+                            <select id="v3_auth_protocol" name="v3_auth_protocol" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in v3AuthProtocolList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="v3_auth_password" class="col-md-3 col-form-label">Auth Password </label>
+                        <div class="col-md-3">
+                            <input id="v3_auth_password" name="v3_auth_password" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="password"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="v3_privacy_protocol" class="col-md-3 col-form-label">Chose Privacy Protocol</label>
+                        <div class="col-md-3">
+                            <select id="v3_privacy_protocol" name="v3_privacy_protocol" style="font-size:9pt;"
+                                    class="form-control form-control-sm">
+                                {% for x in v3PrivacyProtocolList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="v3_privacy_password" class="col-md-3 col-form-label">Privacy Password </label>
+                        <div class="col-md-3">
+                            <input id="v3_privacy_password" name="v3_privacy_password" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="password"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v2c_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="submit_row" style="font-size:9pt;"
+                           onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:none;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" style="font-size:9pt;"
+                           onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {% if warning and warning != "" %}
+                        <li>{{warning}}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <hr/>
+
+            <div class="row justify-content-center">
+                <a class="asLink" href="{% url 'add_log_sources' %}">Return Home</a>
+            </div>
+
+        </div>
+
+        {% elif route == 'detail' %}  <!--form for edit log source-->
+
+        <div class="container" style="text-align:center;font-size:9pt;"> <!-- edit forms -->
+            <h5>{{source}}</h5>
+            <small>{{source.logsourceselection}}</small>
+            <hr>
+            <form method="POST" name="edit_source" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="ip_and_mask_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ip_address" class="col-md-2 col-form-label">IP Address </label>
+                        <div class="col-md-2">
+                            <input id="ip_address" name="ip_address" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text" value="{{source.ipaddress}}" />
+                        </div>
+                        <label for="ip_mask" class="col-md-1 col-form-label">Mask </label>
+                        <div class="col-md-1">
+                            <input id="ip_mask" name="ip_mask" style="font-size:9pt;" class="form-control form-control-sm" type="number" value="32" disabled/>
+                        </div>
+                        <label for="unique_identifier" class="col-md-3 col-form-label">Unique Identifier</label>
+                        <div class="col-md-3">
+                            <input id="unique_identifier" name="unique_identifier" style="font-size:9pt;"
+                                   class="form-control form-control-sm" value="{{source.uniqueidtype}}" disabled />
+                        </div>
+                    </div>
+                    <div class="row">
+<!--                        <div class="col-md-2">Custom Name </div>-->
+<!--                        <div class="col-md-4" style="color:grey;">{% if source.customname %}{{source.customname}}{% endif %}</div>-->
+                        <label for="custom_name" class="col-md-2 col-form-label">Custom Name </label>
+                        <div class="col-md-4">
+                            <input id="custom_name" name="custom_name" class="form-control form-control-sm" type="text"
+                                   maxlength="35" style="font-size:9pt;" placeholder="Give a unique name for device"
+                                   value="{{source.customname}}" disabled/>
+                        </div>
+<!--                        <label for="device_type" class="col-md-3 col-form-label">Device Type </label>-->
+<!--                        <div class="col-md-3">-->
+<!--                            <select id="device_type" name="device_type" class="form-control form-control-sm">-->
+<!--                                <option value="CUSTOM">Custom Log Source Type</option>-->
+<!--                                <option disabled>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+<!--                                {% for x in deviceTypeList %}-->
+<!--                                    <option value="{{x}}" {%if x == source.devicetype %}selected{%endif%}>{{x}}</option>-->
+<!--                                {% endfor %}-->
+<!--                            </select>-->
+<!--                        </div>-->
+                    </div>
+                    <div class="row">
+                        <label for="log_source_name" class="col-md-2 col-form-label">Log Source Name </label>
+                        <div class="col-md-4">
+                            <input id="log_source_name" name="log_source_name" class="form-control form-control-sm"
+                                   type="text" maxlength="35" style="font-size:9pt;"
+                                   placeholder="Give a name for log source" {%if source.sourcename%}value="{{source.sourcename}}"{%endif%}/>
+                        </div>
+                        <label for="log_source_status" class="col-md-3 col-form-label">Log Source Status </label>
+                        <div class="col-md-3">
+                            <select id="log_source_status" name="log_source_status" style="font-size:9pt;" class="form-control form-control-sm">
+                                {% if source.status and source.status == "P" %}
+                                    <option value="A">Active</option>
+                                    <option value="P" selected>Passive</option>
+                                {% else %}
+                                    <option value="A" selected>Active</option>
+                                    <option value="P">Passive</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-12" style="text-align:right;">
+                        <a class="btn btn-outline-info btn-sm" name="oid_row" style="font-size:9pt;" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="oid_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="markid" class="col-md-2 col-form-label">Brand Name</label>
+                        <div class="col-md-2">
+                            <select id="markid" name="markid" class="form-control form-control-sm" style="font-size:9pt;"
+                                    onchange="arrangeModelListForMarkId(this)">
+                                <option value="0">Custom Brand</option>
+                                <option disabled>-----------</option>
+                                {% for x in markList %}
+                                    <option value="{{x.value}}" {%if x.value == source.markid%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="modelid" class="col-md-2 col-form-label">Model Name</label>
+                        <div class="col-md-2">
+                            <select id="modelid" name="modelid" class="form-control form-control-sm" style="font-size:9pt;"
+                                    onchange="arrangeVersionListForModel(this)">
+                                <option value="0">Custom Model</option>
+                                {% for x in modelList %}
+                                    {%if x.value == source.modelid%}
+                                    <option value="{{x.value}}" selected>{{x.name}}</option>
+                                    {%endif%}
+                                {% endfor %}
+<!--                                <option disabled>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+                            </select>
+                        </div>
+                        <label for="deviceverid" class="col-md-2 col-form-label">Version</label>
+                        <div class="col-md-2">
+                            <select id="deviceverid" name="deviceverid" style="font-size:9pt;" class="form-control form-control-sm">
+                                <option value="0">Custom Version</option>
+                                {% for x in versionList %}
+                                    {%if x.value == source.deviceverid%}
+                                    <option value="{{x.value}}" selected>{{x.name}}</option>
+                                    {%endif%}
+                                {% endfor %}
+<!--                                <option disabled>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+                            </select>
+                        </div>
+                    </div>
+
+                    {% if source.logsourceselection != 'networkdevice' %}
+                        <div class="row">
+                            <label for="oid" class="col-md-2 col-form-label">REQUEST </label>
+                            <div class="col-md-10">
+                                <input id="oid" name="oid" class="form-control form-control-sm" style="font-size:9pt;"
+                                       type="text" {%if source.get_monitor_profile.querytosend%}value="{{source.get_monitor_profile.querytosend}}"{%endif%} />
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+<!--                            <div class="col-md-3 col-lg-4">-->
+<!--                                Tag information and address <br>in log for this tag-->
+<!--                            </div>-->
+<!--                            <div class="col-md-3 col-lg-2">-->
+<!--                                <div class="row justify-content-center"><label for="before_tag">Chars Right Before Tag</label></div>-->
+<!--                                <div class="row">-->
+<!--                                    <input id="before_tag" name="before_tag" style="font-size:9pt;"-->
+<!--                                           class="form-control form-control-sm" type="text" minlength="3" maxlength="5" value="{{before_tag}}"/>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-3 col-lg-2">-->
+<!--                                <div class="row justify-content-center"><label for="tag">TAG</label></div><div class="row">-->
+<!--                                    <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"-->
+<!--                                           type="text" minlength="3" maxlength="10" {%if source.syslogtag%}value="{{source.syslogtag}}"{%endif%}/>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-3 col-lg-2">-->
+<!--                                <div class="row justify-content-center"><label for="after_tag">Chars Right After Tag</label></div>-->
+<!--                                <div class="row">-->
+<!--                                    <input id="after_tag" name="after_tag" class="form-control form-control-sm" style="font-size:9pt;"-->
+<!--                                           type="text" minlength="3" maxlength="5" value="{{after_tag}}"/>-->
+<!--                                </div>-->
+<!--                            </div>-->
+                            <label for="tag" class="col-md-2 col-form-label">Tag information</label>
+                            <div class="col-md-10">
+                                <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"
+                                       type="text" placeholder="Tag in log" maxlength="25"/>
+                            </div>
+                            <label for="taglocation" class="col-md-2 col-form-label">Tag location regex</label>
+                            <div class="col-md-10">
+                                <input id="taglocation" name="taglocation" class="form-control form-control-sm" style="font-size:9pt;"
+                                       type="text" placeholder="Regex for tag in log" />
+                            </div>
+                        </div>
+                    {% else %}
+                    <div class="row">
+                        <label for="oid" class="col-md-2 col-form-label">OID </label>
+                        <div class="col-md-10">
+                            <input id="oid" name="oid" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" {%if source.get_monitor_profile.querytosend%}value="{{source.get_monitor_profile.querytosend}}"{%endif%} />
+                        </div>
+                    </div>
+                    {% endif %}
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="ip_and_mask_row" style="font-size:9pt;" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="monitor_row" style="font-size:9pt;" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="monitor_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile" class="col-md-5 col-form-label">Chose Monitoring Profile Type</label>
+                        <div class="col-md-6">
+                            <select id="monitor_profile" name="monitor_profile" style="font-size:9pt;" class="form-control form-control-sm"
+                                    onchange="setSelectedValues(this)">
+                                {% for x in monitorProfileList %}
+                                    <option value="{{x.id}}" {%if x.id == source.get_monitor_profile.monitorProfile.id%}selected{%endif%}>{{x.monitorprofilename}} - type : {{x.monitorprofiletype}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parser_profile" class="col-md-5 col-form-label">Chose Parser Profile </label>
+                        <div class="col-md-6">
+                            <select id="parser_profile" name="parser_profile" style="font-size:9pt;" class="form-control form-control-sm">
+                                <option value="0">No Parser Profile</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}" {%if x.value == source.parserprofile%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="location_profile" class="col-md-5 col-form-label">Chose Location Profile </label>
+                        <div class="col-md-6">
+                            <select id="location_profile" name="location_profile" style="font-size:9pt;" class="form-control form-control-sm">
+                                <option value="0">No Location Profile</option>
+                                <option disabled>-----------</option>
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}" {%if x.value == source.locationprofile%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestion_profile" class="col-md-5 col-form-label">Chose Log Ingestion Profile </label>
+                        <div class="col-md-6">
+                            <select id="ingestion_profile" name="ingestion_profile" style="font-size:9pt;" class="form-control form-control-sm">
+                                <option value="0">No Log Ingestion Profile</option>
+                                <option disabled>-----------</option>
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}" {%if x.value == source.ingestionprofile%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="oid_row" style="font-size:9pt;" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_params_row" style="font-size:9pt;" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_params_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile_name" class="col-md-3 col-form-label">Monitor Profile Name</label>
+                        <div class="col-md-3">
+                            <input name="monitor_profile_name" id="monitor_profile_name" style="font-size:9pt;"
+                                   class="form-control form-control-sm" value="{{source.get_monitor_profile.monitorProfile.monitorprofilename}}" disabled/>
+                        </div>
+                        <label for="monitor_profile_type" class="col-md-3 col-form-label">Chose Monitor Profile Type</label>
+                        <div class="col-md-3">
+                            <select id="monitor_profile_type" name="monitor_profile_type" style="font-size:9pt;" class="form-control form-control-sm">
+                                {% for x in monitorProfileList %}
+                                    {% if x.monitorprofiletype == source.get_monitor_profile.monitorProfile.monitorprofiletype %}
+                                    <option value="{{x.monitorprofiletype}}">{{x.monitorprofiletype}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="snmp_profile" class="col-md-3 col-form-label">SNMP (monitorprofiledetails) Profile</label>
+                        <div class="col-md-3">
+                            <select name="snmp_profile" id="snmp_profile" style="font-size:9pt;" class="form-control form-control-sm" onchange="setSelectedValues(this)">
+                                <option value="0">NEW</option>
+                                <option disabled>-----------</option>
+                                {% for x in snmpProfileList %}
+                                    <option value="{{x.id}}" {%if x.id == source.get_monitor_profile.id%}selected{%endif%}>{{x.paramsname}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="snmp_version" class="col-md-3 col-form-label">Chose SNMP Version</label>
+                        <div class="col-md-3">
+                            <select id="snmp_version" name="snmp_version" style="font-size:9pt;" class="form-control form-control-sm">
+                                {% for x in snmpVersionList %}
+                                    <option value="{{x.value}}" {%if x.value == source.get_monitor_profile.snmpversion%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="snmp_profile_name" class="col-md-3 col-form-label">SNMP (monitorprofiledetails) Profile Name</label>
+                        <div class="col-md-3">
+                            <input name="snmp_profile_name" id="snmp_profile_name" style="font-size:9pt;"
+                                   class="form-control form-control-sm" type="text" maxlength="35" value="{{source.get_monitor_profile.paramsname}}"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="monitor_row" style="font-size:9pt;" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v2c_row" style="font-size:9pt;" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_v2c_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="community_string" class="col-md-5 col-form-label">Community String </label>
+                        <div class="col-md-7">
+                            <input id="community_string" name="community_string" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="password" {%if source.get_monitor_profile.communitystring%}value="{{source.get_monitor_profile.communitystring}}"{%endif%} />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_receive" class="col-md-5 col-form-label">Response That Means Healthy </label>
+                        <div class="col-md-7">
+                            <input id="response_receive" name="response_receive" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" {%if source.get_monitor_profile.responsetoreceive%}value="{{source.get_monitor_profile.responsetoreceive}}"{%endif%} />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_down" class="col-md-5 col-form-label">Response That Means Log Source Down </label>
+                        <div class="col-md-7">
+                            <input id="response_down" name="response_down" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" {%if source.get_monitor_profile.responsetodown%}value="{{source.get_monitor_profile.responsetodown}}"{%endif%} />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_params_row" style="font-size:9pt;" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" style="font-size:9pt;" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="snmp_v3_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="v3_user_name" class="col-md-3 col-form-label">User Name </label>
+                        <div class="col-md-5">
+                            <input id="v3_user_name" name="v3_user_name" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" {%if source.get_monitor_profile.snmpv3user%}value="{{source.get_monitor_profile.snmpv3user}}"{%endif%} />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="v3_auth_protocol" class="col-md-3 col-form-label">Chose Auth Protocol</label>
+                        <div class="col-md-3">
+                            <select id="v3_auth_protocol" name="v3_auth_protocol" style="font-size:9pt;" class="form-control form-control-sm">
+                                {% for x in v3AuthProtocolList %}
+                                    <option value="{{x.value}}" {%if x.value == source.get_monitor_profile.snmpv3authprotocol%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="v3_auth_password" class="col-md-3 col-form-label">Auth Password </label>
+                        <div class="col-md-3">
+                            <input id="v3_auth_password" name="v3_auth_password" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="password" {%if source.get_monitor_profile.snmpv3authpass%}value="{{source.get_monitor_profile.snmpv3authpass}}"{%endif%} />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="v3_privacy_protocol" class="col-md-3 col-form-label">Chose Privacy Protocol</label>
+                        <div class="col-md-3">
+                            <select id="v3_privacy_protocol" name="v3_privacy_protocol" style="font-size:9pt;" class="form-control form-control-sm">
+                                {% for x in v3PrivacyProtocolList %}
+                                    <option value="{{x.value}}" {%if x.value == source.get_monitor_profile.snmpv3privacyprotocol%}selected{%endif%}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="v3_privacy_password" class="col-md-3 col-form-label">Privacy Password </label>
+                        <div class="col-md-3">
+                            <input id="v3_privacy_password" name="v3_privacy_password" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="password" {%if source.get_monitor_profile.snmpv3privacypass%}value="{{source.get_monitor_profile.snmpv3privacypass}}"{%endif%} />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v2c_row" style="font-size:9pt;" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="submit_row" style="font-size:9pt;" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:none;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" name="snmp_v3_row" style="font-size:9pt;" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+
+                </ul>
+            </div>
+
+            <hr/>
+        </div> <!-- / edit forms -->
+
+        {% elif route == 'nginx' %}
+
+        <div class="container" style="text-align:center;font-size:9pt;"> <!-- add nginx forms -->
+            <h5>Insert Log Source Manually</h5>
+            <small> now adding {{route}} </small>
+            <hr>
+            <form method="POST" name="nginx_form" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="source_info_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ip_address" class="col-md-2 col-form-label">IP Address </label>
+                        <div class="col-md-4">
+                            <input id="ip_address" style="font-size:9pt;" name="ip_address" class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="unique_identifier" class="col-md-2 col-form-label">Chose Unique Identifier</label>
+                        <div class="col-md-4">
+                            <select id="unique_identifier" style="font-size:9pt;" name="unique_identifier" class="form-control form-control-sm">
+                                {% for x in identifierList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="custom_name" class="col-md-2 col-form-label">Custom Name </label>
+                        <div class="col-md-4">
+                            <input id="custom_name" style="font-size:9pt;" name="custom_name" class="form-control form-control-sm" type="text"
+                                   maxlength="35" placeholder="Give a unique name for device" title="Unique identifier for source"/>
+                        </div>
+                        <label for="log_source_name" class="col-md-2 col-form-label">Log Source Name </label>
+                        <div class="col-md-4">
+                            <input id="log_source_name" style="font-size:9pt;" name="log_source_name" class="form-control form-control-sm"
+                                   type="text" maxlength="35" placeholder="Give a name for log source"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-12" style="text-align:right;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="profiles_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile_details" class="col-md-5 col-form-label">Chose Monitoring Profile</label>
+                        <div class="col-md-6">
+                            <select id="monitor_profile_details" style="font-size:9pt;" name="monitor_profile_details" class="form-control form-control-sm" onchange="arrangeProfileDetailsForNginx(this)">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in monitorProfileDetailList %}
+                                    <option value="{{x.id}}">{{x.paramsname}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parser_profile" class="col-md-5 col-form-label">Chose Parser Profile </label>
+                        <div class="col-md-6">
+                            <select id="parser_profile" style="font-size:9pt;" name="parser_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="location_profile" class="col-md-5 col-form-label">Chose Location Profile </label>
+                        <div class="col-md-6">
+                            <select id="location_profile" style="font-size:9pt;" name="location_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestion_profile" class="col-md-5 col-form-label">Chose Log Ingestion Profile </label>
+                        <div class="col-md-6">
+                            <select id="ingestion_profile" style="font-size:9pt;" name="ingestion_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="source_info_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="query_and_tag_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="httpurl" class="col-md-2 col-form-label">http url </label>
+                        <div class="col-md-4">
+                            <input id="httpurl" style="font-size:9pt;" name="httpurl" class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="httpuri" class="col-md-2 col-form-label">http uri </label>
+                        <div class="col-md-4">
+                            <input id="httpuri" style="font-size:9pt;" name="httpuri" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="httpsecure" class="col-md-2 col-form-label">Secure http ? </label>
+                        <div class="col-md-1">
+                            <input id="httpsecure" style="height:30px;font-size:9pt;" name="httpsecure" type="checkbox"/>
+                        </div>
+                        <label for="httpmethod" class="col-md-2 col-form-label">http Method </label>
+                        <div class="col-md-1">
+                            <select id="httpmethod" style="font-size:9pt;" name="httpmethod" class="form-control form-control-sm">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                            </select>
+                        </div>
+                        <label for="httpport" class="col-md-2 col-form-label">http Port </label>
+                        <div class="col-md-4">
+                            <input id="httpport" style="font-size:9pt;" name="httpport" class="form-control form-control-sm" type="number"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <label for="request_to_send" class="col-md-4 col-form-label">Request To Send</label>
+                        <div class="col-md-8">
+                            <input id="request_to_send" style="font-size:9pt;" name="request_to_send" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_to_receive" class="col-md-4 col-form-label">Response That Means Healthy </label>
+                        <div class="col-md-8">
+                            <input id="response_to_receive" style="font-size:9pt;" name="response_to_receive" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_to_down" class="col-md-4 col-form-label">Response That Means Log Source Down </label>
+                        <div class="col-md-8">
+                            <input id="response_to_down" style="font-size:9pt;" name="response_to_down" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+<!--                        <div class="col-md-3 col-lg-4">-->
+<!--                            Tag information and address <br>in log for this tag-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="before_tag">Chars Right Before Tag</label></div>-->
+<!--                            <div class="row">-->
+<!--                                <input id="before_tag" style="font-size:9pt;" name="before_tag" class="form-control form-control-sm" type="text" minlength="3" maxlength="5"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="tag">TAG</label></div><div class="row">-->
+<!--                                <input id="tag" name="tag" style="font-size:9pt;" class="form-control form-control-sm" type="text" minlength="3" maxlength="10"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="after_tag">Chars Right After Tag</label></div>-->
+<!--                            <div class="row">-->
+<!--                                <input id="after_tag" style="font-size:9pt;" name="after_tag" class="form-control form-control-sm" type="text" minlength="3" maxlength="5"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        <label for="tag" class="col-md-4 col-form-label">Tag information</label>
+                        <div class="col-md-8">
+                            <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Tag in log" maxlength="25"/>
+                        </div>
+                        <label for="taglocation" class="col-md-4 col-form-label">Tag location regex</label>
+                        <div class="col-md-8">
+                            <input id="taglocation" name="taglocation" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Regex for tag in log" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="submit_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:none;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {% if warning and warning != "" %}
+                        <li>{{warning}}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <hr/>
+
+            <div class="row justify-content-center">
+                <a class="asLink" href="{% url 'add_log_sources' %}">Return Home</a>
+            </div>
+        </div> <!-- / add nginx forms -->
+
+        {% elif route == 'postgresql' %}
+
+        <div class="container" style="text-align:center;font-size:9pt;"> <!-- add postgresql forms -->
+            <h5>Insert Log Source Manually</h5>
+            <small> now adding {{route}} </small>
+            <hr>
+            <form method="POST" name="nginx_form" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="source_info_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ip_address" class="col-md-2 col-form-label">IP Address </label>
+                        <div class="col-md-4">
+                            <input id="ip_address" style="font-size:9pt;" name="ip_address" class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="unique_identifier" class="col-md-2 col-form-label">Chose Unique Identifier</label>
+                        <div class="col-md-4">
+                            <select id="unique_identifier" style="font-size:9pt;" name="unique_identifier" class="form-control form-control-sm">
+                                {% for x in identifierList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="custom_name" class="col-md-2 col-form-label">Custom Name </label>
+                        <div class="col-md-4">
+                            <input id="custom_name" style="font-size:9pt;" name="custom_name" class="form-control form-control-sm" type="text"
+                                   maxlength="35" placeholder="Give a unique name for device"/>
+                        </div>
+                        <label for="log_source_name" class="col-md-2 col-form-label">Log Source Name </label>
+                        <div class="col-md-4">
+                            <input id="log_source_name" style="font-size:9pt;" name="log_source_name" class="form-control form-control-sm"
+                                   type="text" maxlength="35" placeholder="Give a name for log source"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-12" style="text-align:right;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="profiles_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile_details" class="col-md-5 col-form-label">Chose Monitoring Profile</label>
+                        <div class="col-md-6">
+                            <select id="monitor_profile_details" style="font-size:9pt;" name="monitor_profile_details" class="form-control form-control-sm" onchange="arrangeProfileDetailsForSQL(this)">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in monitorProfileDetailList %}
+                                    <option value="{{x.id}}">{{x.paramsname}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parser_profile" class="col-md-5 col-form-label">Chose Parser Profile </label>
+                        <div class="col-md-6">
+                            <select id="parser_profile" style="font-size:9pt;" name="parser_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="location_profile" class="col-md-5 col-form-label">Chose Location Profile </label>
+                        <div class="col-md-6">
+                            <select id="location_profile" style="font-size:9pt;" name="location_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestion_profile" class="col-md-5 col-form-label">Chose Log Ingestion Profile </label>
+                        <div class="col-md-6">
+                            <select id="ingestion_profile" style="font-size:9pt;" name="ingestion_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="source_info_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="query_and_tag_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="dbusername" class="col-md-2 col-form-label">Database User Name </label>
+                        <div class="col-md-4">
+                            <input id="dbusername" style="font-size:9pt;" name="dbusername" class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="dbname" class="col-md-2 col-form-label">Database Name </label>
+                        <div class="col-md-4">
+                            <input id="dbname" style="font-size:9pt;" name="dbname" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="dbpass" class="col-md-2 col-form-label">Database User Password </label>
+                        <div class="col-md-4">
+                            <input id="dbpass" style="font-size:9pt;" name="dbpass" class="form-control form-control-sm" type="password"/>
+                        </div>
+                        <label for="dbport" class="col-md-2 col-form-label">Database Port </label>
+                        <div class="col-md-4">
+                            <input id="dbport" style="font-size:9pt;" name="dbport" class="form-control form-control-sm" type="number"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <label for="query_to_send" class="col-md-4 col-form-label">Query To Send</label>
+                        <div class="col-md-8">
+                            <input id="query_to_send" style="font-size:9pt;" name="query_to_send" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_to_receive" class="col-md-4 col-form-label">Response That Means Healthy </label>
+                        <div class="col-md-8">
+                            <input id="response_to_receive" style="font-size:9pt;" name="response_to_receive" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_to_down" class="col-md-4 col-form-label">Response That Means Log Source Down </label>
+                        <div class="col-md-8">
+                            <input id="response_to_down" style="font-size:9pt;" name="response_to_down" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+<!--                        <div class="col-md-3 col-lg-4">-->
+<!--                            Tag information and address <br>in log for this tag-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="before_tag">Chars Right Before Tag</label></div>-->
+<!--                            <div class="row">-->
+<!--                                <input id="before_tag" style="font-size:9pt;" name="before_tag" class="form-control form-control-sm" type="text" minlength="3" maxlength="5"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="tag">TAG</label></div><div class="row">-->
+<!--                                <input id="tag" name="tag" style="font-size:9pt;" class="form-control form-control-sm" type="text" minlength="3" maxlength="10"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 col-lg-2">-->
+<!--                            <div class="row justify-content-center"><label for="after_tag">Chars Right After Tag</label></div>-->
+<!--                            <div class="row">-->
+<!--                                <input id="after_tag" style="font-size:9pt;" name="after_tag" class="form-control form-control-sm" type="text" minlength="3" maxlength="5"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        <label for="tag" class="col-md-4 col-form-label">Tag information</label>
+                        <div class="col-md-8">
+                            <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Tag in log" maxlength="25"/>
+                        </div>
+                        <label for="taglocation" class="col-md-4 col-form-label">Tag location regex</label>
+                        <div class="col-md-8">
+                            <input id="taglocation" name="taglocation" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Regex for tag in log" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="submit_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:none;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {% if warning and warning != "" %}
+                        <li>{{warning}}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <hr/>
+
+            <div class="row justify-content-center">
+                <a class="asLink" href="{% url 'add_log_sources' %}">Return Home</a>
+            </div>
+        </div> <!-- / add postgresql forms -->
+
+        {% elif route == 'microsoftserver' %}
+
+        <div class="container" style="text-align:center;font-size:9pt;"> <!-- add microsoftserver forms -->
+            <h5>Insert Log Source Manually</h5>
+            <small> now adding {{route}} </small>
+            <hr>
+            <form method="POST" name="microsoft_form" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="source_info_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ip_address" class="col-md-2 col-form-label">IP Address </label>
+                        <div class="col-md-4">
+                            <input id="ip_address" style="font-size:9pt;" name="ip_address" class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="unique_identifier" class="col-md-2 col-form-label">Chose Unique Identifier</label>
+                        <div class="col-md-4">
+                            <select id="unique_identifier" style="font-size:9pt;" name="unique_identifier" class="form-control form-control-sm">
+                                {% for x in identifierList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="custom_name" class="col-md-2 col-form-label">Custom Name </label>
+                        <div class="col-md-4">
+                            <input id="custom_name" style="font-size:9pt;" name="custom_name" class="form-control form-control-sm" type="text"
+                                   maxlength="35" placeholder="Give a unique name for device"/>
+                        </div>
+                        <label for="log_source_name" class="col-md-2 col-form-label">Log Source Name </label>
+                        <div class="col-md-4">
+                            <input id="log_source_name" style="font-size:9pt;" name="log_source_name" class="form-control form-control-sm"
+                                   type="text" maxlength="35" placeholder="Give a name for log source"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-12" style="text-align:right;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="profiles_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile_details" class="col-md-5 col-form-label">Chose Monitoring Profile</label>
+                        <div class="col-md-6">
+                            <select id="monitor_profile_details"
+                                    style="font-size:9pt;" name="monitor_profile_details"
+                                    class="form-control form-control-sm" >
+<!--                                    onchange="arrangeProfileDetailsForMICROSOFT(this)">-->
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in monitorProfileDetailList %}
+                                    <option value="{{x.id}}">{{x.paramsname}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parser_profile" class="col-md-5 col-form-label">Chose Parser Profile </label>
+                        <div class="col-md-6">
+                            <select id="parser_profile" style="font-size:9pt;" name="parser_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="location_profile" class="col-md-5 col-form-label">Chose Location Profile </label>
+                        <div class="col-md-6">
+                            <select id="location_profile" style="font-size:9pt;" name="location_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestion_profile" class="col-md-5 col-form-label">Chose Log Ingestion Profile </label>
+                        <div class="col-md-6">
+                            <select id="ingestion_profile" style="font-size:9pt;" name="ingestion_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="source_info_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="query_and_tag_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="vendor" class="col-md-3 col-form-label">Vendor </label>
+                        <div class="col-md-3">
+                            <input id="vendor" style="font-size:9pt;" name="vendor" class="form-control form-control-sm" type="text" disabled value="{{ vendorName }}"/>
+                        </div>
+                        <label for="devicetype" class="col-md-3 col-form-label">Log Source Type </label>
+                        <div class="col-md-3">
+<!--                            <select id="devicetype" style="font-size:9pt;" name="devicetype" class="form-control form-control-sm">-->
+<!--                                <option value="0">None</option>-->
+<!--                                <option disabled>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+<!--                                {% for x in deviceTypeList %}-->
+<!--                                    <option value="{{x.value}}">{{x.name}}</option>-->
+<!--                                {% endfor %}-->
+<!--                            </select>-->
+                            <input id="devicetype" style="font-size:9pt;" name="devicetype" class="form-control form-control-sm" type="text" disabled value="{{ vendorName }} SERVER TYPES"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="modelid" class="col-md-3 col-form-label">Model </label>
+                        <div class="col-md-3">
+                            <select id="modelid" style="font-size:9pt;" name="modelid" class="form-control form-control-sm" onchange="arrangeVersionListForModel(this)">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in modelList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+<!--                            <input id="modelid" style="font-size:9pt;" name="modelid" class="form-control form-control-sm" type="text"/>-->
+                        </div>
+                        <label for="deviceverid" class="col-md-3 col-form-label">Version </label>
+                        <div class="col-md-3">
+                            <select id="deviceverid" style="font-size:9pt;" name="deviceverid" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in versionList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+<!--                            <input id="deviceverid" style="font-size:9pt;" name="deviceverid" class="form-control form-control-sm" type="number"/>-->
+                        </div>
+                    </div>
+<!--                    <br />-->
+<!--                    <div class="row">-->
+<!--                        <label for="query_to_send" class="col-md-4 col-form-label">Query To Send</label>-->
+<!--                        <div class="col-md-8">-->
+<!--                            <input id="query_to_send" style="font-size:9pt;" name="query_to_send" class="form-control form-control-sm" type="text"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="row">-->
+<!--                        <label for="response_to_receive" class="col-md-4 col-form-label">Response That Means Healthy </label>-->
+<!--                        <div class="col-md-8">-->
+<!--                            <input id="response_to_receive" style="font-size:9pt;" name="response_to_receive" class="form-control form-control-sm" type="text"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="row">-->
+<!--                        <label for="response_to_down" class="col-md-4 col-form-label">Response That Means Log Source Down </label>-->
+<!--                        <div class="col-md-8">-->
+<!--                            <input id="response_to_down" style="font-size:9pt;" name="response_to_down" class="form-control form-control-sm" type="text"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <br>
+                    <div class="row">
+                        <label for="tag" class="col-md-3 col-form-label">Tag information</label>
+                        <div class="col-md-9">
+                            <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Tag in log" maxlength="25"/>
+                        </div>
+                        <label for="taglocation" class="col-md-3 col-form-label">Tag location regex</label>
+                        <div class="col-md-9">
+                            <input id="taglocation" name="taglocation" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Regex for tag in log" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="submit_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:none;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {% if warning and warning != "" %}
+                        <li>{{warning}}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <hr/>
+
+            <div class="row justify-content-center">
+                <a class="asLink" href="{% url 'add_log_sources' %}">Return Home</a>
+            </div>
+        </div> <!-- / add micrsoftserver forms -->
+
+        {% elif route == 'linuxserver' %}
+
+        <div class="container" style="text-align:center;font-size:9pt;"> <!-- add linuxserver forms -->
+            <h5>Insert Log Source Manually</h5>
+            <small> now adding {{route}} </small>
+            <hr>
+            <form method="POST" name="linux_form" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="source_info_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ip_address" class="col-md-2 col-form-label">IP Address </label>
+                        <div class="col-md-4">
+                            <input id="ip_address" style="font-size:9pt;" name="ip_address" class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="unique_identifier" class="col-md-2 col-form-label">Chose Unique Identifier</label>
+                        <div class="col-md-4">
+                            <select id="unique_identifier" style="font-size:9pt;" name="unique_identifier" class="form-control form-control-sm">
+                                {% for x in identifierList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="custom_name" class="col-md-2 col-form-label">Custom Name </label>
+                        <div class="col-md-4">
+                            <input id="custom_name" style="font-size:9pt;" name="custom_name" class="form-control form-control-sm" type="text"
+                                   maxlength="35" placeholder="Give a unique name for device"/>
+                        </div>
+                        <label for="log_source_name" class="col-md-2 col-form-label">Log Source Name </label>
+                        <div class="col-md-4">
+                            <input id="log_source_name" style="font-size:9pt;" name="log_source_name" class="form-control form-control-sm"
+                                   type="text" maxlength="35" placeholder="Give a name for log source"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-12" style="text-align:right;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="profiles_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile_details" class="col-md-5 col-form-label">Chose Monitoring Profile</label>
+                        <div class="col-md-6">
+                            <select id="monitor_profile_details"
+                                    style="font-size:9pt;" name="monitor_profile_details"
+                                    class="form-control form-control-sm" >
+<!--                                    onchange="arrangeProfileDetailsForLINUX(this)">-->
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in monitorProfileDetailList %}
+                                    <option value="{{x.id}}">{{x.paramsname}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parser_profile" class="col-md-5 col-form-label">Chose Parser Profile </label>
+                        <div class="col-md-6">
+                            <select id="parser_profile" style="font-size:9pt;" name="parser_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="location_profile" class="col-md-5 col-form-label">Chose Location Profile </label>
+                        <div class="col-md-6">
+                            <select id="location_profile" style="font-size:9pt;" name="location_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestion_profile" class="col-md-5 col-form-label">Chose Log Ingestion Profile </label>
+                        <div class="col-md-6">
+                            <select id="ingestion_profile" style="font-size:9pt;" name="ingestion_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="source_info_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="query_and_tag_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="vendor" class="col-md-3 col-form-label">Vendor </label>
+                        <div class="col-md-3">
+                            <input id="vendor" style="font-size:9pt;" name="vendor" class="form-control form-control-sm" type="text" disabled value="{{ vendorName }}"/>
+                        </div>
+                        <label for="devicetype" class="col-md-3 col-form-label">Log Source Type </label>
+                        <div class="col-md-3">
+<!--                            <select id="devicetype" style="font-size:9pt;" name="devicetype" class="form-control form-control-sm">-->
+<!--                                <option value="0">None</option>-->
+<!--                                <option disabled>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+<!--                                {% for x in deviceTypeList %}-->
+<!--                                    <option value="{{x.value}}">{{x.name}}</option>-->
+<!--                                {% endfor %}-->
+<!--                            </select>-->
+                            <input id="devicetype" style="font-size:9pt;" name="devicetype" class="form-control form-control-sm" type="text" disabled value="{{ vendorName }} SERVER TYPES"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="modelid" class="col-md-3 col-form-label">Model </label>
+                        <div class="col-md-3">
+                            <select id="modelid" style="font-size:9pt;" name="modelid" class="form-control form-control-sm" onchange="arrangeVersionListForModel(this)">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in modelList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+<!--                            <input id="modelid" style="font-size:9pt;" name="modelid" class="form-control form-control-sm" type="text"/>-->
+                        </div>
+                        <label for="deviceverid" class="col-md-3 col-form-label">Version </label>
+                        <div class="col-md-3">
+                            <select id="deviceverid" style="font-size:9pt;" name="deviceverid" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in versionList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+<!--                            <input id="deviceverid" style="font-size:9pt;" name="deviceverid" class="form-control form-control-sm" type="number"/>-->
+                        </div>
+                    </div>
+<!--                    <br>-->
+<!--                    <div class="row">-->
+<!--                        <label for="query_to_send" class="col-md-4 col-form-label">Query To Send</label>-->
+<!--                        <div class="col-md-8">-->
+<!--                            <input id="query_to_send" style="font-size:9pt;" name="query_to_send" class="form-control form-control-sm" type="text"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="row">-->
+<!--                        <label for="response_to_receive" class="col-md-4 col-form-label">Response That Means Healthy </label>-->
+<!--                        <div class="col-md-8">-->
+<!--                            <input id="response_to_receive" style="font-size:9pt;" name="response_to_receive" class="form-control form-control-sm" type="text"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="row">-->
+<!--                        <label for="response_to_down" class="col-md-4 col-form-label">Response That Means Log Source Down </label>-->
+<!--                        <div class="col-md-8">-->
+<!--                            <input id="response_to_down" style="font-size:9pt;" name="response_to_down" class="form-control form-control-sm" type="text"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+                    <br>
+                    <div class="row">
+                        <label for="tag" class="col-md-3 col-form-label">Tag information</label>
+                        <div class="col-md-9">
+                            <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Tag in log" maxlength="25"/>
+                        </div>
+                        <label for="taglocation" class="col-md-3 col-form-label">Tag location regex</label>
+                        <div class="col-md-9">
+                            <input id="taglocation" name="taglocation" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Regex for tag in log" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="submit_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:none;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {% if warning and warning != "" %}
+                        <li>{{warning}}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <hr/>
+
+            <div class="row justify-content-center">
+                <a class="asLink" href="{% url 'add_log_sources' %}">Return Home</a>
+            </div>
+        </div> <!-- / add linuxserver forms -->
+
+        {% elif route == 'elasticsearch' %}
+
+        <div class="container" style="text-align:center;font-size:9pt;"> <!-- add elaticsearch forms -->
+            <h5>Insert Log Source Manually</h5>
+            <small> now adding {{route}} </small>
+            <hr>
+            <form method="POST" name="elasticsearch_form" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+                <div class="form-group row" id="source_info_row" name="form_rows" style="display:block;text-align:left;">
+                    <div class="row">
+                        <label for="ip_address" class="col-md-2 col-form-label">IP Address </label>
+                        <div class="col-md-4">
+                            <input id="ip_address" style="font-size:9pt;" name="ip_address" class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="unique_identifier" class="col-md-2 col-form-label">Chose Unique Identifier</label>
+                        <div class="col-md-4">
+                            <select id="unique_identifier" style="font-size:9pt;" name="unique_identifier" class="form-control form-control-sm">
+                                {% for x in identifierList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="custom_name" class="col-md-2 col-form-label">Custom Name </label>
+                        <div class="col-md-4">
+                            <input id="custom_name" style="font-size:9pt;" name="custom_name" class="form-control form-control-sm" type="text"
+                                   maxlength="35" placeholder="Give a unique name for device" title="Unique identifier for source"/>
+                        </div>
+                        <label for="log_source_name" class="col-md-2 col-form-label">Log Source Name </label>
+                        <div class="col-md-4">
+                            <input id="log_source_name" style="font-size:9pt;" name="log_source_name" class="form-control form-control-sm"
+                                   type="text" maxlength="35" placeholder="Give a name for log source"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-12" style="text-align:right;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="profiles_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="monitor_profile_details" class="col-md-5 col-form-label">Chose Monitoring Profile</label>
+                        <div class="col-md-6">
+                            <select id="monitor_profile_details" style="font-size:9pt;" name="monitor_profile_details" class="form-control form-control-sm" onchange="arrangeProfileDetailsForNginx(this)">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in monitorProfileDetailList %}
+                                    <option value="{{x.id}}">{{x.paramsname}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="parser_profile" class="col-md-5 col-form-label">Chose Parser Profile </label>
+                        <div class="col-md-6">
+                            <select id="parser_profile" style="font-size:9pt;" name="parser_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in parserProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="location_profile" class="col-md-5 col-form-label">Chose Location Profile </label>
+                        <div class="col-md-6">
+                            <select id="location_profile" style="font-size:9pt;" name="location_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in locationProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="ingestion_profile" class="col-md-5 col-form-label">Chose Log Ingestion Profile </label>
+                        <div class="col-md-6">
+                            <select id="ingestion_profile" style="font-size:9pt;" name="ingestion_profile" class="form-control form-control-sm">
+                                <option value="0">None</option>
+                                <option disabled>-----------</option>
+                                {% for x in ingestionProfileList %}
+                                    <option value="{{x.value}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="source_info_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="query_and_tag_row" name="form_rows" style="display:none;text-align:left;">
+                    <div class="row">
+                        <label for="httpurl" class="col-md-2 col-form-label">http url </label>
+                        <div class="col-md-4">
+                            <input id="httpurl" style="font-size:9pt;" name="httpurl" class="form-control form-control-sm" type="text"/>
+                        </div>
+                        <label for="httpuri" class="col-md-2 col-form-label">http uri </label>
+                        <div class="col-md-4">
+                            <input id="httpuri" style="font-size:9pt;" name="httpuri" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="httpsecure" class="col-md-2 col-form-label">Secure http ? </label>
+                        <div class="col-md-1">
+                            <input id="httpsecure" style="height:30px;font-size:9pt;" name="httpsecure" type="checkbox"/>
+                        </div>
+                        <label for="httpmethod" class="col-md-2 col-form-label">http Method </label>
+                        <div class="col-md-1">
+                            <select id="httpmethod" style="font-size:9pt;" name="httpmethod" class="form-control form-control-sm">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                            </select>
+                        </div>
+                        <label for="httpport" class="col-md-2 col-form-label">http Port </label>
+                        <div class="col-md-4">
+                            <input id="httpport" style="font-size:9pt;" name="httpport" class="form-control form-control-sm" type="number"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <label for="request_to_send" class="col-md-4 col-form-label">Request To Send</label>
+                        <div class="col-md-8">
+                            <input id="request_to_send" style="font-size:9pt;" name="request_to_send" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_to_receive" class="col-md-4 col-form-label">Response That Means Healthy </label>
+                        <div class="col-md-8">
+                            <input id="response_to_receive" style="font-size:9pt;" name="response_to_receive" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="response_to_down" class="col-md-4 col-form-label">Response That Means Log Source Down </label>
+                        <div class="col-md-8">
+                            <input id="response_to_down" style="font-size:9pt;" name="response_to_down" class="form-control form-control-sm" type="text"/>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <label for="tag" class="col-md-4 col-form-label">Tag information</label>
+                        <div class="col-md-8">
+                            <input id="tag" name="tag" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Tag in log" maxlength="25"/>
+                        </div>
+                        <label for="taglocation" class="col-md-4 col-form-label">Tag location regex</label>
+                        <div class="col-md-8">
+                            <input id="taglocation" name="taglocation" class="form-control form-control-sm" style="font-size:9pt;"
+                                   type="text" placeholder="Regex for tag in log" />
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="profiles_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="submit_row" onclick="next_row(this)">Next</a>
+                    </div>
+
+                </div>
+
+                <div class="form-group row" id="submit_row" name="form_rows" style="display:none;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a class="btn btn-outline-info btn-sm" style="font-size:9pt;" name="query_and_tag_row" onclick="previous_row(this)">Previous</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" style="text-align:right;float:left;">
+                        <button class="btn btn-outline-info btn-sm" style="font-size:9pt;" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {% if warning and warning != "" %}
+                        <li>{{warning}}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <hr/>
+
+            <div class="row justify-content-center">
+                <a class="asLink" href="{% url 'add_log_sources' %}">Return Home</a>
+            </div>
+
+        </div> <!-- / add elaticsearch forms -->
+
+
+        {% else %}
+
+         <div class="container" style="text-align:center;">
+            <h5>SOON ...</h5>
+            <hr>
+         </div>
+
+        {% endif %}
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.maskedinput.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+            var add_method = "{{route}}";
+            //console.log(add_method);
+            var sourceSelection = "{{request.GET.adding}}";
+            //console.log(sourceSelection);
+            $('#ip_address').mask('999.999.999.999');
+            if("{{route}}"=="detail"){
+                $('#ip_address').val('{{source.ipaddress|safe}}');
+                if("{{source.uniqueidtype}}"=="ipaddress"){
+                    $('#ip_address').prop("disabled", true);
+                }
+            }
+            var note = $('#form_notifications');  // for validation warnings
+            var form_parts = document.getElementsByName('form_rows');  // list of div elements in form containing parts of form using it next&prev
+            var inputs = document.getElementsByTagName('input');  // input elements in form
+            var selects = document.getElementsByTagName('select');  // select elements in form
+            var markList = [{% for x in markList %}{{ x|safe }},{% endfor %}];
+            var modelList = [{% for x in modelList %}{{ x|safe }},{% endfor %}];
+            var versionList = [{% for x in versionList %}{{ x|safe }},{% endfor %}];
+            var ipAndTaglist = [{%for x in ipAndTaglist%}JSON.stringify({{x|safe}}),{%endfor%}];
+            var ipsOfNetworkDevices = [{% for x in ipsOfNetworkDevices %}"{{ x|safe }}",{% endfor %}];
+            var customNameList = {{customNameList|safe}};
+            //console.log(customNameList);
+            //var add_method = {{request.GET.device_add_method}};
+
+            //console.log(add_method=="scan");
+            //console.log(add_method=="manual");
+
+            // function that when a brand (mark) is chosen arrange a modelList for model selection;
+            function arrangeModelListForMarkId(selected){
+                var modelSelect = document.getElementById("modelid");
+                var existingOptions = modelSelect.options;
+                while(existingOptions.length>2){
+                    modelSelect.remove(existingOptions.length-1);
+                }
+
+                for(var i=0;i<modelList.length;i++){
+                    if(modelList[i].markid==selected.value){
+                        var option = document.createElement("option");
+                        option.text = modelList[i].name;
+                        option.value = modelList[i].value;
+                        modelSelect.add(option);
+                    }
+                }
+            }
+
+            // function that when a model is chosen arrange a versionList for version selection;
+            function arrangeVersionListForModel(selected){
+                var versionSelect = document.getElementById("deviceverid");
+                var existingOptions = versionSelect.options;
+                var selectedDeviceType = "";
+                modelList.forEach(
+                    function (el){
+                        if(el.value==selected.value){
+                            selectedDeviceType=el.devicetype;
+                        }
+                    }
+                );
+                while(existingOptions.length>2){
+                    versionSelect.remove(existingOptions.length-1);
+                }
+                for(var i=0;i<versionList.length;i++){
+                    if(versionList[i].devicetype==selectedDeviceType){
+                        var option = document.createElement("option");
+                        option.text = versionList[i].name;
+                        option.value = versionList[i].value;
+                        versionSelect.add(option);
+                    }
+                }
+            }
+
+            function arrangeProfileDetailList(selected){
+                var snmpProfileList = [{% for x in snmpProfileList %}{{ x.get_json|safe }},{% endfor %}];
+                var profileDetailSelect = document.getElementById("snmp_profile");
+                var existingOptions = profileDetailSelect.options;
+                console.log(existingOptions);
+                while(existingOptions.length>2){
+                    profileDetailSelect.remove(existingOptions.length-1);
+                }
+                for(var i=0;i<snmpProfileList.length;i++){
+                    if(snmpProfileList[i].monitorProfile==selected.value){
+                        var option = document.createElement("option");
+                        option.text = snmpProfileList[i].paramsname;
+                        option.value = snmpProfileList[i].id;
+                        profileDetailSelect.add(option);
+                    }
+                }
+
+            }
+
+            // selection arrange for postgresql
+            function arrangeProfileDetailsForSQL(selected){
+                console.log(selected.value+" selected");
+                var monitorProfileDetailsList = [{%for x in monitorProfileDetailList%}{{x.get_json|safe}}, {%endfor%}];
+                var selectedProfDetail;
+                monitorProfileDetailsList.forEach(function (el){if(el.id==selected.value){selectedProfDetail=el;}});
+
+                if(selectedProfDetail){
+                    $("#dbusername").val(selectedProfDetail.username);
+                    $("#dbname").val(selectedProfDetail.dbasename);
+                    $("#dbpass").val(selectedProfDetail.userpass);
+                    $("#dbport").val(selectedProfDetail.httpport);
+                    $("#query_to_send").val(selectedProfDetail.querytosend);
+                    $("#response_to_receive").val(selectedProfDetail.responsetoreceive);
+                    $("#response_to_down").val(selectedProfDetail.responsetodown);
+                }else{
+                    $("#dbusername").val("");
+                    $("#dbname").val("");
+                    $("#dbpass").val("");
+                    $("#dbport").val("");
+                    $("#query_to_send").val("");
+                    $("#response_to_receive").val("");
+                    $("#response_to_down").val("");
+                }
+
+            }
+
+            // selection arrange for nginx
+            function arrangeProfileDetailsForNginx(selected){
+                console.log(selected.value+" selected");
+                var monitorProfileDetailsList = [{%for x in monitorProfileDetailList%}{{x.get_json|safe}}, {%endfor%}];
+                var selectedProfDetail;
+                monitorProfileDetailsList.forEach(function (el){if(el.id==selected.value){selectedProfDetail=el;}});
+
+                if(selectedProfDetail){
+
+                    $("#httpurl").val(selectedProfDetail.httpurl);
+                    $("#httpuri").val(selectedProfDetail.httpuri);
+                    $("#httpsecure").attr("checked", (selectedProfDetail.httpsecure=="true"));
+                    if(selectedProfDetail.httpmethod=="GET"||selectedProfDetail.httpmethod=="get"){
+                        $("#httpmethod").val("GET");
+                    }else if(selectedProfDetail.httpmethod=="POST"||selectedProfDetail.httpmethod=="post"){
+                        $("#httpmethod").val("POST");
+                    }
+                    $("#httpport").val(selectedProfDetail.httpport);
+                    $("#request_to_send").val(selectedProfDetail.querytosend);
+                    $("#response_to_receive").val(selectedProfDetail.responsetoreceive);
+                    $("#response_to_down").val(selectedProfDetail.responsetodown);
+
+                }else{
+
+                    $("#httpurl").val("");
+                    $("#httpuri").val("");
+                    $("#httpsecure").attr("checked", false);
+                    $("#httpmethod").val("GET");
+                    $("#httpport").val("");
+                    $("#request_to_send").val("");
+                    $("#response_to_receive").val("");
+                    $("#response_to_down").val("");
+
+                }
+
+            }
+
+            // selection arrange for microsoftserver
+            function arrangeProfileDetailsForMICROSOFT(selected){
+
+            }
+
+            // selection arrange for linuxserver
+            function arrangeProfileDetailsForLINUX(selected){
+
+            }
+
+            function setSelectedValues(selected){
+                // selected is html select element which calls this function;
+                console.log(selected.value);
+                console.log(selected.name);
+
+                if(selected.name=="snmp_profile"){
+                    if(selected.value=="0"){
+                        // if selected element is about snmp profiles selected as new to create new snmp profile;
+                        $('#snmp_profile_name').val("");
+                        $('#community_string').val("");
+                        $('#v3_user_name').val("");
+                        $('#v3_auth_password').val("");
+                        $('#v3_privacy_password').val("");
+                    }else{
+                        // if selected element is one of the existing snmp profiles;
+                        var snmpProfileList = [{% for x in snmpProfileList %}{{ x.get_json|safe }},{% endfor %}];
+                        var selectedProfile;
+                        for(var i=0;i<snmpProfileList.length;i++){
+                            if(snmpProfileList[i].id==selected.value){
+                                selectedProfile=snmpProfileList[i];
+                                break;
+                            }
+                        }
+                        if(selectedProfile){
+                            if(selectedProfile.snmpversion=="v2c"||selectedProfile.snmpversion=="V2c"||selectedProfile.snmpversion=="V2C"||selectedProfile.snmpversion=="v2C"){
+                                $('#snmp_profile_name').val(selectedProfile.paramsname);
+                                $('#snmp_version').val("v2c");
+                                $('#community_string').val(selectedProfile.communitystring);
+                            }else if(selectedProfile.snmpversion=="v3"||selectedProfile.snmpversion=="V3"){
+                                $('#snmp_profile_name').val(selectedProfile.paramsname);
+                                $('#snmp_version').val("v3");
+                                $('#community_string').val(selectedProfile.communitystring);
+                                $('#v3_user_name').val(selectedProfile.snmpv3user);
+                                $('#v3_auth_protocol').val(selectedProfile.snmpv3authprotocol);
+                                $('#v3_auth_password').val(selectedProfile.snmpv3authpass);
+                                $('#v3_privacy_protocol').val(selectedProfile.snmpv3privacyprotocol);
+                                $('#v3_privacy_password').val(selectedProfile.snmpv3privacypass);
+                            }
+                        }
+                    }
+                }
+                /*
+                if(selected.value=="0"){
+                    $('#monitor_profile_name').val("");
+                    $('#monitor_profile_type').val("");
+                }else{
+                    var monitorProfileList = [{% for x in monitorProfileList %}{{x.get_json|safe}},{% endfor %}];
+                    var selectedMonitor;
+                    for(var i=0;i<monitorProfileList.length;i++){
+                        if(monitorProfileList[i].id==selected.value){
+                            selectedMonitor = monitorProfileList[i];
+                            break;
+                        }
+                    }
+                    if(selectedMonitor){
+                        $('#monitor_profile_name').val(selectedMonitor.monitorprofilename);
+                        $('#monitor_profile_type').val(selectedMonitor.monitorprofiletype);
+                    }
+                }
+                    */
+
+            }
+
+            function testSpecialCharacters(str){
+                var regex = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g;
+                return regex.test(str);
+            }
+
+            function only_show(form_part){
+                for(var i=0;i<form_parts.length;i++){
+                    form_parts[i].style.display = "none";
+                }
+                form_part.style.display = "block";
+            }
+
+            function validate_form_element(form_element){
+                if(form_element.id=="ip_address"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li><u>IP Address</u> field blank !!</li>");
+                        return false;
+                    }else if(sourceSelection=="networkdevice"){
+                        var ipPartList = form_element.value.split(".");
+                        var ipString = parseInt(ipPartList[0])+"."+parseInt(ipPartList[1])+"."+parseInt(ipPartList[2])+"."+parseInt(ipPartList[3]);
+                        //console.log(ipString);
+                        if(ipsOfNetworkDevices.includes(ipString)){
+                            form_element.focus();
+                            note.append("<li>There is another network device on this <u>IP Address</u> !!</li>");
+                            return false;
+                        }
+                    }else{
+                        var ok = true;
+                        var list = form_element.value.split(".");
+                        list.forEach(function(str){ok = (ok&&(parseInt(str)<256));});
+                        if(!ok){
+                            form_element.focus();
+                            note.append("<li>Make sure you have entered the correct <u>IP Address</u> !!</li>");
+                            return false;
+                        }
+                    }
+                }  // text
+                if(form_element.id=="ip_mask"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li><u>Mask</u> field blank !!</li>");
+                        return false;
+                    }else if(form_element.value>32||form_element.value<=0){
+                        form_element.focus();
+                        note.append("<li>Wrong value in <u>Mask</u> field, must be between 1 and 32 !!</li>");
+                        return false;
+                    }
+                }  // integer max = 32
+                if(form_element.id=="unique_identifier"){ }  // selection
+                if(form_element.id=="markid"){
+                    if(sourceSelection=="networkdevice"&&form_element.value=="0"){
+                        form_element.focus();
+                        note.append("<li>Please chose <u>Brand Name</u>, If you could not find the device brand in list, install its driver first !!</li>");
+                        return false;
+                    }
+                }  // selection
+                if(form_element.id=="modelid"){
+                    if(sourceSelection=="networkdevice"&&form_element.value=="0"){
+                        form_element.focus();
+                        note.append("<li>Please chose <u>Model Name</u>, If you could not find the device model in list, install its driver first !!</li>");
+                        return false;
+                    }
+                }  // selection
+                if(form_element.id=="deviceverid"){
+                    if(sourceSelection=="networkdevice"&&form_element.value=="0"){
+                        form_element.focus();
+                        note.append("<li>Please chose <u>Version</u>, If you could not find the device version in list, install its driver first !!</li>");
+                        return false;
+                    }
+                }  // selection
+                if(form_element.id=="oid"){
+                    if(form_element.value==""&&(document.getElementById("unique_identifier").value=="macaddress"||document.getElementById("unique_identifier").value=="hostname")){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>OID</u> field blank when unique identifier Mac Address or Host Name !!</li>");
+                        return false;
+                    }
+                }  // text
+                if(form_element.id=="custom_name"){
+                    if(form_element.value==""&&document.getElementById("unique_identifier").value=="customname"){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Custom Name</u> field blank when unique identifier Custom Name !!</li>");
+                        return false;
+                    }else if(customNameList.includes((form_element.value).toLowerCase())){
+                        form_element.focus();
+                        note.append("<li>Please don't use same <u>Custom Name</u> with another log source !!</li>");
+                        return false;
+                    }else if(testSpecialCharacters(form_element.value)){
+                        form_element.focus();
+                        note.append("<li>Please don't use special characters or white space in <u>Custom Name</u> !!</li>");
+                        return false;
+                    }
+                }  // text max 35 chars
+                if(form_element.id=="log_source_name"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Log Source Name</u> field blank !!</li>");
+                        return false;
+                    }else if(testSpecialCharacters(form_element.value)){
+                        form_element.focus();
+                        note.append("<li>Please don't use special characters or white space in <u>Log Source Name</u> !!</li>");
+                        return false;
+                    }
+                }  // text max 35 chars
+                if(form_element.id=="monitor_profile"){ }  // selection
+                if(form_element.id=="snmp_profile"){ }  // selection
+                if(form_element.id=="monitor_profile_name"){
+                    if(document.getElementById("monitor_profile").value=="0"&&form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Monitor Profile Name</u> field blank for new profile !!</li>");
+                        return false;
+                    }
+                } // name input
+                if(form_element.id=="monitor_profile_type"){ } // selection
+                if(form_element.id=="snmp_profile_name"){
+                    if(document.getElementById("snmp_profile").value=="0"&&form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>SNMP Profile Name</u> field blank when creating new SNMP profile !!</li>");
+                        return false;
+                    }
+                }
+                if(form_element.id=="parser_profile"){ }  //selection
+                if(form_element.id=="location_profile"){ }  //selection
+                if(form_element.id=="ingestion_profile"){ }  //selection
+                if(form_element.id=="snmp_version"){ }  //selection
+                if(form_element.id=="community_string"){
+                    if(add_method=="scan"){
+                        if(form_element.value==""){
+                            form_element.focus();
+                            note.append("<li>You can not pass <u>Community String</u> field blank for auto SNMP scan !!</li>");
+                            return false;
+                        }
+                    }else{
+                        if(document.getElementById("monitor_profile").text=="SNMP"&&form_element.value==""){
+                            form_element.focus();
+                            note.append("<li>You can not pass <u>Community String</u> field blank when Monitor Profile Type SNMP !!</li>");
+                            return false;
+                        }
+                    }
+                }  // password for V2c
+                if(form_element.id=="response_receive"){ }  // response to receive input
+                if(form_element.id=="response_down"){ }  // response to down input
+                if(form_element.id=="v3_user_name"){ }  // for v3 text
+                if(form_element.id=="v3_auth_protocol"){
+                    if(document.getElementById("snmp_version").value=="v3"&&form_element.value=="0"){
+                        form_element.focus();
+                        note.append("<li>You have to chose <u>Auth Protocol</u> when SNMP Version chosen V3 !!</li>");
+                        return false;
+                    }
+                }  // for v3 selection
+                if(form_element.id=="v3_auth_password"){
+                    if(document.getElementById("snmp_version").value=="v3"&&form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Auth Password</u> field blank when SNMP Version chosen V3 !!</li>");
+                        return false;
+                    }
+                }  // for v3 password
+                if(form_element.id=="v3_privacy_protocol"){
+                    if(document.getElementById("snmp_version").value=="v3"&&form_element.value=="0"){
+                        form_element.focus();
+                        note.append("<li>You have to chose <u>Privacy Protocol</u> when SNMP Version chosen V3 !!</li>");
+                        return false;
+                    }
+                }  // for v3 selection
+                if(form_element.id=="v3_privacy_password"){
+                    if(document.getElementById("snmp_version").value=="v3"&&form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>You can not pass <u>Privacy Password</u> field blank when SNMP Version chosen V3 !!</li>");
+                        return false;
+                    }
+                }  // for v3 password
+                if(form_element.id=="tag"){
+                    var ipPartList = $("#ip_address").val().split(".");
+                    var ipString = parseInt(ipPartList[0])+"."+parseInt(ipPartList[1])+"."+parseInt(ipPartList[2])+"."+parseInt(ipPartList[3])
+                    var ipAndTag = {ipaddress:ipString, syslogtag:$("#tag").val()};
+                    if(ipAndTaglist.includes(JSON.stringify(ipAndTag))){
+                        form_element.focus();
+                        note.append("<li>There is another log source with same <u>ip & tag</u> !!</li>");
+                        return false;
+                    }
+                } // input for check syslogtag is unique with ipaddress
+
+                // FOR POSTGRESQL
+                if(form_element.id=="dbusername"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li><u>Database User Name</u> is empty !!</li>");
+                        return false;
+                    }
+                }
+                if(form_element.id=="dbname"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li><u>Database Name</u> is empty !!</li>");
+                        return false;
+                    }
+                }
+                if(form_element.id=="dbpass"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li><u>Database User Password</u> is empty !!</li>");
+                        return false;
+                    }
+                }
+                if(form_element.id=="dbport"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li><u>Database Port</u> is empty !!</li>");
+                        return false;
+                    }
+                }
+                if(form_element.id=="query_to_send"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>Please write a <u>Query To Send</u> to check health !!</li>");
+                        return false;
+                    }
+                }
+                if(form_element.id=="response_to_receive"){}
+                if(form_element.id=="response_to_down"){}
+
+                // BOTH POSTGRESQL & NGINX
+                if(form_element.id=="monitor_profile_details" && (add_method=="postgresql" || add_method=="nginx")){
+
+                    if(form_element.value==0){
+                        form_element.focus();
+                        note.append("<li>Chose <u>Monitor Profile</u>, if list is empty then create a monitor profile for "+add_method+" first !!</li>");
+                        return false;
+                    }
+                }  // select
+                // FOR NGINX
+                if(form_element.id=="request_to_send"){
+                    if(form_element.value==""){
+                        form_element.focus();
+                        note.append("<li>Please write a <u>Request To Send</u> to check health !!</li>");
+                        return false;
+                    }
+                }
+
+                note.text("");
+                return true
+
+            }
+
+            function next_row(button){
+                if(button.name=="submit_row"){
+                    var form_map = $('form').serializeArray();
+                    $('#form_results').text("");
+                    for(var i=1;i<form_map.length;i++){
+                        if(form_map[i].value!=""){
+                            if(form_map[i].name=="community_string"||form_map[i].name=="v3_auth_password"||form_map[i].name=="v3_privacy_password"||form_map[i].name=="dbpass"){
+                                $('#form_results').append("<li><b>"+form_map[i].name+" :</b> *** </li>");
+                            }else{
+                                $('#form_results').append("<li><b>"+form_map[i].name+" :</b> "+form_map[i].value+"</li>");
+                            }
+                        }else{
+                            $('#form_results').append("<li><b>"+form_map[i].name+" :</b> EMPTY </li>");
+                        }
+                    }
+                }
+                var current_el = button.parentElement.parentElement;
+                var next_element = document.getElementById(button.name);
+                var input_parts = current_el.getElementsByTagName('input');
+                var select_parts = current_el.getElementsByTagName('select');
+                var valid = true;
+                if(input_parts.length>0){
+                    for(var i=0;i<input_parts.length;i++){
+                        valid = (valid&&validate_form_element(input_parts[i]));
+                    }
+                }
+                if(select_parts.length>0){
+                    for(var i=0;i<select_parts.length;i++){
+                        valid = (valid&&validate_form_element(select_parts[i]));
+                    }
+                }
+                if(valid){
+                    only_show(next_element);
+                }
+
+            }
+
+            function previous_row(button){
+                var current_el = button.parentElement.parentElement;
+                var previous_element = document.getElementById(button.name);
+                only_show(previous_element);
+            }
+
+
+
+        </script>
+    </body>
+
+</html>

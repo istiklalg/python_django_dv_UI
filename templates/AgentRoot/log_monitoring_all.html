@@ -1,0 +1,239 @@
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en-US">
+    <head>
+
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title> Monitor All Logs </title>
+
+        <link rel="icon" href="{% static 'img/favicon.png' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/general_style.css' %}">
+    </head>
+    <body  style="padding-top:15px;">
+
+        {% if route == 'general' %}
+
+        <div class="container-fluid" style="text-align:center;font-size:9pt;">
+            <h4>LOG MONITORING</h4>
+            <div class="row justify-content-center innerBodies">
+                <div class="col col-xl-10 col-lg-11 col-md-12 col-sm-12" align="center" name="charts">
+                    <canvas id="chart_all_logs" title="Log Counts" height="100"></canvas>
+                    <hr/>
+                    <data id="{{all_logs_chart_labels}}" value="{{all_logs_chart_values}}" style="display:none;">logs_bar</data>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <table class="table table-sm table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th></th>
+                            <th>
+                                <a href="?sort=ipaddress{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                                    IP
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=uniqueid{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                                    Unique ID
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=logcode{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                                    Log Code
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=credate{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                                    Date
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=logevent{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                                    Log Event
+                                </a>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th>
+                                <select name="filter"
+                                        onchange="location.href='?ipaddress='+this.value{%if request.GET.uniqueid%}+'&uniqueid={{request.GET.uniqueid}}'{%endif%}{%if request.GET.logcode%}+'&logcode={{request.GET.logcode}}'{%endif%}{% if request.GET.sort %}+'&sort={{ request.GET.sort }}'{% endif %};">
+                                    <option value="">No Filter</option>
+                                    <option disabled>------</option>
+                                    {% for ip in filterIpList %}
+                                        <option value="{{ip}}" {% if request.GET.ipaddress == ip %}selected{% endif %}>{{ip}}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                            <th>
+                                <select name="filter"
+                                        onchange="location.href='?uniqueid='+this.value{%if request.GET.ipaddress%}+'&ipaddress={{request.GET.ipaddress}}'{%endif%}{%if request.GET.logcode%}+'&logcode={{request.GET.logcode}}'{%endif%}{% if request.GET.sort %}+'&sort={{ request.GET.sort }}'{% endif %};">
+                                    <option value="">No Filter</option>
+                                    <option disabled>------</option>
+                                    {% for uniqueid in filterUniqueidList %}
+                                        <option value="{{uniqueid}}" {% if request.GET.uniqueid == uniqueid %}selected{% endif %}>{{uniqueid}}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                            <th>
+                                <select name="filter"
+                                        onchange="location.href='?logcode='+this.value{%if request.GET.uniqueid%}+'&uniqueid={{request.GET.uniqueid}}'{%endif%}{%if request.GET.ipaddress%}+'&ipaddress={{request.GET.ipaddress}}'{%endif%}{% if request.GET.sort %}+'&sort={{ request.GET.sort }}'{% endif %};">
+                                    <option value="">No Filter</option>
+                                    <option disabled>------</option>
+                                    {% for code in filterLogCodeList %}
+                                        <option value="{{code}}" {% if request.GET.logcode == code %}selected{% endif %}>{{code}}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                            <th>
+
+                            </th>
+                            <th>
+                                <input type="text" name="searchEvent" placeholder="Search in Log Event" style="font-size:9pt;" {% if request.GET.searchEvent %} value="{{request.GET.searchEvent}}" {% endif %}
+                                       onkeypress="if(event.key=='Enter'){location.href='?searchEvent='+this.value{%if request.GET.uniqueid%}+'&uniqueid={{request.GET.uniqueid}}'{%endif%}{%if request.GET.ipaddress%}+'&ipaddress={{request.GET.ipaddress}}'{%endif%}{%if request.GET.logcode%}+'&logcode={{request.GET.logcode}}'{%endif%}{% if request.GET.sort %}+'&sort={{ request.GET.sort }}'{% endif %};}" />
+
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in elasticLogList %}
+                            <tr>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary circle" name="logDetail{{log.id}}"
+                                            id="logDetailButton{{log.id}}" onclick="open_close(this)" title="See Content"
+                                            style="padding:0;margin:0;width:20px;height:20px;font-size:8pt;">
+                                            &#x002B;
+                                    </button>
+                                </td>
+                                <td>{{ log.ipaddress }}</td>
+                                <td>{{ log.uniqueid }}</td>
+                                <td>{{ log.logcode }}</td>
+                                <td>{{ log.credate }}</td>
+                                <td>{{ log.logevent }}</td>
+                            </tr>
+                            <tr id="logDetail{{log.id}}" style="display:none;min-height:50px;text-align:center;">
+                                <td></td>
+                                <td colspan="5">
+                                    <div class="row">
+                                        <p>
+                                            <span style="font-weight:bold;">Full Log Data : </span>
+                                            <span style="border: 0.5px solid rgba(255, 159, 64, 0.85);border-radius:3px;">{{log.rawlog}}</span>
+                                        </p>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-xl-3 col-lg-3 col-md-3 col-sm-3" align="center" name="charts">
+                                            <canvas id="chart_logcode_count{{log.id}}" title="Counts" height="100"></canvas>
+                                            <hr/>
+                                            <data id="[{{log.logcode}}]" value="{{log.logCodeCount|default_if_none:0}}" style="display:none;">horizontalBar</data>
+                                        </div>
+                                        <div class="col col-xl-3 col-lg-3 col-md-3 col-sm-3" align="center" name="charts">
+                                            <canvas id="chart_uniqueid{{log.id}}" title="Sources" height="100"></canvas>
+                                            <hr/>
+                                            <data id="[{{log.logCodeUniqueids}}]" value="{{log.logCodeUniqueidCounts}}" style="display:none;">doughnut_empty</data>
+                                        </div>
+                                        <div class="col col-xl-3 col-lg-3 col-md-3 col-sm-3" align="center">
+<!--                                            <canvas id="chart_uniqueid{{log.id}}" title="Log Source distribution" height="50"></canvas>-->
+<!--                                            <hr/>-->
+<!--                                            <data id="[{{log.logCodeUniqueids}}]" value="{{log.logCodeUniqueidCounts}}" style="display:none;">bar</data>-->
+                                            {% if log.parameters %}
+                                                <table class="table table-sm">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <th>Parameter</th>
+                                                            <th>Value</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for k, v in log.parameters.items %}
+                                                        <tr>
+                                                            <td>{{k}}</td>
+                                                            <td>{{v}}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            {% else %}
+                                                <p>No Parameters Parsed</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col col-xl-3 col-lg-3 col-md-3 col-sm-3" align="center">
+<!--                                            <canvas id="chart_uniqueid{{log.id}}" title="Log Source distribution" height="50"></canvas>-->
+<!--                                            <hr/>-->
+<!--                                            <data id="[{{log.logCodeUniqueids}}]" value="{{log.logCodeUniqueidCounts}}" style="display:none;">bar</data>-->
+<!--                                            <p>{{log.logcode}} - {{log.logCodeCount|default_if_none:"0"}} - {{log.logCodeUniqueids}} - {{log.logCodeUniqueidCounts}} - {{log.parameters|default_if_none:"No Parameter"}}</p>-->
+                                        </div>
+                                    </div>
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+            <div class="pagination">{# pagination #}
+                <span class="step-links">
+                    {% if elasticLogList.has_previous %}
+                        <a href="?page=1{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                            &laquo; jump to first
+                        </a>/
+                        <a href="?page={{ elasticLogList.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                            previous
+                        </a>/
+                    {% endif %}
+
+                    <span class="current">
+                        <i>{{ elasticLogList.number }}. of {{ elasticLogList.paginator.num_pages }} pages </i>
+                    </span>
+
+                    {% if elasticLogList.has_next %}
+                        /<a href="?page={{ elasticLogList.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                            next
+                        </a>
+                        /<a href="?page={{ elasticLogList.paginator.num_pages }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{%if request.GET.uniqueid%}&uniqueid={{request.GET.uniqueid}}{%endif%}{%if request.GET.ipaddress%}&ipaddress={{request.GET.ipaddress}}{%endif%}{%if request.GET.logcode%}&logcode={{request.GET.logcode}}{%endif%}{% if request.GET.searchEvent %}&searchEvent={{ request.GET.searchEvent }}{% endif %}">
+                            jump to last &raquo;
+                        </a>
+                    {% endif %}
+                </span>
+            </div>{# /pagination #}
+
+
+        </div>
+
+        {% elif route == 'detail' %}
+
+        <div class="container-fluid" style="text-align:center;font-size:9pt;">
+
+
+
+        </div>
+
+        {% else %}
+
+         <div class="container" style="text-align:center;">
+            <h5>SOON ...</h5>
+            <hr>
+         </div>
+
+        {% endif %}
+
+        <div class="container" style="position:fixed;bottom:0.1%;left:2%;width:30%;zoom:0.75">
+            <small>{% include 'messages.html' %}</small>
+        </div>
+
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/Chart.js' %}"></script>
+        <script type="text/javascript" language="JavaScript" src="{% static 'js/general_style.js' %}"></script>
+        <script type="text/javascript" language="JavaScript">
+
+        </script>
+    </body>
+
+</html>

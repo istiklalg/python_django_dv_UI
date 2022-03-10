@@ -1,0 +1,1333 @@
+
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block titleBlock %}
+
+    New Parser Profile {{ block.super }}
+
+{% endblock %}
+
+{% block bodyBlock %}
+
+
+{% if route == "general" %}
+
+<div class="container-fluid innerBodies">
+
+
+    <div class="container-fluid" style="text-align:center;font-size:9pt;">
+            <h5>New Parser Profile</h5>
+            <small style="text-align:left;color:rgba(54, 162, 235, 0.85);">
+                <ul>
+                    <li>Please note that chose log event part first while creating new parser profile</li>
+                    <li>Please don't forget to test rules and check results before save, otherwise it may cause parse problems</li>
+                </ul>
+            </small>
+            <hr>
+            <div class="row">
+                <label for="ipselection" class="col-md-1 col-form-label">Select IP Address </label>
+                <div class="col-md-2">
+                    <select style="font-size:9pt;" id="ipselection" name="ipselection" class="form-control form-control-sm" onchange="arrangeFormParts(this)">
+                        <option value="-">Please Select</option>
+                        <option disabled>-------</option>
+                        {% for x in ipList %}
+                        <option value="{{x}}">{{x}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+<!--            </div>-->
+<!--            <br>-->
+<!--            <div class="row">-->
+                <label for="rawlogselection" class="col-md-1 col-form-label">Select Raw Log </label>
+                <div class="col-md-8">
+                    <select style="font-size:9pt;" id="rawlogselection" name="rawlogselection" class="form-control form-control-sm" onblur="arrangeFormParts(this)" onchange="arrangeFormParts(this)">
+                        <option value="">Please Select</option>
+                        <option disabled>-------</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+
+                <div class="form-check form-check-inline col-md-2" style="margin:0;padding:0;">
+                    <label class="form-check-label">
+                        <input type="radio" class="form-check-input" id="logidradio" name="choseparserarea" value="logid" onchange="checkEventRadio()" />For Log PRI Number
+                    </label>
+                </div>
+                <div class="form-check form-check-inline col-md-2" style="margin:0;padding:0;">
+                    <label class="form-check-label">
+                        <input type="radio" class="form-check-input" id="logdateradio" name="choseparserarea" value="logdate" onchange="checkEventRadio()" />For Log Date
+                    </label>
+                </div>
+                <div class="form-check form-check-inline col-md-2" style="margin:0;padding:0;">
+                    <label class="form-check-label">
+                        <input type="radio" class="form-check-input" id="logserviceradio" name="choseparserarea" value="logservice" onchange="checkEventRadio()" />For Log Service
+                    </label>
+                </div>
+                <div class="form-check form-check-inline col-md-2" style="margin:0;padding:0;">
+                    <label class="form-check-label">
+                        <input type="radio" class="form-check-input" id="logservicenoradio" name="choseparserarea" value="logserviceno" onchange="checkEventRadio()" />For Log Service No
+                    </label>
+                </div>
+                <div class="form-check form-check-inline col-md-2" style="margin:0;padding:0;">
+                    <label class="form-check-label">
+                        <input type="radio" class="form-check-input" id="lognoradio" name="choseparserarea" value="logno" onchange="checkEventRadio()" />For Log Code
+                    </label>
+                </div>
+                <div class="form-check form-check-inline col-md-2" style="margin:0;padding:0;">
+                    <label class="form-check-label">
+                        <input type="radio" class="form-check-input" id="logeventradio" name="choseparserarea" value="logevent" onchange="checkEventRadio()" checked />For Log Event
+                    </label>
+                </div>
+
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-12">
+                    <input style="font-size:9pt;" class="form-control form-control-sm" type="text" id="rawlogdata" onkeyup="getSelectedText(this)" onmouseup="getSelectedText(this)" onpaste="pastedRawLog(this.id, event)"/>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-2">Start Point :</div>
+                <div class="col-md-2" id="startindex" style="color:red;"></div>
+                <div class="col-md-2">Count of Chars :</div>
+                <div class="col-md-2" id="countofchars" style="color:red;"></div>
+                <div class="col-md-2">Parser Test Result :</div>
+                <div class="col-md-2" id="parsertestresult">
+
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <label for="versionparserselection" class="col-md-2 col-form-label">Select From Existing Version Parsers </label>
+                <div class="col-md-3">
+                    <select style="font-size:9pt;" id="versionparserselection" name="versionparserselection" class="form-control form-control-sm" onblur="arrangeFormParts(this)" onchange="arrangeFormParts(this)">
+                        <option value="0">Please Select</option>
+                        <option disabled>-------</option>
+                        {% for x in versionParserList %}
+                        <option value="{{x.id}}">{{x}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">OR</div>
+                <label for="customparserselection" class="col-md-2 col-form-label">Select From Existing Custom Parsers </label>
+                <div class="col-md-3">
+                    <select style="font-size:9pt;" id="customparserselection" name="customparserselection" class="form-control form-control-sm" onchange="arrangeFormParts(this)">
+                        <option value="0">Please Select</option>
+                        <option disabled>-------</option>
+                        {% for x in customParserList %}
+                        <option value="{{x.id}}">{{x}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <br><br>
+            <div class="row test" style="min-height:100px;background-color:rgb(240,240,240);border-color:rgb(240,240,240);">
+                <div class="col-md-1">
+                    <div class="row justify-content-center">Log PRI Number</div>
+                    <hr>
+                    <div class="row justify-content-center" id="seelogid" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-1">
+                    <div class="row justify-content-center">Severity</div>
+                    <hr>
+                    <div class="row justify-content-center" id="seeseverity" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center"> Log Date</div>
+                    <hr>
+                    <div class="row justify-content-center" id="seelogdate" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center"> Log Service</div>
+                    <hr>
+                    <div class="row justify-content-center" id="seelogservice" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center"> Log Service No</div>
+                    <hr>
+                    <div class="row justify-content-center" id="seelogserviceno" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center"> Log Code</div>
+                    <hr>
+                    <div class="row justify-content-center" id="seelogno" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center"> Log Event</div>
+                    <hr>
+                    <div class="row justify-content-center" id="seelogevent" style="word-break: break-all;"></div>
+                </div>
+            </div>
+            <div class="row test" style="min-height:50px;background-color:rgb(240,240,240);border-color:rgb(240,240,240);">
+                <div class="col-md-1">
+                    <div class="row justify-content-center" id="psqllogid" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-1">
+                    <div class="row justify-content-center" id="psqlseverity" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center" id="psqllogdate" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center" id="psqllogservice" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center" id="psqllogserviceno" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center" id="psqllogno" style="border-right:0.5px solid lightgrey;"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row justify-content-center" id="psqllogevent" style="word-break: break-all;"></div>
+                </div>
+            </div>
+            <br><br>
+<!--            <div class="row">-->
+<!--                <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">-->
+<!--                    <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" href="">TEST</a>-->
+<!--                </div>-->
+<!--            </div>-->
+            <br>
+            <form method="POST" name="new_parser_profile" onkeydown="return event.key != 'Enter';">
+                {% csrf_token %}
+
+                <div class="form-group row test" id="parserprofile_row" name="form_rows" style="display:block;margin:0;">
+                    <div class="row">
+                        <div class="col-md-1" style="font-size:9pt;color:grey;">Parser Profile</div>
+
+                        <div class="col-md-1">
+                            <label class="row" for="ipaddress">IP Address</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="ipaddress" name="ipaddress" />
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="row" for="uniqueid">Unique Identifier</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="uniqueid" name="uniqueid" />
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="row" for="parsername">Parser Profile Name</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="parsername" name="parsername" placeholder="Give a unique name for profile" required />
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="row" for="alternateparseid">Chose Alternative Parser</label>
+                            <div class="row">
+                                <select style="font-size:9pt;" class="form-control form-control-sm" id="alternateparseid" name="alternateparseid">
+                                    <option value="0">No Alternative</option>
+                                    <option disabled>----CUSTOM PARSERS----</option>
+                                    {% for x in customParserList %}
+                                    <option value="{{x.id}}">{{x}}</option>
+                                    {% endfor %}
+                                    <option disabled>----INSTALLED PARSERS----</option>
+                                    {% for x in versionParserList %}
+                                    <option value="{{x.id}}">{{x}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="row" for="alternatecondition">Alternate Condition</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="alternatecondition" name="alternatecondition"
+                                       placeholder="Write down a condition for altenative parser" />
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="row" for="save_or_update">Save / Update</label>
+                            <div class="row">
+                                <select style="font-size:9pt;" class="form-control form-control-sm" id="save_or_update" name="save_or_update" onchange="arrangeFormParts(this)">
+                                    <option value="0">Save As New</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row test" id="logid_row" name="form_rows" style="display:block;margin:0;">
+                    <div class="row">
+                        <div class="col-md-1" style="font-size:9pt;color:grey;display:flex;flex-direction:column;">
+                            <div>Log PRI Number</div>
+                            <div style="margin-top:7px;">
+                                <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" type="button" id="logid_test" onclick="testSelectedRow(this)">
+                                    TEST
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logidstart">Start Point</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logidstart" name="logidstart"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logidcount">Count of Chars</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logidcount" name="logidcount" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logidtype">Type of Data</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logidtype" name="logidtype" value="String" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logidformat">Format</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logidformat" name="logidformat" value="Regular Expression" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logidstatic">Static Value</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logidstatic" name="logidstatic" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;overflow:hidden;" id="logidresult"></div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row test" id="logdate_row" name="form_rows" style="display:block;margin:0;">
+                    <div class="row">
+                        <div class="col-md-1" style="font-size:9pt;color:grey;display:flex;flex-direction:column;">
+                            <div>Log Date</div>
+                            <div style="margin-top:7px;">
+                                <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" type="button" id="logdate_test" onclick="testSelectedRow(this)">
+                                    TEST
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logdatestart">Start Point</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logdatestart" name="logdatestart"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logdatecount">Count of Chars</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logdatecount" name="logdatecount" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logdatetype">Type of Data</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logdatetype" name="logdatetype" value="date" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logdateformat">
+                                Format
+                                <a href="{% url 'help_pages' %}" title="Click for help pages"
+                                   style="color:rgba(54, 162, 235, 0.85);border:0.5px solid rgba(54, 162, 235, 0.85);width:18px;height:18px;margin-left:30px;text-decoration:none;border-radius:50%;"
+                                   target="_blank">?</a>
+                            </label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logdateformat" name="logdateformat" placeholder="Format like - Mon DD HH24:MI:SS Y" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logdatestatic">Static Value</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logdatestatic" name="logdatestatic" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;overflow:hidden;" id="logdateresult"></div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row test" id="logservice_row" name="form_rows" style="display:block;margin:0;">
+                    <div class="row">
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;display:flex;flex-direction:column;">
+                            <div>Log Service</div>
+                            <div style="margin-top:7px;">
+                                <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" type="button" id="logservice_test" onclick="testSelectedRow(this)">
+                                    TEST
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicestart">Start Point</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicestart" name="logservicestart"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicecount">Count of Chars</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicecount" name="logservicecount" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicetype">Type of Data</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicetype" name="logservicetype" value="String" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logserviceformat">Format</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logserviceformat" name="logserviceformat" value="Regular Expression" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicestatic">Static Value</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicestatic" name="logservicestatic" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;overflow:hidden;" id="logserviceresult"></div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row test" id="logserviceno_row" name="form_rows" style="display:block;margin:0;">
+                    <div class="row">
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;display:flex;flex-direction:column;">
+                            <div>Log Service No</div>
+                            <div style="margin-top:7px;">
+                                <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" type="button" id="logserviceno_test" onclick="testSelectedRow(this)">
+                                    TEST
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicenostart">Start Point</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicenostart" name="logservicenostart"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicenocount">Count of Chars</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicenocount" name="logservicenocount" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicenotype">Type of Data</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicenotype" name="logservicenotype" value="String" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicenoformat">Format</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicenoformat" name="logservicenoformat" value="Regular Expression" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logservicenostatic">Static Value</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logservicenostatic" name="logservicenostatic" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;overflow:hidden;" id="logservicenoresult"></div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row test" id="logno_row" name="form_rows" style="display:block;margin:0;">
+                    <div class="row">
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;display:flex;flex-direction:column;">
+                            <div>Log Code</div>
+                            <div style="margin-top:7px;">
+                                <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" type="button" id="logno_test" onclick="testSelectedRow(this)">
+                                    TEST
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="lognostart">Start Point</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="lognostart" name="lognostart"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="lognocount">Count of Chars</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="lognocount" name="lognocount" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="lognotype">Type of Data</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="lognotype" name="lognotype" value="String" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="lognoformat">Format</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="lognoformat" name="lognoformat" value="Regular Expression" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="lognostatic">Static Value</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="lognostatic" name="lognostatic" placeholder="if not selected it will be <undef**>" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;overflow:hidden;" id="lognoresult"></div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row test" id="logevent_row" name="form_rows" style="display:block;margin:0;">
+                    <div class="row">
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;display:flex;flex-direction:column;">
+                            <div>Log Event</div>
+                            <div style="margin-top:7px;">
+                                <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" type="button" id="logevent_test" onclick="testSelectedRow(this)">
+                                    TEST
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logeventstart">Start Point</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logeventstart" name="logeventstart" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logeventcount">Count of Chars</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logeventcount" name="logeventcount" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logeventtype">Type of Data</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logeventtype" name="logeventtype" value="String" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logeventformat">Format</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logeventformat" name="logeventformat" value="Regular Expression" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="row" for="logeventstatic">Static Value</label>
+                            <div class="row">
+                                <input style="font-size:9pt;" type="text" class="form-control form-control-sm" id="logeventstatic" name="logeventstatic" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-1" style="font-size:9pt;color:grey;overflow:hidden;" id="logeventresult"></div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group row test" id="multiline_row" name="form_rows" style="display:block;margin:0;">
+                    <h6>Configuration For Multiline & Traceback Logs</h6>
+                    <div class="row justify-content-around">
+
+                        <div class="col-md-5 test">
+                            <div class="row justify-content-around">
+                                <div class="col-md-2">
+                                    <input type="checkbox" class="form-check-input col-md-6" id="multiline_log"
+                                           name="multiline_log"
+                                           onchange="if(this.checked){$('#multiline_details').show();}else{$('#multiline_details').hide();$('#delim').val('');$('#delimposition_before').prop('checked', false);$('#delimposition_after').prop('checked', false);}" />
+                                </div>
+                                <h6 class="col-md-10" align="left">Multiline Logs Definition</h6>
+                            </div>
+                            <div class="row justify-content-end">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-10" align="left">
+                                    <ul>
+                                        <li>if you're expecting multiline logs, check and provide information on the statement that the rows continue</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row"  style="font-style:italic;display:none;" id="multiline_details">
+                                <div class="col-md-8">
+                                    <div class="row justify-content-center">
+                                        <p>Delimiter Position</p>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-check-label">
+                                                <input type="radio" name="delimposition" id="delimposition_before" value="0" /> At the beginning
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-check-label">
+                                                <input type="radio" name="delimposition" id="delimposition_after" value="1" /> At the end
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="delim">Delimiter Characters</label>
+                                    <input style="font-size:9pt;" type="text" class="form-control form-control-sm"
+                                           id="delim" name="delim" placeholder="If delimiter exists" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5 test">
+                            <div class="row justify-content-around">
+                                <div class="col-md-2">
+                                    <input type="checkbox" class="form-check-input col-md-6" id="traceback_log"
+                                           name="traceback_log"
+                                           onchange="if(this.checked){$('#traceback_details').show();}else{$('#traceback_details').hide();$('#tbackdelim').val('');$('#tbackdelimposition_before').prop('checked', false);$('#tbackdelimposition_after').prop('checked', false);}" />
+                                </div>
+                                <h6 class="col-md-10" align="left">Traceback Logs Definition</h6>
+                            </div>
+                            <div class="row justify-content-end">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-10" align="left">
+                                    <ul>
+                                        <li>if you're expecting traceback logs, check and provide information on the statement that the rows continue</li>
+                                        <li>if there is a delimiter indicating that logging is in progress, fill in the information below,
+                                            otherwise leave the following information blank if it will be distinguished from the logging structure</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row" style="font-style:italic;display:none;" id="traceback_details">
+                                <div class="col-md-8">
+                                    <div class="row justify-content-center">
+                                        <p>Delimiter Position</p>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-check-label">
+                                                <input type="radio" name="tbackdelimposition" id="tbackdelimposition_before" value="0" /> At the beginning
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-check-label">
+                                            <input type="radio" name="tbackdelimposition" id="tbackdelimposition_after" value="1" /> At the end
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="tbackdelim">Delimiter Characters</label>
+                                    <input style="font-size:9pt;" type="text" class="form-control form-control-sm"
+                                           id="tbackdelim" name="tbackdelim" placeholder="If delimiter exists" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <br>
+
+                <div class="form-group row" name="form_rows" style="display:block;">
+                    <div class="col-md-12" id="form_results" style="text-align:left;">
+
+                    </div>
+                    <br>
+                    <div class="col-md-6 col-sm-6" style="text-align:left;float:left;">
+                        <a style="font-size:9pt;" class="btn btn-outline-info btn-sm" href="{% url 'add_parser_profile' %}">RESET FORM</a>
+                    </div>
+                    <div class="col-md-6 col-sm-6" id="form_save_button_div" style="display:block;text-align:right;float:left;">
+                        <button style="font-size:9pt;" class="btn btn-outline-info btn-sm" id="add_parser_profile_save" type="submit">SAVE</button>
+                    </div>
+                </div>
+            </form>
+            <br><br>
+            <div class="row">
+                <ul id="form_notifications" style="color:red;text-align:left;">
+                    {%if warning and warning != ""%}<li>{{warning}}</li>{%endif%}
+
+                </ul>
+            </div>
+
+            <hr/>
+        </div>
+
+</div>
+
+{% elif route == "detail" %}
+
+<div class="container-fluid innerBodies">
+
+
+</div>
+
+{% else %}
+
+<div class="container-fluid innerBodies">
+
+
+</div>
+
+{% endif %}
+
+
+<script type="text/javascript" language="JavaScript" src="{% static 'js/jquery.min.js' %}"></script>
+<script type="text/javascript" lang="javascript">
+var route = "{{route}}";
+var note = $('#form_notifications');  // for validation warnings
+var form_parts = document.getElementsByName('form_rows');
+var inputs = document.getElementsByTagName('input');
+var selects = document.getElementsByTagName('select');
+var saveButtonDiv = document.getElementById('form_save_button_div');
+var radiosForParserAreas = document.getElementsByName('choseparserarea');
+var subStringWithoutEvent;
+var problemChars = ["(", ")", "[", "]", "{", "}", "/", "\\", "-", "."];
+//console.log(radiosForParserAreas);
+//console.log(radiosForParserAreas[0]);
+//console.log(radiosForParserAreas[1].checked);
+//console.log(radiosForParserAreas[1].value);
+
+/* To prevent the form from being submitted again when the page is refreshed. */
+if(window.history.replaceState){window.history.replaceState( null, null, window.location.href );}
+
+function cleanFormFields(){
+    for(var i=0;i<idPartList.length;i++){
+        var part = idPartList[i];
+        $("#see"+part).text("");
+        $("#psql"+part).html("");
+        $("#"+part+"result").html("");
+        $("#"+part+"start").val("");
+        $("#"+part+"count").val("");
+        if(part=="logdate"){$("#"+part+"format").val("");}
+        if(part=="logno"){$("#"+part+"static").val("");}
+    }
+    $("#multiline_log").prop("checked", false);
+    $('#multiline_details').hide();
+    $('#delim').val('');
+    $('#delimposition_before').prop("checked", false);
+    $('#delimposition_after').prop("checked", false);
+    $("#traceback_log").prop("checked", false);
+    $('#traceback_details').hide();
+    $('#tbackdelim').val("");
+    $('#tbackdelimposition_before').prop('checked', false);
+    $('#tbackdelimposition_after').prop('checked', false);
+}
+
+function pastedRawLog(elementId, event){
+    var rawLogInput = document.getElementById(elementId);
+    var textPaste = confirm("You have pasted a text to test parser, confirm to continue with this value : \n"+event.clipboardData.getData('text/plain'));
+    //alert(textPaste);
+    //console.log(textPaste);
+    if(textPaste){
+        var pastedText = event.clipboardData.getData('text/plain');
+        var rawLogSelectBar = document.getElementById("rawlogselection");
+        var option = document.createElement("option");
+        option.text = pastedText;
+        option.value = pastedText;
+        rawLogSelectBar.add(option);
+        rawLogSelectBar.value = pastedText;
+    }else{
+        //console.log(event.cancelable);
+        event.preventDefault();
+    }
+}
+
+function testSpecialCharacters(str){
+    var regex = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g;
+    return regex.test(str);
+}
+
+if(route=="general"){
+    var customParserList = [{% for x in customParserList %}{{ x.get_json|safe}}, {%endfor%}];
+    var idPartList = ["logid","logdate","logservice","logserviceno","logno","logevent"]
+    var rawLogString = document.getElementById("rawlogdata").value;
+    var formIpAddressInput = document.getElementById("ipaddress");
+    var uniqueidInput = document.getElementById("uniqueid");
+
+    function testSelectedRow(pressedForTest){
+        var idPart = pressedForTest.id.replace("_test","")
+        var csrf = $("input[name=csrfmiddlewaretoken]").val();
+        var plogdata = $("#rawlogselection").val();
+        //console.log(plogdata);
+        var pdegisken = $("#see"+idPart).text().trim();
+        var pstart = $("#"+idPart+"start").val();
+        var pkaraktersay = $("#"+idPart+"count").val();
+        var ptype = $("#"+idPart+"type").val();
+        var pformat = $("#"+idPart+"format").val();
+        var testResult = $("#"+idPart+"result");
+        var psqlResult = $("#psql"+idPart);
+
+        $.ajax({
+            url: "/profiles/add_parser_profile",
+            type: "post",
+            data: { csrfmiddlewaretoken: csrf,
+                    action: "test",
+                    plogdata: plogdata,
+                    pdegisken: pdegisken,
+                    pstart: pstart,
+                    pkaraktersay: pkaraktersay,
+                    ptype: ptype,
+                    pformat: pformat
+                   },
+            success: function(response){
+                if(response.command!=0){
+                    if(pdegisken!=""){
+                        if(response.testResult.rtext==pdegisken){
+                            if(response.testResult.rlogdate&&response.testResult.rlogdate!="None"){
+                                testResult.html("<span style='color:green;'>&#x2713;<br>Match<br>"+response.testResult.rlogdate+"</span>");
+                                psqlResult.html("<span style='color:green;'>"+response.testResult.rtext+"</span>");
+                            }else{
+                                testResult.html("<span style='color:green;'>&#x2713;<br>Match</span>");
+                                psqlResult.html("<span style='color:green;'>"+response.testResult.rtext+"</span>");
+                            }
+                        }else{
+                            testResult.html("<span style='color:red;'>&#x2718;<br>No Match</span>");
+                            psqlResult.html("<span style='color:red;'>"+response.testResult.rtext+"</span>");
+                        }
+                    }else{
+                        testResult.html("<span style='color:green;'>&#x2713;<br>Check Value</span>");
+                        if(response.testResult.rtext){
+                            if(response.testResult.rtext!=""){
+                                //$("#see"+idPart).text(response.testResult.rtext);
+                                $("#psql"+idPart).text(response.testResult.rtext);
+                            }else{
+                                //$("#see"+idPart).text("<span style='color:orange;'>&#x2713;<br>Result is Empty</span>");
+                                $("#psql"+idPart).text("<span style='color:orange;'>&#x2713;<br>Result is Empty</span>");
+                            }
+                        }
+                    }
+                }else {
+                    testResult.html("<span style='color:red;'>&#x2718;<br>"+response.warning+"</span>");
+                    psqlResult.html("<span style='color:red;'>&#x2718;<br>"+response.err+"</span>");
+                }
+            }
+        });
+
+    }
+
+    function arrangeFormParts(select){
+        if(select.id=="ipselection"){
+            var rawLogSelect = document.getElementById("rawlogselection");
+            var existingOptions = rawLogSelect.options;
+            var ipString = select.value.split("-")[0];
+            var uniqueidString = select.value.split("-")[1];
+            formIpAddressInput.value = ipString;
+            uniqueidInput.value = uniqueidString;
+
+            var csrf = $("input[name=csrfmiddlewaretoken]").val();
+            $.ajax({
+                url: "/profiles/add_parser_profile",
+                type: "post",
+                data: { csrfmiddlewaretoken: csrf,
+                        action: "get_rawLogList",
+                        ip: ipString,
+                        uniqueid: uniqueidString,
+                       },
+                success: function(response){
+                    if(response.command!=0){
+                        //console.log(response.rawLogList);
+                        if(response.rawLogList.length>0){
+                            var rawLogList = response.rawLogList
+                            while(existingOptions.length>2){
+                                rawLogSelect.remove(existingOptions.length-1);
+                            }
+                            for(var i=0;i<rawLogList.length;i++){
+                                var option = document.createElement("option");
+                                option.text = rawLogList[i];
+                                option.value = rawLogList[i];
+                                rawLogSelect.add(option);
+                            }
+                        }else{
+                            console.log("List is empty!!");
+                        }
+                    }else {
+                        console.log("No list !! Because of error : "+response.error);
+                    }
+                }
+            });
+        }
+        if(select.id=="rawlogselection"){
+            //console.log(select.value);
+            var rawLogData = document.getElementById("rawlogdata");
+            //rawLogData.innerHTML = "";
+            //rawLogData.innerHTML = select.value;
+            rawLogData.value = "";
+            rawLogData.value = select.value;
+        }
+        if(select.id=="customparserselection"){
+            $("#versionparserselection").val(0);
+            $("#add_parser_profile_save").show();
+            if(select.value==0){
+                $("#parsertestresult").html("");
+                $("#parsername").val("");
+                $("#alternateparseid").val(0);
+                $("#save_or_update").val(0);
+                $("#add_parser_profile_save").text("SAVE");
+                cleanFormFields();
+                /*
+                for(var i=0;i<idPartList.length;i++){
+                    var part = idPartList[i];
+                    $("#see"+part).text("");
+                    $("#psql"+part).html("");
+                    $("#"+part+"result").html("");
+                    $("#"+part+"start").val("");
+                    $("#"+part+"count").val("");
+                    if(part=="logdate"){$("#"+part+"format").val("");}
+                    if(part=="logno"){$("#"+part+"static").val("");}
+                }
+                */
+            }else{
+                if($("#rawlogdata").val()==""||$("#rawlogdata").val().length<3){
+                    document.getElementById("rawlogselection").focus();
+                    $("#parsertestresult").html("<span style='color:red;'>You have to chose a raw log first</span>");
+                }else{
+                    var csrf = $("input[name=csrfmiddlewaretoken]").val();
+                    var parserTestResult = $("#parsertestresult");
+                    var alternativeParser;
+                    var rulesList = [];
+                    $.ajax({
+                        url: "/profiles/add_parser_profile",
+                        type: "post",
+                        data: { csrfmiddlewaretoken: csrf,
+                                action: "getCustomRules",
+                                parserID: select.value,
+                               },
+                        success: function(response){
+                            if(response.command!=0){
+                                alternativeParser = response.alternativeProfile;
+                                rulesList = response.parserRules;
+                                $("#parsername").val(response.selectedProfile.parsername);
+
+                                if(response.selectedProfile.delim!==""){
+                                    $("#multiline_log").prop("checked", true);
+                                    $('#multiline_details').show();
+                                    $('#delim').val(response.selectedProfile.delim);
+                                    if(response.selectedProfile.delimposition==="0"||response.selectedProfile.delimposition===0){
+                                        $('#delimposition_before').prop("checked", true);
+                                    }else if(response.selectedProfile.delimposition==="1"||response.selectedProfile.delimposition===1){
+                                        $('#delimposition_after').prop("checked", true);
+                                    }else{
+                                        $('#delimposition_before').prop("checked", false);
+                                        $('#delimposition_after').prop("checked", false);
+                                    }
+
+                                }else{
+                                    $("#multiline_log").prop("checked", false);
+                                    $('#multiline_details').hide();
+                                    $('#delim').val('');
+                                }
+                                if(response.selectedProfile.tback==="true"){
+                                    $("#traceback_log").prop("checked", true);
+                                    $('#traceback_details').show();
+                                    $('#tbackdelim').val(response.selectedProfile.tbackdelim)
+                                    if(response.selectedProfile.tbackdelimposition==="0"||response.selectedProfile.tbackdelimposition===0){
+                                        $('#tbackdelimposition_before').prop("checked", true);
+                                    }else if(response.selectedProfile.tbackdelimposition==="1"||response.selectedProfile.tbackdelimposition===1){
+                                        $('#tbackdelimposition_after').prop("checked", true);
+                                    }else{
+                                        $('#tbackdelimposition_before').prop('checked', false);
+                                        $('#tbackdelimposition_after').prop('checked', false);
+                                    }
+                                }else{
+                                    $("#traceback_log").prop("checked", false);
+                                    $('#traceback_details').hide();
+                                    $('#tbackdelim').val("");
+                                }
+                                $("#alternatecondition").val(response.selectedProfile.alternatecondition);
+                                if(response.selectedProfile.alternateparseid){
+                                    $("#alternateparseid").val(response.selectedProfile.alternateparseid);
+                                }else{
+                                    $("#alternateparseid").val("0");
+                                }
+                                saveOrUpdate = document.getElementById("save_or_update");
+                                if(saveOrUpdate.options.length==1){
+                                    var option = document.createElement("option");
+                                    option.text = "Update Selected";
+                                    option.value = select.value;
+                                    saveOrUpdate.add(option);
+                                }else{
+                                    saveOrUpdate.options[1].value = select.value;
+                                }
+                                saveOrUpdate.value = select.value;
+                                $("#add_parser_profile_save").text("UPDATE SELECTED");
+                                if(rulesList.length>0){
+                                    parserTestResult.html("<span style='color:green;'>Rules have been set for this profile</span>");
+                                    for(var i=0;i<idPartList.length;i++){
+                                        var part = idPartList[i];
+                                        $("#see"+part).html("");
+                                        $("#psql"+part).html("");
+                                        $("#"+part+"result").html("");
+                                        $("#"+part+"start").val("");
+                                        $("#"+part+"count").val("");
+                                        if(part=="logdate"){$("#"+part+"format").val("");}
+                                        if(part=="logno"){$("#"+part+"static").val("");}
+
+                                    }
+                                    rulesList.forEach(function (rule){
+                                        $("#"+rule.varname+"start").val(rule.startpoint);
+                                        $("#"+rule.varname+"count").val(rule.charcount);
+                                        if(rule.vartype!=""){$("#"+rule.varname+"type").val(rule.vartype);}
+                                        if(rule.varformat!=""){$("#"+rule.varname+"format").val(rule.varformat);}
+                                        if(rule.staticval!=""){$("#"+rule.varname+"static").val(rule.staticval);}
+                                    });
+                                }else{
+                                    parserTestResult.html("<span style='color:red;'>There is no rules saved for this profile</span>");
+                                }
+                            }else {
+                                parserTestResult.html("<span style='color:red;'>"+response.warning+"</span>");
+                                cleanFormFields();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        if(select.id=="save_or_update"){
+            if(select.value==0){
+                $("#add_parser_profile_save").text("SAVE AS NEW");
+            }else{
+                $("#add_parser_profile_save").text("UPDATE SELECTED");
+            }
+        }
+        if(select.id=="versionparserselection"){
+            $("#customparserselection").val(0)
+            //$("#add_parser_profile_save").hide();
+            if(select.value==0){
+                $("#parsertestresult").html("");
+                $("#parsername").val("");
+                $("#alternateparseid").val(0);
+                $("#save_or_update").val(0);
+                $("#add_parser_profile_save").text("SAVE");
+                for(var i=0;i<idPartList.length;i++){
+                    var part = idPartList[i];
+                    $("#see"+part).text("");
+                    $("#psql"+part).html("");
+                    $("#"+part+"result").html("");
+                    $("#"+part+"start").val("");
+                    $("#"+part+"count").val("");
+                    if(part=="logdate"){$("#"+part+"format").val("");}
+                    if(part=="logno"){$("#"+part+"static").val("");}
+                }
+            }else{
+                if($("#rawlogdata").val()==""||$("#rawlogdata").val().length<3){
+                    document.getElementById("rawlogselection").focus();
+                    $("#parsertestresult").html("<span style='color:red;'>You have to chose a raw log first</span>");
+                }else{
+                    var csrf = $("input[name=csrfmiddlewaretoken]").val();
+                    var parserTestResult = $("#parsertestresult");
+                    var alternativeParser;
+                    var rulesList = [];
+                    $.ajax({
+                        url: "/profiles/add_parser_profile",
+                        type: "post",
+                        data: { csrfmiddlewaretoken: csrf,
+                                action: "getInstalledRules",
+                                parserID: select.value,
+                               },
+                        success: function(response){
+                            if(response.command!=0){
+                                alternativeParser = response.alternativeProfile;
+                                rulesList = response.parserRules;
+                                //$("#parsername").val(response.selectedProfile.parsername);
+                                $("#alternatecondition").val(response.selectedProfile.alternatecondition);
+                                if(response.selectedProfile.alternateparseid){
+                                    //$("#alternateparseid").val(response.selectedProfile.alternateparseid);
+                                }else{
+                                    $("#alternateparseid").val("0");
+                                }
+                                $("#add_parser_profile_save").text("SAVE AS NEW CUSTOM");
+
+                                if(response.selectedProfile.delim!==""){
+                                    $("#multiline_log").prop("checked", true);
+                                    $('#multiline_details').show();
+                                    $('#delim').val(response.selectedProfile.delim);
+                                    if(response.selectedProfile.delimposition==="0"||response.selectedProfile.delimposition===0){
+                                        $('#delimposition_before').prop("checked", true);
+                                    }else if(response.selectedProfile.delimposition==="1"||response.selectedProfile.delimposition===1){
+                                        $('#delimposition_after').prop("checked", true);
+                                    }else{
+                                        $('#delimposition_before').prop("checked", false);
+                                        $('#delimposition_after').prop("checked", false);
+                                    }
+
+                                }else{
+                                    $("#multiline_log").prop("checked", false);
+                                    $('#multiline_details').hide();
+                                    $('#delim').val('');
+                                }
+                                if(response.selectedProfile.tback==="true"){
+                                    $("#traceback_log").prop("checked", true);
+                                    $('#traceback_details').show();
+                                    $('#tbackdelim').val(response.selectedProfile.tbackdelim)
+                                    if(response.selectedProfile.tbackdelimposition==="0"||response.selectedProfile.tbackdelimposition===0){
+                                        $('#tbackdelimposition_before').prop("checked", true);
+                                    }else if(response.selectedProfile.tbackdelimposition==="1"||response.selectedProfile.tbackdelimposition===1){
+                                        $('#tbackdelimposition_after').prop("checked", true);
+                                    }else{
+                                        $('#tbackdelimposition_before').prop('checked', false);
+                                        $('#tbackdelimposition_after').prop('checked', false);
+                                    }
+                                }else{
+                                    $("#traceback_log").prop("checked", false);
+                                    $('#traceback_details').hide();
+                                    $('#tbackdelim').val("");
+                                }
+
+                                //saveOrUpdate = document.getElementById("save_or_update");
+                                /*
+                                if(saveOrUpdate.options.length==1){
+                                    var option = document.createElement("option");
+                                    option.text = "Update Selected";
+                                    option.value = select.value;
+                                    saveOrUpdate.add(option);
+                                }else{
+                                    saveOrUpdate.options[1].value = select.value;
+                                }
+                                */
+                                //saveOrUpdate.value = select.value;
+                                //$("#add_parser_profile_save").text("UPDATE SELECTED");
+                                if(rulesList.length>0){
+                                    parserTestResult.html("<span style='color:green;'>Rules have been set for this profile</span>");
+                                    for(var i=0;i<idPartList.length;i++){
+                                        var part = idPartList[i];
+                                        $("#see"+part).html("");
+                                        $("#psql"+part).html("");
+                                        $("#"+part+"result").html("");
+                                        $("#"+part+"start").val("");
+                                        $("#"+part+"count").val("");
+                                        if(part=="logdate"){$("#"+part+"format").val("");}
+                                        if(part=="logno"){$("#"+part+"static").val("");}
+
+                                    }
+                                    rulesList.forEach(function (rule){
+                                        $("#"+rule.varname+"start").val(rule.startpoint);
+                                        $("#"+rule.varname+"count").val(rule.charcount);
+                                        if(rule.vartype!=""){$("#"+rule.varname+"type").val(rule.vartype);}
+                                        if(rule.varformat!=""){$("#"+rule.varname+"format").val(rule.varformat);}
+                                        if(rule.staticval!=""){$("#"+rule.varname+"static").val(rule.staticval);}
+                                    });
+                                }else{
+                                    parserTestResult.html("<span style='color:red;'>There is no rules saved for this profile</span>");
+                                }
+                            }else {
+                                parserTestResult.html("<span style='color:red;'>"+response.warning+"</span>");
+                                cleanFormFields();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    function checkEventRadio(){
+        if(($("#logeventstart").val()=="")&&($("#logeventcount").val()=="")){
+            //$("#logeventradio").show();
+            $("#logeventradio").prop('checked', true);
+            $("#parsertestresult").html("<span style='color:red;'>Chose Log Event First</span>");
+        }else if(($("#seelogevent").text()=='')||($("#seelogevent").html()=='')){
+            $("#logeventradio").prop('checked', true);
+            $("#parsertestresult").html("<span style='color:red;'>Chose Log Event First</span>");
+        }else{
+            $("#parsertestresult").html("");
+        }
+    }
+
+    function getSelectedText(element){
+        var startResult = document.getElementById("startindex");
+        var charCountResult = document.getElementById("countofchars");
+        var totalString = element.value;
+        var partOfString = window.getSelection().toString()
+        startResult.innerHTML = totalString.indexOf(partOfString) + 1;
+        charCountResult.innerHTML = partOfString.length;
+        if(totalString.length>5 && partOfString.length>0){
+            for(i in radiosForParserAreas){
+                if(radiosForParserAreas[i].checked){
+                    console.log(radiosForParserAreas[i].value);
+                    var formStartPointInput = document.getElementById(radiosForParserAreas[i].value+"start");
+                    var formCharCountInput = document.getElementById(radiosForParserAreas[i].value+"count");
+                    var formTypeInput = document.getElementById(radiosForParserAreas[i].value+"type");
+                    var formFormatInput = document.getElementById(radiosForParserAreas[i].value+"format");
+                    var formStaticInput = document.getElementById(radiosForParserAreas[i].value+"static");
+                    var formRowResultDiv = document.getElementById(radiosForParserAreas[i].value+"result");
+                    var seeDiv = document.getElementById("see"+radiosForParserAreas[i].value);
+                    var psqlDiv = document.getElementById("psql"+radiosForParserAreas[i].value);
+                    var seeSeverityDiv = document.getElementById("seeseverity");
+                    var charCount = partOfString.length;
+                    var endpoint = charCount;
+
+                    seeDiv.innerHTML = partOfString;
+                    formRowResultDiv.innerHTML = "";
+                    psqlDiv.innerHTML = "";
+
+                    var startSentence;
+                    //var indexRightBefore = totalString.indexOf(partOfString)-1;
+                    var indexRightBefore = (radiosForParserAreas[i].value=="logid"&&partOfString.startsWith("<"))?totalString.indexOf(partOfString):totalString.indexOf(partOfString)-1;
+                    //var charRightBefore = totalString[totalString.indexOf(partOfString)-1];
+                    var charRightBefore = (radiosForParserAreas[i].value=="logid"&&partOfString.startsWith("<"))?totalString[totalString.indexOf(partOfString)]:totalString[totalString.indexOf(partOfString)-1];
+                    var readyCharRightBefore = true;
+                    if(problemChars.includes(charRightBefore)){
+                        var charBeforeWithEscape = "\\"+charRightBefore;
+                        var regForBefore = new RegExp(charBeforeWithEscape, "g");
+                        $("#parsertestresult").html("");
+                    }else if(charRightBefore=="'"){
+                        var charBeforeForQuote = "\\"+charRightBefore;
+                        var regForBefore = new RegExp(charBeforeForQuote, "g");
+                        //charRightBefore="''"
+                        //readyCharRightBefore = false;
+                        //$("#rawlogdata").focus();
+                        //$("#parsertestresult").html("<span style='color:red;'>Please select string with quotes !!</span>");
+                    }else{
+                        var regForBefore = new RegExp(charRightBefore, "g");
+                        $("#parsertestresult").html("");
+                    }
+                    //console.log(totalString.slice(0, indexRightBefore+1).match(regForBefore));
+                    var countCharRightBefore = totalString.slice(0, indexRightBefore+1).match(regForBefore).length;
+                    if(charRightBefore){
+                        if(charRightBefore=="'"){
+                            charRightBefore="''";
+                        }
+                        startSentence = (radiosForParserAreas[i].value=="logid"&&partOfString.startsWith("<"))?"instr($1,'"+charRightBefore+"',1,"+countCharRightBefore+")":"instr($1,'"+charRightBefore+"',1,"+countCharRightBefore+")+1";
+                    }else{
+                        startSentence = "instr($1,'',1,"+countCharRightBefore+")";
+                    }
+
+                    var endSentence;
+                    //var indexRightAfter = totalString.indexOf(partOfString)+partOfString.length;
+                    var indexRightAfter = (radiosForParserAreas[i].value=="logid"&&partOfString.endsWith(">"))?(totalString.indexOf(partOfString)+partOfString.length-1):totalString.indexOf(partOfString)+partOfString.length;
+                    //var charRightAfter = totalString[totalString.indexOf(partOfString)+partOfString.length];
+                    var charRightAfter = (radiosForParserAreas[i].value=="logid"&&partOfString.endsWith(">"))?totalString[totalString.indexOf(partOfString)+partOfString.length-1]:totalString[totalString.indexOf(partOfString)+partOfString.length];
+                    var readyCharRightAfter = true;
+                    if(problemChars.includes(charRightAfter)){
+                        var charAfterWithEscape = "\\"+charRightAfter;
+                        var regForAfter = new RegExp(charAfterWithEscape, "g");
+                    }else if(charRightAfter=="'"){
+                        var charAfterForQuote = "\\"+charRightAfter;
+                        var regForAfter = new RegExp(charAfterForQuote, "g");
+                        //readyCharRightAfter = false;
+                        //$("#rawlogdata").focus();
+                        //$("#parsertestresult").html("<span style='color:red;'>Please select string with quotes !!</span>");
+                    }else{
+                        var regForAfter = new RegExp(charRightAfter, "g");
+                    }
+                    var countCharRightAfter = totalString.slice(indexRightAfter, totalString.length).match(regForAfter).length;
+                    if(charRightAfter){
+                        if(charRightAfter=="'"){
+                            charRightAfter="''";
+                        }
+                        if(subStringWithoutEvent){
+                            endSentence = (radiosForParserAreas[i].value=="logid"&&partOfString.endsWith(">"))?"instr("+subStringWithoutEvent+",'"+charRightAfter+"',-1,"+countCharRightAfter+")+1":"instr("+subStringWithoutEvent+",'"+charRightAfter+"',-1,"+countCharRightAfter+")";
+                        }else{
+                            endSentence = (radiosForParserAreas[i].value=="logid"&&partOfString.endsWith(">"))?"instr($1,'"+charRightAfter+"',-1,"+countCharRightAfter+")+1":"instr($1,'"+charRightAfter+"',-1,"+countCharRightAfter+")";
+                        }
+                    }else{
+                        if(subStringWithoutEvent){
+                            endSentence = "instr("+subStringWithoutEvent+",'',-1,"+countCharRightAfter+")";
+                        }else{
+                            endSentence = "instr($1,'',-1,"+countCharRightAfter+")";
+                        }
+                    }
+                    var countSentence = endSentence+"-("+startSentence+")"
+                    formStartPointInput.value = startSentence;
+
+                    if(radiosForParserAreas[i].value=="logdate"){
+                        formCharCountInput.value = partOfString.length;
+                    }else{
+                        formCharCountInput.value = countSentence;
+                    }
+                    if(radiosForParserAreas[i].value=="logevent"){
+                        if(readyCharRightAfter&&readyCharRightBefore){
+                            $("#parsertestresult").html("");
+                            //var sbstrng = totalString.replace(partOfString, "");
+                            var sbstrng = totalString.substring(0, totalString.indexOf(partOfString));
+                            //console.log(totalString.indexOf(partOfString));
+                            //console.log(totalString.substring(0, totalString.indexOf(partOfString)));
+                            //console.log("subStringWithoutEvent is : "+sbstrng);
+                            //console.log("partOfString for logevent is : "+partOfString);
+                            //console.log("startSentence for logevent is : "+startSentence);
+                            subStringWithoutEvent = "substring($1,1,"+startSentence.replace("+1","")+")";
+                            //console.log("subStringWithoutEvent for logevent is : "+subStringWithoutEvent);
+                            if(partOfString.length>2){
+                                document.getElementById("logidradio").checked = true;
+                                radiosForParserAreas[i].parentElement.parentElement.style.display = "none";
+                                element.value = sbstrng;
+                            }
+                        }else{
+                            $("#seelogevent").html("<span style='color:red;'>RETRY</spam>");
+                        }
+                    }
+                    if(radiosForParserAreas[i].value=="logid"){
+                        $("#parsertestresult").html("");
+                        if(!partOfString.startsWith("<")||!partOfString.endsWith(">")){
+                            $("#parsertestresult").html("<span style='color:red'>Please select < and > for Log PRI");
+                        }
+                        try{
+                            var priString = partOfString;
+                            //var pri = parseInt(partOfString);
+                            var priPart = parseInt(priString.replace("<","").replace(">",""));
+                            var pri = parseInt(priPart);
+                            //console.log("PRI : "+pri);
+                            if(Number.isNaN(pri)){
+                                seeSeverityDiv.innerHTML = "Incorrect PRI";
+                                formRowResultDiv.innerHTML = "<span style='color:red;'>Incorrect PRI !! </span>";
+                            }else if(testSpecialCharacters(priPart)){
+                                seeSeverityDiv.innerHTML = "Incorrect PRI";
+                                formRowResultDiv.innerHTML = "<span style='color:red;'>Unexpected special chars in PRI !! </span>";
+                            }else if(!priString.startsWith("<")||!priString.endsWith(">")){
+                                seeSeverityDiv.innerHTML = "Incorrect PRI";
+                                formRowResultDiv.innerHTML = "<span style='color:red;'>PRI is not in '<' and '>' !! </span>";
+                            }else{
+                                var severity = pri%8;
+                                //console.log("severity : "+severity);
+                                seeSeverityDiv.innerHTML = severity;
+                                formRowResultDiv.innerHTML = "";
+                            }
+                        }catch(err){
+                            seeSeverityDiv.innerHTML = "Incorrect PRI";
+                            formRowResultDiv.innerHTML = "<span style='color:red;'> !! </span>";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}else if(route=="detail"){}
+
+</script>
+
+
+{% endblock %}
