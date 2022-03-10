@@ -1,1 +1,0 @@
-{"tarType":"device","definitioncode":1906001,"definitionname":"LINUX","filename":"linux.1.0.1","defversion":"1.0","defsubversion":1,"files":[{"filename":"version.txt"},{"filename":"linux.sql"}]}
